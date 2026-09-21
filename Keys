@@ -1,1 +1,1269 @@
+-- This file was generated at discord.gg/syncrypt
 
+local t1 = {}
+t1.__index = t1
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local function v5(p1, p2, p3)
+    local v13 = Instance.new(p1)
+
+    for k, v in pairs(p2) do
+        v13[k] = v
+    end
+
+    if p3 then
+        v13.Parent = p3
+    end
+
+    return v13
+end
+function t1.CreateKeySystem(_, p5)
+    local v18 = p5.Description or "Input Key..."
+    local v19 = p5.Keys or {
+		"Snowball",
+		"",
+		""
+	}
+    local v20 = p5.KeyNote or "Get the valid Key in in our Discord"
+    local v21 = p5.MainScriptCallback or function(_)
+    end
+    local v22 = p5.FarmingScriptCallback or function(_)
+    end
+
+    if p5.SaveKey == false then
+    end
+
+    local color3 = Color3.fromRGB(228, 228, 228)
+    local color3_2 = Color3.fromRGB(201, 201, 201)
+    local color3_3 = Color3.fromRGB(130, 130, 130)
+
+    Color3.fromRGB(211, 211, 211)
+
+    local color3_4 = Color3.fromRGB(191, 191, 191)
+
+    Color3.fromRGB(153, 153, 153)
+
+    local v27 = v5
+    local t2 = {
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+		IgnoreGuiInset = true,
+		Name = "KeySystemGui"
+	}
+    local v29 = RunService:IsStudio()
+
+    if v29 then
+        v29 = LocalPlayer.PlayerGui
+    end
+
+    if not v29 then
+        v29 = gethui and gethui()
+
+        if not v29 then
+            v29 = game:GetService("CoreGui")
+        end
+    end
+
+    local v30 = v27("ScreenGui", t2, v29)
+    local v31 = v5
+    local color3_5 = Color3.fromRGB(35, 35, 35)
+    local uDim2 = UDim2.new(1, 0, 1, 0)
+    local uDim2_2 = UDim2.new(0, 0, 0, 0)
+    local v35 = v31("Frame", {
+		BackgroundColor3 = color3_5,
+		BackgroundTransparency = 0.5,
+		BorderSizePixel = 0,
+		Size = uDim2,
+		Position = uDim2_2,
+		Name = "BlurBackground"
+	}, v30)
+    local v36 = v5("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 35)),
+			ColorSequenceKeypoint.new(0.3, Color3.fromRGB(50, 50, 50)),
+			ColorSequenceKeypoint.new(0.7, Color3.fromRGB(40, 40, 40)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 45, 45))
+		}),
+		Rotation = 45
+	}, v35)
+
+    TweenService:Create(v36, TweenInfo.new(8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+		Rotation = 225
+	}):Play()
+
+    for i = 1, 25 do
+        local v38 = i
+        local v39 = math.random(1, 6)
+        local v40 = v5
+        local v41 = v38 <= 15 and color3
+
+        if not v41 then
+            v41 = v38 <= 20 and color3_4 or color3_2
+        end
+
+        local v42 = math.random(70, 90) / 100
+        local uDim2_3 = UDim2.new(0, v39, 0, v39)
+        local uDim2_4 = UDim2.new(math.random(0, 100) / 100, 0, math.random(0, 100) / 100, 0)
+        local v45 = "Particle" .. v38
+        local v46 = v40("Frame", {
+			BackgroundColor3 = v41,
+			BackgroundTransparency = v42,
+			BorderSizePixel = 0,
+			Size = uDim2_3,
+			Position = uDim2_4,
+			Name = v45
+		}, v35)
+
+        v5("UICorner", {
+			CornerRadius = UDim.new(1, 0)
+		}, v46)
+
+        if v38 <= 10 then
+            local v47 = v5
+            local vector2 = Vector2.new(0.5, 0.5)
+            local uDim2_5 = UDim2.new(0.5, 0, 0.5, 0)
+            local uDim2_6 = UDim2.new(1, 4, 1, 4)
+            local BackgroundColor3 = v46.BackgroundColor3
+            local v52 = v46.ZIndex - 1
+            local v53 = v47("Frame", {
+				AnchorPoint = vector2,
+				Position = uDim2_5,
+				Size = uDim2_6,
+				BackgroundColor3 = BackgroundColor3,
+				BackgroundTransparency = 0.9,
+				BorderSizePixel = 0,
+				ZIndex = v52
+			}, v46)
+
+            v5("UICorner", {
+				CornerRadius = UDim.new(1, 0)
+			}, v53)
+
+            local v54 = TweenService
+            local new = TweenInfo.new
+            local v56 = math.random(2, 4)
+            local Sine = Enum.EasingStyle.Sine
+            local EasingDirection = Enum.EasingDirection
+            local Create = v54.Create
+            local v60 = new(v56, Sine, EasingDirection.InOut, -1, true)
+            local uDim2_7 = UDim2.new(1, 8, 1, 8)
+
+            Create(v54, v53, v60, {
+				BackgroundTransparency = 0.95,
+				Size = uDim2_7
+			}):Play()
+        end
+
+        local v62 = math.random(8, 30)
+        local v63 = TweenService
+        local tweenInfo = TweenInfo.new(v62, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+        local uDim2_8 = UDim2.new(math.random(0, 100) / 100, 0, math.random(0, 100) / 100, 0)
+        local v66 = math.random(40, 95) / 100
+        local Create = v63.Create
+        local v68 = math.random(-180, 180)
+
+        Create(v63, v46, tweenInfo, {
+			Position = uDim2_8,
+			BackgroundTransparency = v66,
+			Rotation = v68
+		}):Play()
+    end
+
+    local v69 = v5
+    local vector2 = Vector2.new(0.5, 0.5)
+    local color3_6 = Color3.fromRGB(50, 50, 50)
+    local uDim2_9 = UDim2.new(0.5, 0, 0.5, 0)
+    local uDim2_10 = UDim2.new(0, 340, 0, 310)
+    local v74 = v69("Frame", {
+		AnchorPoint = vector2,
+		BackgroundColor3 = color3_6,
+		BackgroundTransparency = 0.05,
+		BorderSizePixel = 0,
+		Position = uDim2_9,
+		Size = uDim2_10,
+		Name = "KeyContainer"
+	}, v35)
+
+    v5("UICorner", {
+		CornerRadius = UDim.new(0, 18)
+	}, v74)
+
+    for i = 1, 3 do
+        local v76 = v5
+        local color3_7 = Color3.fromRGB(i * 10 + 200, i * 20 + 150, 255)
+        local v78 = i * 0.02 + 0.94
+        local uDim2_11 = UDim2.new(1, 0, 1, 0)
+        local v80 = "GlassLayer" .. i
+        local v81 = v76("Frame", {
+			BackgroundColor3 = color3_7,
+			BackgroundTransparency = v78,
+			BorderSizePixel = 0,
+			Size = uDim2_11,
+			Name = v80
+		}, v74)
+
+        v5("UICorner", {
+			CornerRadius = UDim.new(0, 18)
+		}, v81)
+    end
+
+    local v82 = v5
+    local Border = Enum.ApplyStrokeMode.Border
+    local v84 = v82("UIStroke", {
+		Color = color3,
+		Thickness = 2.5,
+		Transparency = 0.2,
+		ApplyStrokeMode = Border
+	}, v74)
+
+    for i = 1, 3 do
+        local v86 = i
+        local v87 = 8 + v86 * 4
+        local v88 = v5
+        local vector2_2 = Vector2.new(0.5, 0.5)
+        local uDim2_12 = UDim2.new(0.5, 0, 0.5, 0)
+        local uDim2_13 = UDim2.new(1, v87, 1, v87)
+        local v92 = v86 == 1 and color3
+
+        if not v92 then
+            v92 = v86 == 2 and color3_4 or color3_2
+        end
+
+        local v93 = 0.8 + v86 * 0.05
+        local v94 = v74.ZIndex - v86
+        local v95 = v88("Frame", {
+			AnchorPoint = vector2_2,
+			Position = uDim2_12,
+			Size = uDim2_13,
+			BackgroundColor3 = v92,
+			BackgroundTransparency = v93,
+			BorderSizePixel = 0,
+			ZIndex = v94
+		}, v35)
+
+        v5("UICorner", {
+			CornerRadius = UDim.new(0, 22 + v86 * 2)
+		}, v95)
+
+        local v96 = TweenService
+        local tweenInfo = TweenInfo.new(2 + v86, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+        local new = UDim2.new
+        local Create = v96.Create
+        local v100 = new(1, v87 + 8, 1, v87 + 8)
+
+        Create(v96, v95, tweenInfo, {
+			BackgroundTransparency = 0.95,
+			Size = v100
+		}):Play()
+    end
+
+    local v101 = v5
+    local GothamBold = Enum.Font.GothamBold
+    local color3_8 = Color3.fromRGB(255, 255, 255)
+    local color3_9 = Color3.fromRGB(150, 150, 150)
+    local uDim2_14 = UDim2.new(1, -35, 0, 8)
+    local uDim2_15 = UDim2.new(0, 28, 0, 28)
+    local v107 = v101("TextButton", {
+		Font = GothamBold,
+		Text = "×",
+		TextColor3 = color3_8,
+		TextSize = 22,
+		BackgroundColor3 = color3_9,
+		BackgroundTransparency = 0.1,
+		BorderSizePixel = 0,
+		Position = uDim2_14,
+		Size = uDim2_15,
+		Name = "CloseButton"
+	}, v74)
+
+    v5("UICorner", {
+		CornerRadius = UDim.new(0, 8)
+	}, v107)
+
+    local v108 = v5
+    local vector2_3 = Vector2.new(0.5, 0.5)
+    local uDim2_16 = UDim2.new(0.5, 0, 0.5, 0)
+    local uDim2_17 = UDim2.new(1, 6, 1, 6)
+    local color3_10 = Color3.fromRGB(255, 255, 255)
+    local ZIndex = v107.ZIndex
+    local v114 = v108("Frame", {
+		AnchorPoint = vector2_3,
+		Position = uDim2_16,
+		Size = uDim2_17,
+		BackgroundColor3 = color3_10,
+		BackgroundTransparency = 0.9,
+		BorderSizePixel = 0,
+		ZIndex = ZIndex - 1
+	}, v107)
+
+    v5("UICorner", {
+		CornerRadius = UDim.new(0, 12)
+	}, v114)
+
+    local v115 = v5
+    local GothamBold2 = Enum.Font.GothamBold
+    local color3_11 = Color3.fromRGB(255, 255, 255)
+    local color3_12 = Color3.fromRGB(226, 226, 226)
+    local vector2_4 = Vector2.new(0.5, 0.5)
+    local uDim2_18 = UDim2.new(0.5, 0, 0, 35)
+    local uDim2_19 = UDim2.new(0, 300, 0, 40)
+    local Center = Enum.TextXAlignment.Center
+    local v123 = v115("TextLabel", {
+		Font = GothamBold2,
+		Text = "",
+		TextColor3 = color3_11,
+		TextSize = 32,
+		TextStrokeColor3 = color3_12,
+		TextStrokeTransparency = 0.3,
+		BackgroundTransparency = 1,
+		AnchorPoint = vector2_4,
+		Position = uDim2_18,
+		Size = uDim2_19,
+		TextXAlignment = Center,
+		Name = "TitleLabel"
+	}, v74)
+    local v124 = v5("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(135, 135, 135)),
+			ColorSequenceKeypoint.new(0.3, Color3.fromRGB(175, 175, 175)),
+			ColorSequenceKeypoint.new(0.7, Color3.fromRGB(215, 215, 215)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+		}),
+		Rotation = 45
+	}, v123)
+    local v125 = v5
+    local GothamBold3 = Enum.Font.GothamBold
+    local color3_13 = Color3.fromRGB(0, 0, 0)
+    local vector2_5 = Vector2.new(0.5, 0.5)
+    local uDim2_20 = UDim2.new(0.5, 2, 0, 37)
+    local uDim2_21 = UDim2.new(0, 300, 0, 40)
+    local Center2 = Enum.TextXAlignment.Center
+    local v132 = v123.ZIndex - 1
+    local v133 = v125("TextLabel", {
+		Font = GothamBold3,
+		Text = "",
+		TextColor3 = color3_13,
+		TextSize = 32,
+		TextTransparency = 0.7,
+		BackgroundTransparency = 1,
+		AnchorPoint = vector2_5,
+		Position = uDim2_20,
+		Size = uDim2_21,
+		TextXAlignment = Center2,
+		ZIndex = v132,
+		Name = "TitleShadow"
+	}, v74)
+
+    for i = 1, 3 do
+        local v135 = v5
+        local v136 = i
+        local v137 = v136 == 1
+
+        if v137 then
+            v137 = Color3.fromRGB(226, 226, 226)
+        end
+
+        if not v137 then
+            v137 = v136 == 2 and color3_4 or color3_2
+        end
+
+        local v138 = 0.85 + v136 * 0.03
+        local vector2_6 = Vector2.new(0.5, 0.5)
+        local uDim2_22 = UDim2.new(0.5, 0, 0, 35)
+        local uDim2_23 = UDim2.new(0, 180 + v136 * 20, 0, 35 + v136 * 5)
+        local v142 = v123.ZIndex - (v136 + 1)
+        local v143 = "TitleGlow" .. v136
+        local v144 = v135("Frame", {
+			BackgroundColor3 = v137,
+			BackgroundTransparency = v138,
+			BorderSizePixel = 0,
+			AnchorPoint = vector2_6,
+			Position = uDim2_22,
+			Size = uDim2_23,
+			ZIndex = v142,
+			Name = v143
+		}, v74)
+
+        v5("UICorner", {
+			CornerRadius = UDim.new(0, 15 + v136)
+		}, v144)
+
+        local v145 = TweenService
+        local new = TweenInfo.new
+        local v147 = 1.5 + v136
+        local Sine = Enum.EasingStyle.Sine
+        local EasingDirection = Enum.EasingDirection
+        local Create = v145.Create
+        local v151 = new(v147, Sine, EasingDirection.InOut, -1, true)
+        local v152 = 0.7 + v136 * 0.05
+        local uDim2_24 = UDim2.new(0, 200 + v136 * 25, 0, 40 + v136 * 8)
+
+        Create(v145, v144, v151, {
+			BackgroundTransparency = v152,
+			Size = uDim2_24
+		}):Play()
+    end
+
+    TweenService:Create(v124, TweenInfo.new(6, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, false), {
+		Rotation = 405
+	}):Play()
+    spawn(function()
+        local u256 = true
+
+        while v30.Parent do
+            for i = 1, 11 do
+                if not v30.Parent then
+                    break
+                end
+
+                local v258 = string.sub("GenX Loader", 1, i)
+
+                v123.Text = v258
+                v133.Text = v258
+                v123.TextSize = 38
+                v133.TextSize = 38
+                TweenService:Create(v123, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					TextSize = 32
+				}):Play()
+                TweenService:Create(v133, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					TextSize = 32
+				}):Play()
+
+                local t3 = {
+					Color3.fromRGB(255, 255, 255),
+					Color3.fromRGB(235, 235, 235),
+					Color3.fromRGB(215, 215, 215)
+				}
+                local TextStrokeColor3 = v123.TextStrokeColor3
+
+                v123.TextStrokeColor3 = t3[math.random(1, 3)]
+                TweenService:Create(v123, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+					TextStrokeColor3 = TextStrokeColor3
+				}):Play()
+                TweenService:Create(v84, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {
+					Color = color3_4,
+					Transparency = 0.1
+				}):Play()
+                TweenService:Create(v84, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+					Color = color3,
+					Transparency = 0.2
+				}):Play()
+                wait(0.1)
+            end
+
+            u256 = true
+            spawn(function()
+                while v30.Parent and u256 do
+                    v123.Text = v123.Text:gsub("|", "") .. "|"
+                    v133.Text = v123.Text
+                    wait(0.5)
+
+                    if u256 then
+                        v123.Text = v123.Text:gsub("|", "")
+                        v133.Text = v123.Text
+                        wait(0.5)
+                    end
+                end
+            end)
+            wait(3)
+            u256 = false
+
+            for i = 11, 0, -1 do
+                if not v30.Parent then
+                    break
+                end
+
+                local v262 = string.sub("GenX Loader", 1, i)
+
+                v123.Text = v262
+                v133.Text = v262
+                v123.TextSize = 34
+                v133.TextSize = 34
+                TweenService:Create(v123, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+					TextSize = 32
+				}):Play()
+                TweenService:Create(v133, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+					TextSize = 32
+				}):Play()
+                TweenService:Create(v123, TweenInfo.new(0.04, Enum.EasingStyle.Quad), {
+					TextTransparency = 0.5
+				}):Play()
+                TweenService:Create(v123, TweenInfo.new(0.04, Enum.EasingStyle.Quad), {
+					TextTransparency = 0
+				}):Play()
+                wait(0.05)
+            end
+
+            wait(1)
+        end
+    end)
+
+    for i = 1, 20 do
+        local v155 = i
+        local v156 = if not (v155 <= 8) then not (v155 <= 14) and 3 or 2 else 1
+        local v157 = if v156 ~= 1 then v156 ~= 2 and 1 or 3 else 2
+        local v158 = v156 == 1
+
+        if v158 then
+            v158 = Color3.fromRGB(255, 255, 255)
+        end
+
+        if not v158 then
+            v158 = v156 == 2 and color3_4 or color3_2
+        end
+
+        local v159 = v5
+        local uDim2_25 = UDim2.new(0, v157, 0, v157)
+        local vector2_7 = Vector2.new(0.5, 0.5)
+        local uDim2_26 = UDim2.new(0.5, math.random(-120, 120), 0, 35 + math.random(-30, 30))
+        local v163 = v123.ZIndex + 1
+        local v164 = "Sparkle" .. v155
+        local v165 = v159("Frame", {
+			BackgroundColor3 = v158,
+			BackgroundTransparency = 0.6,
+			BorderSizePixel = 0,
+			Size = uDim2_25,
+			AnchorPoint = vector2_7,
+			Position = uDim2_26,
+			ZIndex = v163,
+			Name = v164
+		}, v74)
+
+        if v156 == 3 then
+            v5("UICorner", {
+				CornerRadius = UDim.new(0, 1)
+			}, v165)
+        else
+            v5("UICorner", {
+				CornerRadius = UDim.new(1, 0)
+			}, v165)
+        end
+
+        local v166 = math.random(10, 40) / 10
+        local v167 = TweenService
+        local tweenInfo = TweenInfo.new(v166, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+        local uDim2_27 = UDim2.new(0, v157 + 2, 0, v157 + 2)
+        local uDim2_28 = UDim2.new(0.5, math.random(-140, 140), 0, 35 + math.random(-35, 35))
+        local v171 = math.random(-360, 360)
+
+        v167:Create(v165, tweenInfo, {
+			BackgroundTransparency = 0.2,
+			Size = uDim2_27,
+			Position = uDim2_28,
+			Rotation = v171
+		}):Play()
+    end
+
+    local v172 = v5
+    local Gotham = Enum.Font.Gotham
+    local color3_14 = Color3.fromRGB(220, 220, 220)
+    local uDim2_29 = UDim2.new(0, 20, 0, 65)
+    local uDim2_30 = UDim2.new(1, -40, 0, 30)
+    local Center3 = Enum.TextXAlignment.Center
+    local v178 = v172("TextLabel", {
+		Font = Gotham,
+		Text = v18,
+		TextColor3 = color3_14,
+		TextSize = 15,
+		TextWrapped = true,
+		BackgroundTransparency = 1,
+		Position = uDim2_29,
+		Size = uDim2_30,
+		TextXAlignment = Center3,
+		Name = "DescLabel"
+	}, v74)
+    local v179 = v5
+    local Gotham2 = Enum.Font.Gotham
+    local color3_15 = Color3.fromRGB(255, 255, 255)
+    local uDim2_31 = UDim2.new(0, 21, 0, 66)
+    local uDim2_32 = UDim2.new(1, -40, 0, 30)
+    local Center4 = Enum.TextXAlignment.Center
+    local v185 = v178.ZIndex - 1
+
+    v179("TextLabel", {
+		Font = Gotham2,
+		Text = v18,
+		TextColor3 = color3_15,
+		TextTransparency = 0.8,
+		TextSize = 15,
+		TextWrapped = true,
+		BackgroundTransparency = 1,
+		Position = uDim2_31,
+		Size = uDim2_32,
+		TextXAlignment = Center4,
+		ZIndex = v185,
+		Name = "DescGlow"
+	}, v74)
+
+    local v186 = v5
+    local color3_16 = Color3.fromRGB(70, 70, 70)
+    local uDim2_33 = UDim2.new(0, 20, 0, 110)
+    local uDim2_34 = UDim2.new(1, -40, 0, 45)
+    local v190 = v186("Frame", {
+		BackgroundColor3 = color3_16,
+		BackgroundTransparency = 0.1,
+		BorderSizePixel = 0,
+		Position = uDim2_33,
+		Size = uDim2_34,
+		Name = "InputFrame"
+	}, v74)
+
+    v5("UICorner", {
+		CornerRadius = UDim.new(0, 12)
+	}, v190)
+
+    local v191 = v5("UIStroke", {
+		Color = Color3.fromRGB(138, 138, 138),
+		Thickness = 1.5,
+		Transparency = 0.4
+	}, v190)
+    local v192 = v5
+    local vector2_8 = Vector2.new(0.5, 0.5)
+    local uDim2_35 = UDim2.new(0.5, 0, 0.5, 0)
+    local uDim2_36 = UDim2.new(1, 4, 1, 4)
+    local color3_17 = Color3.fromRGB(255, 255, 255)
+    local ZIndex2 = v190.ZIndex
+    local v198 = v192("Frame", {
+		AnchorPoint = vector2_8,
+		Position = uDim2_35,
+		Size = uDim2_36,
+		BackgroundColor3 = color3_17,
+		BackgroundTransparency = 0.9,
+		BorderSizePixel = 0,
+		ZIndex = ZIndex2 - 1
+	}, v190)
+
+    v5("UICorner", {
+		CornerRadius = UDim.new(0, 14)
+	}, v198)
+
+    local v199 = v5
+    local Gotham3 = Enum.Font.Gotham
+    local color3_18 = Color3.fromRGB(201, 201, 201)
+    local color3_19 = Color3.fromRGB(255, 255, 255)
+    local uDim2_37 = UDim2.new(0, 15, 0, 0)
+    local uDim2_38 = UDim2.new(1, -30, 1, 0)
+    local Left = Enum.TextXAlignment.Left
+    local v206 = v199("TextBox", {
+		Font = Gotham3,
+		PlaceholderText = "Enter the Key...",
+		PlaceholderColor3 = color3_18,
+		Text = "",
+		TextColor3 = color3_19,
+		TextSize = 14,
+		BackgroundTransparency = 1,
+		Position = uDim2_37,
+		Size = uDim2_38,
+		TextXAlignment = Left,
+		ClearTextOnFocus = false,
+		Name = "KeyInput"
+	}, v190)
+
+    v206.Focused:Connect(function()
+        TweenService:Create(v191, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+			Color = color3_4,
+			Transparency = 0.1,
+			Thickness = 3
+		}):Play()
+        TweenService:Create(v190, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+			Size = UDim2.new(1, -32, 0, 50)
+		}):Play()
+
+        local v263 = TweenService
+        local v264 = v198
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad)
+        local uDim2_39 = UDim2.new(1, 8, 1, 8)
+
+        v263:Create(v264, tweenInfo, {
+			BackgroundTransparency = 0.7,
+			Size = uDim2_39
+		}):Play()
+    end)
+    v206.FocusLost:Connect(function()
+        TweenService:Create(v191, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+			Color = Color3.fromRGB(201, 201, 201),
+			Transparency = 0.4,
+			Thickness = 1.5
+		}):Play()
+        TweenService:Create(v190, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+			Size = UDim2.new(1, -40, 0, 45)
+		}):Play()
+
+        local v267 = TweenService
+        local v268 = v198
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad)
+        local Create = v267.Create
+        local uDim2_40 = UDim2.new(1, 4, 1, 4)
+
+        Create(v267, v268, tweenInfo, {
+			BackgroundTransparency = 0.9,
+			Size = uDim2_40
+		}):Play()
+    end)
+
+    local v207 = v5
+    local uDim2_41 = UDim2.new(0, 20, 0, 170)
+    local uDim2_42 = UDim2.new(1, -40, 0, 80)
+    local v210 = v207("Frame", {
+		BackgroundTransparency = 1,
+		Position = uDim2_41,
+		Size = uDim2_42,
+		Name = "ButtonsFrame"
+	}, v74)
+
+    local function v211(p8, p9)
+        local v274 = v5("TextButton", p8, p9)
+
+        v5("UICorner", {
+			CornerRadius = UDim.new(0, 10)
+		}, v274)
+
+        local v275 = v5
+        local vector2_9 = Vector2.new(0.5, 0.5)
+        local uDim2_43 = UDim2.new(0.5, 0, 0.5, 0)
+        local uDim2_44 = UDim2.new(1, 4, 1, 4)
+        local p8BackgroundColor3 = p8.BackgroundColor3
+        local v280 = v274.ZIndex - 1
+        local v281 = v275("Frame", {
+			AnchorPoint = vector2_9,
+			Position = uDim2_43,
+			Size = uDim2_44,
+			BackgroundColor3 = p8BackgroundColor3,
+			BackgroundTransparency = 0.9,
+			BorderSizePixel = 0,
+			ZIndex = v280
+		}, v274)
+
+        v5("UICorner", {
+			CornerRadius = UDim.new(0, 12)
+		}, v281)
+
+        return v274, v281
+    end
+
+    local GothamBold4 = Enum.Font.GothamBold
+    local color3_20 = Color3.fromRGB(255, 255, 255)
+    local uDim2_45 = UDim2.new(1, 0, 0, 35)
+    local v215, v216 = v211({
+		Font = GothamBold4,
+		Text = "Main Script",
+		TextColor3 = color3_20,
+		TextSize = 13,
+		BackgroundColor3 = color3_3,
+		BackgroundTransparency = 0.05,
+		BorderSizePixel = 0,
+		Size = uDim2_45,
+		Name = "MainScript"
+	}, v210)
+    local GothamBold5 = Enum.Font.GothamBold
+    local color3_21 = Color3.fromRGB(255, 255, 255)
+    local uDim2_46 = UDim2.new(0, 0, 0, 42)
+    local uDim2_47 = UDim2.new(1, 0, 0, 35)
+    local v221, v222 = v211({
+		Font = GothamBold5,
+		Text = "Farming Script",
+		TextColor3 = color3_21,
+		TextSize = 13,
+		BackgroundColor3 = color3_2,
+		BackgroundTransparency = 0.05,
+		BorderSizePixel = 0,
+		Position = uDim2_46,
+		Size = uDim2_47,
+		Name = "FarmingScript"
+	}, v210)
+    local v223 = v5
+    local Gotham4 = Enum.Font.Gotham
+    local color3_22 = Color3.fromRGB(220, 220, 220)
+    local uDim2_48 = UDim2.new(0, 20, 0, 260)
+    local uDim2_49 = UDim2.new(1, -40, 0, 30)
+    local Center5 = Enum.TextXAlignment.Center
+    local v229 = v223("TextLabel", {
+		Font = Gotham4,
+		Text = v20,
+		TextColor3 = color3_22,
+		TextSize = 12,
+		TextWrapped = true,
+		BackgroundTransparency = 1,
+		Position = uDim2_48,
+		Size = uDim2_49,
+		TextXAlignment = Center5,
+		Name = "KeyNoteLabel"
+	}, v74)
+    local v230 = v5
+    local GothamBold6 = Enum.Font.GothamBold
+    local color3_23 = Color3.fromRGB(255, 255, 255)
+    local uDim2_50 = UDim2.new(0, 0, 1, -30)
+    local uDim2_51 = UDim2.new(1, 0, 0, 25)
+    local Center6 = Enum.TextXAlignment.Center
+    local v236 = v230("TextLabel", {
+		Font = GothamBold6,
+		Text = "Made with ♥\239\184\143 by Henne",
+		TextColor3 = color3_23,
+		TextSize = 14,
+		TextTransparency = 0.3,
+		BackgroundTransparency = 1,
+		Position = uDim2_50,
+		Size = uDim2_51,
+		TextXAlignment = Center6,
+		Name = "FooterLabel"
+	}, v74)
+    local v237 = v5("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 220, 220)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(185, 185, 185))
+		}),
+		Rotation = 0
+	}, v236)
+
+    TweenService:Create(v237, TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, false), {
+		Rotation = 360
+	}):Play()
+
+    local v238 = v5
+    local GothamBold7 = Enum.Font.GothamBold
+    local color3_24 = Color3.fromRGB(255, 255, 255)
+    local color3_25 = Color3.fromRGB(50, 50, 50)
+    local uDim2_52 = UDim2.new(0, 20, 0, 290)
+    local uDim2_53 = UDim2.new(1, -40, 0, 20)
+    local Center7 = Enum.TextXAlignment.Center
+    local v245 = v238("TextLabel", {
+		Font = GothamBold7,
+		Text = "",
+		TextColor3 = color3_24,
+		TextSize = 12,
+		BackgroundColor3 = color3_25,
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Position = uDim2_52,
+		Size = uDim2_53,
+		TextXAlignment = Center7,
+		Visible = false,
+		Name = "StatusLabel"
+	}, v74)
+
+    v5("UICorner", {
+		CornerRadius = UDim.new(0, 6)
+	}, v245)
+
+    local function v246(p10, p11, p12, p13)
+        p10.MouseEnter:Connect(function()
+            local v344 = TweenService
+            local v345 = p10
+            local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad)
+            local v347 = p12
+            local new = UDim2.new
+            local XScale = p10.Size.X.Scale
+            local XOffset = p10.Size.X.Offset
+            local v351 = p10
+            local Create = v344.Create
+            local v353 = new(XScale, XOffset, v351.Size.Y.Scale, p10.Size.Y.Offset + 3)
+            local p10TextSize = p10.TextSize
+
+            Create(v344, v345, tweenInfo, {
+				BackgroundColor3 = v347,
+				Size = v353,
+				TextSize = p10TextSize + 1
+			}):Play()
+
+            local v355 = TweenService
+            local v356 = p11
+            local tweenInfo2 = TweenInfo.new(0.2, Enum.EasingStyle.Quad)
+            local Create2 = v355.Create
+            local uDim2_54 = UDim2.new(1, 8, 1, 8)
+
+            Create2(v355, v356, tweenInfo2, {
+				BackgroundTransparency = 0.7,
+				Size = uDim2_54
+			}):Play()
+        end)
+        p10.MouseLeave:Connect(function()
+            local v360 = TweenService
+            local v361 = p10
+            local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad)
+            local v363 = p13
+            local new = UDim2.new
+            local XScale = p10.Size.X.Scale
+            local XOffset = p10.Size.X.Offset
+            local YScale = p10.Size.Y.Scale
+            local p10Size = p10.Size
+            local Create = v360.Create
+            local v370 = new(XScale, XOffset, YScale, p10Size.Y.Offset - 3)
+            local p10TextSize = p10.TextSize
+
+            Create(v360, v361, tweenInfo, {
+				BackgroundColor3 = v363,
+				Size = v370,
+				TextSize = p10TextSize - 1
+			}):Play()
+
+            local v372 = TweenService
+            local v373 = p11
+            local tweenInfo3 = TweenInfo.new(0.2, Enum.EasingStyle.Quad)
+            local new2 = UDim2.new
+            local Create3 = v372.Create
+            local v377 = new2(1, 4, 1, 4)
+
+            Create3(v372, v373, tweenInfo3, {
+				BackgroundTransparency = 0.9,
+				Size = v377
+			}):Play()
+        end)
+    end
+
+    v246(v215, v216, Color3.fromRGB(150, 150, 150), color3_3)
+    v246(v221, v222, Color3.fromRGB(255, 255, 255), color3_2)
+
+    local function v247()
+        local v286 = v5
+        local color3_26 = Color3.fromRGB(255, 255, 255)
+        local uDim2_55 = UDim2.new(1, 0, 1, 0)
+        local v289 = v286("Frame", {
+			BackgroundColor3 = color3_26,
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			Size = uDim2_55,
+			Name = "ScreenFlash"
+		}, v35)
+
+        TweenService:Create(v289, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+			BackgroundTransparency = 0.8
+		}):Play()
+        TweenService:Create(v289, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
+			BackgroundTransparency = 1
+		}):Play()
+
+        local v290 = v5
+        local color3_27 = Color3.fromRGB(255, 255, 255)
+        local uDim2_56 = UDim2.new(1, 0, 1, 0)
+        local v293 = v290("Frame", {
+			BackgroundColor3 = color3_27,
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			Size = uDim2_56,
+			Name = "SuccessOverlay"
+		}, v74)
+
+        v5("UICorner", {
+			CornerRadius = UDim.new(0, 18)
+		}, v293)
+
+        for i = 1, 3 do
+            local v295 = v5
+            local GothamBold8 = Enum.Font.GothamBold
+            local color3_28 = Color3.fromRGB(138, 138, 138)
+            local v298 = i ~= 1 and 0.5 or 0
+            local v299 = i * 5 + 80
+            local vector2_10 = Vector2.new(0.5, 0.5)
+            local uDim2_57 = UDim2.new(0.5, (i - 1) * 2, 0.5, (i - 1) * 2)
+            local uDim2_58 = UDim2.new(0, 100, 0, 100)
+            local v303 = 10 - i
+            local v304 = "CheckMark" .. i
+            local v305 = v295("TextLabel", {
+				Font = GothamBold8,
+				Text = "✓",
+				TextColor3 = color3_28,
+				TextTransparency = v298,
+				TextSize = v299,
+				BackgroundTransparency = 1,
+				AnchorPoint = vector2_10,
+				Position = uDim2_57,
+				Size = uDim2_58,
+				TextScaled = true,
+				ZIndex = v303,
+				Name = v304
+			}, v293)
+
+            v305.Size = UDim2.new(0, 0, 0, 0)
+            TweenService:Create(v305, TweenInfo.new(i * 0.1 + 0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				Size = UDim2.new(0, 100, 0, 100)
+			}):Play()
+        end
+
+        local v306 = v5
+        local GothamBold9 = Enum.Font.GothamBold
+        local color3_29 = Color3.fromRGB(255, 255, 255)
+        local uDim2_59 = UDim2.new(0, 0, 0.7, 0)
+        local uDim2_60 = UDim2.new(1, 0, 0, 30)
+        local Center8 = Enum.TextXAlignment.Center
+        local v312 = v306("TextLabel", {
+			Font = GothamBold9,
+			Text = "ACCESS GRANTED!",
+			TextColor3 = color3_29,
+			TextSize = 20,
+			TextTransparency = 1,
+			BackgroundTransparency = 1,
+			Position = uDim2_59,
+			Size = uDim2_60,
+			TextXAlignment = Center8,
+			Name = "SuccessText"
+		}, v293)
+
+        TweenService:Create(v293, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
+			BackgroundTransparency = 0.1
+		}):Play()
+        wait(0.3)
+        TweenService:Create(v312, TweenInfo.new(0.5, Enum.EasingStyle.Back), {
+			TextTransparency = 0,
+			TextSize = 22
+		}):Play()
+        TweenService:Create(v84, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
+			Color = Color3.fromRGB(255, 255, 255),
+			Thickness = 4
+		}):Play()
+
+        for i = 1, 40 do
+            local v314 = i
+            local v315 = v5
+            local v316 = v314 <= 20
+
+            if v316 then
+                v316 = Color3.fromRGB(255, 255, 255)
+            end
+
+            if not v316 then
+                v316 = v314 <= 30 and color3_4
+
+                if not v316 then
+                    v316 = Color3.fromRGB(255, 255, 255)
+                end
+            end
+
+            local uDim2_61 = UDim2.new(0, math.random(2, 12), 0, math.random(2, 12))
+            local uDim2_62 = UDim2.new(0.5, 0, 0.5, 0)
+            local v319 = v315("Frame", {
+				BackgroundColor3 = v316,
+				BackgroundTransparency = 0,
+				BorderSizePixel = 0,
+				Size = uDim2_61,
+				Position = uDim2_62,
+				Name = "SuccessParticle" .. v314
+			}, v74)
+
+            v5("UICorner", {
+				CornerRadius = UDim.new(math.random(0, 1), 0)
+			}, v319)
+
+            local v320 = math.random(-300, 300)
+            local v321 = math.random(-300, 300)
+            local v322 = math.random(15, 35) / 10
+            local v323 = TweenService
+            local tweenInfo = TweenInfo.new(v322, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local uDim2_63 = UDim2.new(0.5, v320, 0.5, v321)
+            local random = math.random
+            local Create = v323.Create
+            local v328 = random(-720, 720)
+            local uDim2_64 = UDim2.new(0, 0, 0, 0)
+
+            Create(v323, v319, tweenInfo, {
+				Position = uDim2_63,
+				BackgroundTransparency = 1,
+				Rotation = v328,
+				Size = uDim2_64
+			}):Play()
+            spawn(function()
+                wait(v322)
+                v319:Destroy()
+            end)
+        end
+
+        wait(0.5)
+        spawn(function()
+            wait(2)
+            v289:Destroy()
+        end)
+    end
+    local function v248(p14)
+        local timestamp = tick()
+        if false then
+            v245.Text = "⏳ Please wait before trying again!"
+            v245.TextColor3 = Color3.fromRGB(255, 200, 100)
+            v245.BackgroundColor3 = Color3.fromRGB(45, 20, 20)
+            v245.BackgroundTransparency = 1
+            v245.Visible = true
+            wait(1)
+            v245.Visible = false
+
+            return
+        end
+        if timestamp - 0 < 1 then
+            v245.Text = "⚠\239\184\143 Too fast! Slow down."
+            v245.TextColor3 = Color3.fromRGB(255, 217, 0)
+            v245.BackgroundColor3 = Color3.fromRGB(45, 20, 20)
+            v245.BackgroundTransparency = 1
+            v245.Visible = true
+
+            local Position = v74.Position
+
+            for i = 1, 4 do
+                v74.Position = Position + UDim2.new(0, i % 2 ~= 0 and -5 or 5, 0, 0)
+                wait(0.05)
+            end
+
+            v74.Position = Position
+            wait(1.5)
+            v245.Visible = false
+
+            return
+        end
+        local Text = v206.Text
+        if Text == "" then
+            v245.Text = "⚠\239\184\143 Please enter a key!"
+            v245.TextColor3 = Color3.fromRGB(255, 217, 0)
+            v245.BackgroundColor3 = Color3.fromRGB(45, 20, 20)
+            v245.BackgroundTransparency = 1
+            v245.Visible = true
+
+            local Position = v190.Position
+
+            for i = 1, 8 do
+                v190.Position = Position + UDim2.new(0, i % 2 ~= 0 and -10 or 10, 0, 0)
+                wait(0.06)
+            end
+
+            v190.Position = Position
+            wait(2)
+            v245.Visible = false
+
+            return
+        end
+        local v337 = v19
+        local g341
+        local v340
+        for _, v in pairs(v337) do
+            if Text == v then
+                v340 = true
+                g341 = true
+            end
+
+            if g341 then
+                break
+            end
+        end
+        if not g341 then
+            v340 = false
+        end
+        g341 = false
+        if v340 then
+            v245.Text = "✅ Key Valid - Loading " .. p14 .. "..."
+            v245.TextColor3 = Color3.fromRGB(0, 255, 21)
+            v245.BackgroundColor3 = Color3.fromRGB(45, 20, 20)
+            v245.BackgroundTransparency = 1
+            v245.Visible = true
+            v247()
+            wait(2.5)
+            v30:Destroy()
+
+            if p14 == "Main Script" then
+                v21(true)
+
+                return
+            end
+
+            v22(true)
+
+            return
+        end
+        v245.Text = "❌ Key Invalid - Try again!"
+        v245.TextColor3 = Color3.fromRGB(230, 7, 7)
+        v245.BackgroundColor3 = Color3.fromRGB(45, 20, 20)
+        v245.BackgroundTransparency = 1
+        v245.Visible = true
+        local Position = v74.Position
+        for i = 1, 12 do
+            v74.Position = Position + UDim2.new(0, i % 2 ~= 0 and -15 or 15, 0, 0)
+            wait(0.04)
+        end
+        v74.Position = Position
+        TweenService:Create(v84, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+			Color = Color3.fromRGB(255, 0, 0),
+			Thickness = 4
+		}):Play()
+        TweenService:Create(v84, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+			Color = Color3.fromRGB(255, 120, 120),
+			Thickness = 3
+		}):Play()
+        wait(0.5)
+        TweenService:Create(v84, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
+			Color = color3,
+			Thickness = 2.5
+		}):Play()
+        v206.Text = ""
+        wait(2)
+        v245.Visible = false
+    end
+
+    v215.Activated:Connect(function()
+        v248("Main Script")
+    end)
+    v221.Activated:Connect(function()
+        v248("Farming Script")
+    end)
+    v107.Activated:Connect(function()
+        TweenService:Create(v74, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+			Size = UDim2.new(0, 0, 0, 0),
+			BackgroundTransparency = 1,
+			Rotation = 180
+		}):Play()
+        TweenService:Create(v35, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
+			BackgroundTransparency = 1
+		}):Play()
+        wait(0.6)
+        v30:Destroy()
+    end)
+    v74.Size = UDim2.new(0, 0, 0, 0)
+    v74.BackgroundTransparency = 1
+    v74.Rotation = -180
+    TweenService:Create(v74, TweenInfo.new(1.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+		Size = UDim2.new(0, 340, 0, 310),
+		BackgroundTransparency = 0.05,
+		Rotation = 0
+	}):Play()
+
+    for k, v in pairs({
+		v123,
+		v178,
+		v190,
+		v210,
+		v229,
+		v236
+	}) do
+        local v251 = k
+
+        v.Position = v.Position + UDim2.new(0, 0, 0, 50)
+        v.BackgroundTransparency = 1
+        v.Rotation = math.random(-45, 45)
+        TweenService:Create(v, TweenInfo.new(0.8 + v251 * 0.1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Position = v.Position - UDim2.new(0, 0, 0, 50),
+			Rotation = 0
+		}):Play()
+
+        if v.BackgroundTransparency then
+            TweenService:Create(v, TweenInfo.new(0.6 + v251 * 0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				BackgroundTransparency = v.BackgroundTransparency
+			}):Play()
+        end
+    end
+
+    return v30
+end
+t1:CreateKeySystem({
+	Description = "",
+	Keys = {
+		"Snowball",
+		"Snowball",
+		"Snowball"
+	},
+	KeyNote = "",
+	SaveKey = true,
+	MainScriptCallback = function(p15)
+    if p15 then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ghjkl1312/GenX/main/main.luau"))()
+    end
+end,
+	FarmingScriptCallback = function(p16)
+    if p16 then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ghjkl1312/GenX/main/farming.luau"))()
+    end
+end
+})
