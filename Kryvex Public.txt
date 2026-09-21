@@ -3328,6 +3328,8 @@ thanks.TextColor3 = Color3.fromRGB(0, 255, 255)
 
 credits:AddLabel("--------------------------")
 
+credits:AddLabel(“fast farm ByRuling”)
+
 credits:AddLabel("👇 My Discord Server Link Here")
 
 credits:AddButton("Discord Link", function()
