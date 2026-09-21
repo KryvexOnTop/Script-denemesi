@@ -2153,11 +2153,11 @@ local function pressE()
     vim:SendKeyEvent(false, "E", false, game)
 end
 
-local serverLabel = FastRebTab:AddLabel("Time:")
+local serverLabel = tabFarming:AddLabel("Time:")
 serverLabel.TextSize = 20
-local timeLabel = FastRebTab:AddLabel("0d 0h 0m 0s - Inactive")
-local paceLabel = FastRebTab:AddLabel("Pace: 0 / Hour | 0 / Day | 0 / Week")
-local averagePaceLabel = FastRebTab:AddLabel("Average Pace: 0 / Hour | 0 / Day | 0 / Week")
+local timeLabel = tabFarming:AddLabel("0d 0h 0m 0s - Inactive")
+local paceLabel = tabFarming:AddLabel("Pace: 0 / Hour | 0 / Day | 0 / Week")
+local averagePaceLabel = tabFarming:AddLabel("Average Pace: 0 / Hour | 0 / Day | 0 / Week")
 
 paceLabel.TextSize = 17
 averagePaceLabel.TextSize = 17
@@ -2167,7 +2167,7 @@ timeLabel.TextSize = 17
 timeLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
 paceLabel.TextSize = 17
 
-local rebirthsStatsLabel = FastRebTab:AddLabel("Rebirths: "..formatNumber(rebirthsStat.Value).." | Gained: 0")
+local rebirthsStatsLabel = tabFarming:AddLabel("Rebirths: "..formatNumber(rebirthsStat.Value).." | Gained: 0")
 rebirthsStatsLabel.TextSize = 17
 
 
