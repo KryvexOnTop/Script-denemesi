@@ -2308,6 +2308,8 @@ tabFarming:AddSwitch("👁️‍🗨️ Hide All Frames", function(state)
     end
 end)
 
+AddLabel("❤️ This Tab Made ByRuLing").TextSize = 15
+
 
 local pets = window:AddTab("Pets")
 pets:AddLabel("💵 Auto Buy")
