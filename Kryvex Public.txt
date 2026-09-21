@@ -2101,6 +2101,7 @@ for _, itemName in ipairs(items) do
     upgradeDropdown:Add(itemName)
 end
 
+
 local tabFarming = window:AddTab("Pack Farm")
 
 local player = game.Players.LocalPlayer
@@ -2110,7 +2111,24 @@ local isRunning = false
 local strengthOnly = false
 local autoEatEnabled = false
 local startTime = tick()
+local totalElapsed = 0
 local initialRebirthsCount = player.leaderstats.Rebirths.Value
+local rebirthsStat = player.leaderstats.Rebirths
+local strengthStat = player.leaderstats.Strength
+local durabilityStat = player:WaitForChild("Durability")
+
+local function formatNumber(n)
+    if not n then return "0" end
+    local num = tonumber(n) or 0
+    if num < 1000 then return tostring(math.floor(num)) end
+    local abbreviations = {"", "K", "M", "B", "T", "Qa", "Qi"}
+    local i = 1
+    while num >= 1000 and i < #abbreviations do
+        num = num / 1000
+        i = i + 1
+    end
+    return string.format("%.2f%s", num, abbreviations[i])
+end
 
 local function unequipAllPets()
     if player:FindFirstChild("petsFolder") then
@@ -2127,7 +2145,7 @@ local function equipUniquePet(name)
         for _, pet in pairs(player.petsFolder.Unique:GetChildren()) do
             if pet.Name == name then
                 rEvents.equipPetEvent:FireServer("equipPet", pet)
-                task.wait(0.01) 
+                task.wait(0.01)
             end
         end
     end
@@ -2161,55 +2179,38 @@ local averagePaceLabel = tabFarming:AddLabel("Average Pace: 0 / Hour | 0 / Day |
 
 paceLabel.TextSize = 17
 averagePaceLabel.TextSize = 17
-
-
 timeLabel.TextSize = 17
 timeLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-paceLabel.TextSize = 17
 
-local rebirthsStatsLabel = tabFarming:AddLabel("Rebirths: "..formatNumber(rebirthsStat.Value).." | Gained: 0")
+local rebirthsStatsLabel = tabFarming:AddLabel("Rebirths: 0 | Gained: 0")
 rebirthsStatsLabel.TextSize = 17
-
-
-local lastRebirthTime = tick()
-local lastRebirthValue = rebirthsStat.Value
-
-local function updateRebirthsLabel()
-    local gained = rebirthsStat.Value - initialRebirths
-    rebirthsStatsLabel.Text = string.format("Rebirths: %s | Gained: %s", 
-                                           formatNumber(rebirthsStat.Value), 
-                                           formatNumber(gained))
-end
-
-local function updateUI(forceUpdate)
-    local currentTime = tick()
-    local elapsed = isRunning and (currentTime - startTime + totalElapsed) or totalElapsed
-    
-    local days = math.floor(elapsed / 86400)
-    local hours = math.floor((elapsed % 86400) / 3600)
-    local minutes = math.floor((elapsed % 3600) / 60)
-    local seconds = math.floor(elapsed % 60)
-    
-    timeLabel.Text = string.format("%dd %dh %dm %ds - %s", days, hours, minutes, seconds,
-                                 isRunning and "Rebirthing" or "Paused")
-    timeLabel.TextColor3 = isRunning and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
-end
-
-local lastRebirthTime = tick()
-local lastRebirthValue = rebirthsStat.Value
 
 local paceHistoryHour = {}
 local paceHistoryDay = {}
 local paceHistoryWeek = {}
-
 local maxHistoryLength = 20
-
 local rebirthCount = 0
+local lastRebirthTime = tick()
+local lastRebirthValue = rebirthsStat.Value
+
+local function updateRebirthsLabel()
+    local gained = rebirthsStat.Value - initialRebirthsCount
+    rebirthsStatsLabel.Text = string.format("Rebirths: %s | Gained: %s",
+        formatNumber(rebirthsStat.Value),
+        formatNumber(gained))
+end
+
+local function average(tbl)
+    local sum = 0
+    for _, v in ipairs(tbl) do
+        sum = sum + v
+    end
+    return #tbl > 0 and (sum / #tbl) or 0
+end
 
 local function calculatePaceOnRebirth()
     rebirthCount = rebirthCount + 1
-    
-    -- Erst ab dem 2. Rebirth berechnen
+
     if rebirthCount < 2 then
         lastRebirthTime = tick()
         lastRebirthValue = rebirthsStat.Value
@@ -2238,14 +2239,6 @@ local function calculatePaceOnRebirth()
             table.remove(paceHistoryWeek, 1)
         end
 
-        local function average(tbl)
-            local sum = 0
-            for _, v in ipairs(tbl) do
-                sum = sum + v
-            end
-            return #tbl > 0 and (sum / #tbl) or 0
-        end
-
         local avgHour = average(paceHistoryHour)
         local avgDay = average(paceHistoryDay)
         local avgWeek = average(paceHistoryWeek)
@@ -2271,9 +2264,10 @@ task.spawn(function()
         local minutes = math.floor((elapsed % 3600) / 60)
         local seconds = math.floor(elapsed % 60)
         footerTimeLabel.Text = string.format("Time: %dd %dh %dm %ds", days, hours, minutes, seconds)
-        local current = player.leaderstats.Rebirths.Value
+        local current = rebirthsStat.Value
         footerRebirthsLabel.Text = "Total Rebirths: " .. current
         footerRebirthsGainedLabel.Text = "Rebirths Gained: " .. (current - initialRebirthsCount)
+        updateRebirthsLabel()
         task.wait(1)
     end
 end)
@@ -2295,7 +2289,7 @@ tabFarming:AddSwitch("🔄 Auto Rebirth Farm", function(bool)
             task.wait(0.1)
             equipUniquePet("Swift Samurai")
             while isRunning and player.leaderstats.Strength.Value < rebirthCost do
-                for i = 1, 12 do 
+                for i = 1, 12 do
                     muscleEvent:FireServer("rep")
                 end
                 task.wait(0.01)
@@ -2314,43 +2308,42 @@ tabFarming:AddSwitch("🔄 Auto Rebirth Farm", function(bool)
                     retryCount = retryCount + 1
                 until (player.Character and player.Character.Humanoid.Sit) or retryCount > 20 or not isRunning
             end
-            local initialRebirths = player.leaderstats.Rebirths.Value
+            local beforeRebirths = player.leaderstats.Rebirths.Value
             repeat
                 rEvents.rebirthRemote:InvokeServer("rebirthRequest")
                 task.wait(0.5)
-            until player.leaderstats.Rebirths.Value > initialRebirths or not isRunning
+            until player.leaderstats.Rebirths.Value > beforeRebirths or not isRunning
+            calculatePaceOnRebirth()
         end
     end)
 end)
 
 tabFarming:AddLabel("💪 Fast Strength").TextSize = 21
 
-FarmingTab:AddLabel("Time:").TextSize = 20
-local stopwatchLabel = FarmingTab:AddLabel("0d 0h 0m 0s - Fast Rep Inactive")
+tabFarming:AddLabel("Time:").TextSize = 20
+local stopwatchLabel = tabFarming:AddLabel("0d 0h 0m 0s - Fast Rep Inactive")
 stopwatchLabel.TextSize = 17
 stopwatchLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
 
-local projectedStrengthLabel = FarmingTab:AddLabel("Strength Pace: 0 /Hour | 0 /Day | 0 /Week")
+local projectedStrengthLabel = tabFarming:AddLabel("Strength Pace: 0 /Hour | 0 /Day | 0 /Week")
 projectedStrengthLabel.TextSize = 17
-local projectedDurabilityLabel = FarmingTab:AddLabel("Durability Pace: 0 /Hour | 0 /Day | 0 /Week")
+local projectedDurabilityLabel = tabFarming:AddLabel("Durability Pace: 0 /Hour | 0 /Day | 0 /Week")
 projectedDurabilityLabel.TextSize = 17
-local averageStrengthLabel = FarmingTab:AddLabel("Average Strength Pace: 0 /Hour | 0 /Day | 0 /Week")
+local averageStrengthLabel = tabFarming:AddLabel("Average Strength Pace: 0 /Hour | 0 /Day | 0 /Week")
 averageStrengthLabel.TextSize = 17
-local averageDurabilityLabel = FarmingTab:AddLabel("Average Durability Pace: 0 /Hour | 0 /Day | 0 /Week")
+local averageDurabilityLabel = tabFarming:AddLabel("Average Durability Pace: 0 /Hour | 0 /Day | 0 /Week")
 averageDurabilityLabel.TextSize = 17
 
-FarmingTab:AddLabel("").TextSize = 10
-local statsLabel = FarmingTab:AddLabel("Stats:")
+tabFarming:AddLabel("").TextSize = 10
+local statsLabel = tabFarming:AddLabel("Stats:")
 statsLabel.TextSize = 20
-local strengthLabel = FarmingTab:AddLabel("Strength: 0 | Gained: 0")
+local strengthLabel = tabFarming:AddLabel("Strength: 0 | Gained: 0")
 strengthLabel.TextSize = 17
-local durabilityLabel = FarmingTab:AddLabel("Durability: 0 | Gained: 0")
+local durabilityLabel = tabFarming:AddLabel("Durability: 0 | Gained: 0")
 durabilityLabel.TextSize = 17
 
-local startTime = 0
+local fastRepStartTime = 0
 local pausedElapsedTime = 0
-local lastPauseTime = 0
-
 local runFastRep = false
 local trackingStarted = false
 
@@ -2374,11 +2367,11 @@ task.spawn(function()
         if runFastRep then
             if not trackingStarted then
                 trackingStarted = true
-                startTime = currentTime
+                fastRepStartTime = currentTime
                 strengthHistory = {}
                 durabilityHistory = {}
             end
-            local elapsedTime = pausedElapsedTime + (currentTime - startTime)
+            local elapsedTime = pausedElapsedTime + (currentTime - fastRepStartTime)
             local days = math.floor(elapsedTime / (24 * 3600))
             local hours = math.floor((elapsedTime % (24 * 3600)) / 3600)
             local minutes = math.floor((elapsedTime % 3600) / 60)
@@ -2417,15 +2410,15 @@ task.spawn(function()
                     projectedDurabilityLabel.Text = "Durability Pace: " .. formatNumber(durabilityPerHour) .. "/Hour | " .. formatNumber(durabilityPerDay) .. "/Day | " .. formatNumber(durabilityPerWeek) .. "/Week"
                 end
 
-                local totalElapsed = pausedElapsedTime + (currentTime - startTime)
-                if totalElapsed > 0 then
-                    local avgStrengthPerSecond = (currentStrength - initialStrength) / totalElapsed
+                local sessionElapsed = pausedElapsedTime + (currentTime - fastRepStartTime)
+                if sessionElapsed > 0 then
+                    local avgStrengthPerSecond = (currentStrength - initialStrength) / sessionElapsed
                     local avgStrengthPerHour = avgStrengthPerSecond * 3600
                     local avgStrengthPerDay = avgStrengthPerSecond * 86400
                     local avgStrengthPerWeek = avgStrengthPerSecond * 604800
                     averageStrengthLabel.Text = "Average Strength Pace: " .. formatNumber(avgStrengthPerHour) .. "/Hour | " .. formatNumber(avgStrengthPerDay) .. "/Day | " .. formatNumber(avgStrengthPerWeek) .. "/Week"
 
-                    local avgDurabilityPerSecond = (currentDurability - initialDurability) / totalElapsed
+                    local avgDurabilityPerSecond = (currentDurability - initialDurability) / sessionElapsed
                     local avgDurabilityPerHour = avgDurabilityPerSecond * 3600
                     local avgDurabilityPerDay = avgDurabilityPerSecond * 86400
                     local avgDurabilityPerWeek = avgDurabilityPerSecond * 604800
@@ -2435,8 +2428,12 @@ task.spawn(function()
         else
             if trackingStarted then
                 trackingStarted = false
-                pausedElapsedTime = pausedElapsedTime + (currentTime - startTime)
-                stopwatchLabel.Text = string.format("%dd %dh %dm %ds - Fast Rep Stopped", math.floor(pausedElapsedTime / (24 * 3600)), math.floor((pausedElapsedTime % (24 * 3600)) / 3600), math.floor((pausedElapsedTime % 3600) / 60), math.floor(pausedElapsedTime % 60))
+                pausedElapsedTime = pausedElapsedTime + (currentTime - fastRepStartTime)
+                stopwatchLabel.Text = string.format("%dd %dh %dm %ds - Fast Rep Stopped",
+                    math.floor(pausedElapsedTime / (24 * 3600)),
+                    math.floor((pausedElapsedTime % (24 * 3600)) / 3600),
+                    math.floor((pausedElapsedTime % 3600) / 60),
+                    math.floor(pausedElapsedTime % 60))
                 stopwatchLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
 
                 projectedStrengthLabel.Text = "Strength Pace: 0 /Hour | 0 /Day | 0 /Week"
@@ -2455,13 +2452,14 @@ end)
 
 tabFarming:AddSwitch("💢 Auto Strength Farm", function(bool)
     strengthOnly = bool
+    runFastRep = bool
     if not bool then return end
     task.spawn(function()
         unequipAllPets()
         task.wait(0.1)
         equipUniquePet("Swift Samurai")
         while strengthOnly do
-            for i = 1, 23 do 
+            for i = 1, 23 do
                 muscleEvent:FireServer("rep")
             end
             task.wait(0.01)
@@ -2533,12 +2531,6 @@ tabFarming:AddButton("🏴 Full FPS Boost", function()
     lighting.Brightness = 0
     lighting.OutdoorAmbient = Color3.new(0, 0, 0)
     for _, v in pairs(lighting:GetChildren()) do if v:IsA("Sky") then v:Destroy() end end
-end)
-
-tabFarming:AddSwitch("👁️‍🗨️ Hide All Frames", function(state)
-    for _, obj in pairs(game:GetService("ReplicatedStorage"):GetChildren()) do
-        if obj.Name:match("Frame$") then obj.Visible = not state end
-    end
 end)
 
 tabFarming:AddLabel("❤️ This Tab Made ByRuLing").TextSize = 15
