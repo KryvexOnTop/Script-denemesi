@@ -1,0 +1,967 @@
+-- This file was generated at discord.gg/syncrypt
+
+local t1 = {}
+local v2 = unpack or table.unpack
+t1.value1 = nil
+t1.value2 = game:GetService("Players").LocalPlayer
+t1.value3 = game:GetService("VirtualInputManager")
+t1.value4 = game:GetService("ReplicatedStorage")
+t1.value5 = t1.value2:WaitForChild("muscleEvent")
+
+local leaderstats = t1.value2:WaitForChild("leaderstats")
+
+t1.value6 = leaderstats:WaitForChild("Rebirths")
+
+local _ = t1.value2.DisplayName
+t1.value7 = game:GetService("VirtualUser")
+game:GetService("Lighting")
+
+local _loadstring = loadstring
+local _game = game
+t1.value8 = nil
+local v7 = _loadstring(_game:HttpGet("https://raw.githubusercontent.com/imhenne187/libvariations/refs/heads/main/librarys/red.luau", true))()
+local t2 = {
+	Color3.fromRGB(138, 138, 138),
+	Color3.fromRGB(255, 255, 255)
+}
+local t3 = {
+	Color3.fromRGB(119, 119, 119),
+	Color3.fromRGB(200, 200, 200)
+}
+local color3 = Color3.fromRGB(255, 255, 255)
+local AddWindow = v7.AddWindow
+local vector2 = Vector2.new(450, 450)
+local v13 = AddWindow(v7, "GenX | Farming", {
+	title_bar = t2,
+	title_bar_transparency = 0.3,
+	background = t3,
+	background_transparency = 0.1,
+	main_color = color3,
+	min_size = vector2,
+	can_resize = true
+})
+t1.value2.Idled:Connect(function()
+    t1.value7:CaptureController()
+
+    local value7 = t1.value7
+    local t4 = { Vector2.new() }
+
+    value7:ClickButton2(v2(t4))
+end);
+(function()
+    for _, descendant in pairs(game:GetDescendants()) do
+        if descendant.Name == "RobloxForwardPortals" then
+            descendant:Destroy()
+        end
+    end
+
+    if _G.ads then
+        _G.ads:Disconnect()
+    end
+
+    _G.ads = game.DescendantAdded:Connect(function(descendant)
+        if descendant.Name == "RobloxForwardPortals" then
+            descendant:Destroy()
+        end
+    end)
+end)()
+local v14 = v13:AddTab("Fast Rebirth")
+
+local function v15(p1)
+    if p1 >= 1000000000000000 then
+        return string.format("%.2fQa", p1 / 1000000000000000)
+    end
+
+    if p1 >= 1000000000000 then
+        return string.format("%.2fT", p1 / 1000000000000)
+    end
+
+    if p1 >= 1000000000 then
+        return string.format("%.2fB", p1 / 1000000000)
+    end
+
+    if p1 >= 1000000 then
+        return string.format("%.2fM", p1 / 1000000)
+    end
+
+    if p1 >= 1000 then
+        return string.format("%.2fK", p1 / 1000)
+    end
+
+    return string.format("%.0f", p1)
+end
+t1.value9 = false
+t1.value10 = 0
+t1.value11 = 0
+t1.value12 = t1.value6.Value
+v14:AddLabel("📊 Stats:").TextSize = 17
+t1.value13 = v14:AddLabel("0d 0h 0m 0s - Inactive")
+t1.value14 = v14:AddLabel("Rebirth Pace: /Hour | /Day | /Week")
+t1.value15 = v14:AddLabel("Average Rebirth Pace: /Hour | /Day | /Week")
+t1.value14.TextSize = 15
+t1.value15.TextSize = 15
+t1.value13.TextSize = 15
+t1.value13.TextColor3 = Color3.fromRGB(255, 50, 50)
+
+local value6 = t1.value6
+t1.value16 = nil
+local value6Value = value6.Value
+t1.value17 = nil
+t1.value18 = v14:AddLabel("Rebirths: " .. v15(value6Value) .. " | Gained: 0")
+t1.value18.TextSize = 15
+t1.value19 = tick()
+t1.value20 = t1.value6.Value
+function t1.value21()
+    local v31 = t1.value6.Value - t1.value12
+
+    t1.value18.Text = string.format("Rebirths: %s | Gained: %s", v15(t1.value6.Value), v15(v31))
+end
+function t1.value22(_)
+    local timestamp = tick()
+    local v34 = t1.value9 and timestamp - t1.value10 + t1.value11 or t1.value11
+    local v35 = math.floor(v34 / 86400)
+    local v36 = math.floor(v34 % 86400 / 3600)
+    local v37 = math.floor(v34 % 3600 / 60)
+    local v38 = math.floor(v34 % 60)
+    local value9 = t1.value9
+
+    if value9 then
+        value9 = "Rebirthing"
+    end
+
+    if not value9 then
+        value9 = not (v34 > 0) and "Fast Reb Inactive" or "Rebirthing Paused"
+    end
+
+    t1.value13.Text = string.format("%dd %dh %dm %ds - %s", v35, v36, v37, v38, value9)
+
+    if t1.value9 then
+        t1.value13.TextColor3 = Color3.fromRGB(50, 255, 50)
+
+        return
+    end
+
+    if v34 > 0 then
+        t1.value13.TextColor3 = Color3.fromRGB(255, 165, 0)
+
+        return
+    end
+
+    t1.value13.TextColor3 = Color3.fromRGB(255, 50, 50)
+end
+t1.value23 = {}
+t1.value24 = {}
+t1.value25 = {}
+t1.value26 = 20
+t1.value27 = 0
+t1.value28 = 0
+t1.value29 = 0
+t1.value17 = 0
+t1.value8 = 0
+t1.value1 = 0
+t1.value16 = 0
+function t1.value30()
+    t1.value27 = t1.value27 + 1
+
+    if t1.value27 < 2 then
+        t1.value19 = tick()
+        t1.value20 = t1.value6.Value
+
+        return
+    end
+
+    if not t1.value9 then
+        return
+    end
+
+    local timestamp = tick()
+    local v41 = t1.value6.Value - t1.value20
+
+    if v41 > 0 then
+        local v42 = (timestamp - t1.value19) / v41
+        local v43 = 3600 / v42
+        local v44 = 86400 / v42
+        local v45 = 604800 / v42
+
+        t1.value28 = v43
+        t1.value29 = v44
+        t1.value17 = v45
+        t1.value14.Text = string.format("Pace: %s / Hour | %s / Day | %s / Week", v15(v43), v15(v44), v15(v45))
+        table.insert(t1.value23, v43)
+        table.insert(t1.value24, v44)
+        table.insert(t1.value25, v45)
+
+        if #t1.value23 > t1.value26 then
+            table.remove(t1.value23, 1)
+            table.remove(t1.value24, 1)
+            table.remove(t1.value25, 1)
+        end
+
+        local function v46(p3)
+            local n1 = 0
+
+            for _, v in ipairs(p3) do
+                n1 += v
+            end
+
+            return #p3 > 0 and n1 / #p3 or 0
+        end
+
+        local v47 = v46(t1.value23)
+        local v48 = v46(t1.value24)
+        local v49 = v46(t1.value25)
+
+        t1.value8 = v47
+        t1.value1 = v48
+        t1.value16 = v49
+        t1.value15.Text = string.format("Average Pace: %s / Hour | %s / Day | %s / Week", v15(v47), v15(v48), v15(v49))
+
+        local _ = t1.value6.Value
+    end
+end
+t1.value6:GetPropertyChangedSignal("Value"):Connect(function()
+    t1.value30()
+    t1.value21()
+end)
+t1.value31 = nil
+function t1.value31(p4)
+
+    for v62, v63 in pairs(t1.value2.petsFolder:GetChildren()) do
+
+        if v63:IsA("Folder") then
+            for _, child in pairs(v63:GetChildren()) do
+                t1.value4.rEvents.equipPetEvent:FireServer("unequipPet", child)
+            end
+        end
+    end
+    task.wait(0.1)
+    for _, child in pairs(t1.value2.petsFolder.Unique:GetChildren()) do
+        if p4 == child.Name then
+            t1.value4.rEvents.equipPetEvent:FireServer("equipPet", child)
+        end
+    end
+end
+function t1.value32()
+    local v51 = 5000 + t1.value6.Value * 2550
+
+    while true do
+        local value9 = t1.value9
+
+        if value9 then
+            value9 = v51 > t1.value2.leaderstats.Strength.Value
+        end
+
+        if not value9 then
+            break
+        end
+
+        local v53 = t1.value2.MembershipType ~= Enum.MembershipType.Premium and 16 or 12
+        local v54 = false
+        local n2 = 0
+
+        while true do
+            n2 += 1
+
+            if (not v54 or not (v53 <= n2)) and (v54 or not (n2 <= v53)) then
+                break
+            end
+
+            t1.value5:FireServer("rep")
+        end
+
+        task.wait(0.02)
+    end
+
+    local value9 = t1.value9
+
+    if value9 then
+        value9 = v51 <= t1.value2.leaderstats.Strength.Value
+    end
+
+    if value9 then
+        t1.value31("Tribal Overlord")
+        task.wait(0.25)
+
+        local value6Value2 = t1.value6.Value
+
+        if not (value6Value2 < t1.value6.Value) then
+            local _ = t1.value9
+        end
+
+        repeat
+            t1.value4.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+            task.wait(0.05)
+        until value6Value2 < t1.value6.Value or not t1.value9
+    end
+end
+function t1.value33()
+    while t1.value9 do
+        t1.value31("Swift Samurai")
+        t1.value32()
+        task.wait(0.5)
+    end
+end
+v14:AddLabel("")
+v14:AddLabel("🔄\239\184\143 Rebirth:").TextSize = 17
+v14:AddSwitch("Fast Rebirth", function(p5)
+    t1.value9 = p5
+
+    if p5 then
+        t1.value10 = tick()
+
+        if t1.value28 > 0 then
+            t1.value14.Text = string.format("Pace: %s / Hour | %s / Day | %s / Week", v15(t1.value28), v15(t1.value29), v15(t1.value17))
+            t1.value15.Text = string.format("Average Pace: %s / Hour | %s / Day | %s / Week", v15(t1.value8), v15(t1.value1), v15(t1.value16))
+        end
+
+        task.spawn(t1.value33)
+
+        return
+    end
+
+    local _ = t1.value11 + (tick() - t1.value10)
+
+    t1.value22(true)
+end)
+task.spawn(function()
+    while true do
+        t1.value22(false)
+        task.wait(0.1)
+    end
+end)
+
+local v18 = v13:AddTab("Fast Farm")
+
+t1.value34 = leaderstats:WaitForChild("Strength")
+t1.value35 = t1.value2:WaitForChild("Durability")
+v18:AddLabel("📊 Stats:").TextSize = 17
+t1.value36 = v18:AddLabel("0d 0h 0m 0s - Fast Rep Inactive")
+t1.value36.TextSize = 15
+t1.value36.TextColor3 = Color3.fromRGB(255, 50, 50)
+t1.value37 = v18:AddLabel("Strength: /Hour | /Day | /Week")
+t1.value37.TextSize = 15
+t1.value38 = v18:AddLabel("Average: /Hour | /Day | /Week")
+t1.value38.TextSize = 15
+v18:AddLabel("")
+t1.value39 = v18:AddLabel("Dura: /Hour | /Day | /Week")
+t1.value39.TextSize = 15
+t1.value40 = v18:AddLabel("Average: /Hour | /Day | /Week")
+t1.value40.TextSize = 15
+v18:AddLabel("")
+t1.value41 = v18:AddLabel("Strength: " .. v15(t1.value34.Value) .. " | Gained: 0")
+t1.value41.TextSize = 15
+t1.value42 = v18:AddLabel("Durability: " .. v15(t1.value35.Value) .. " | Gained: 0")
+t1.value42.TextSize = 15
+t1.value43 = 0
+t1.value44 = 0
+t1.value45 = false
+t1.value46 = false
+t1.value47 = {}
+t1.value48 = {}
+t1.value49 = 10
+t1.value50 = t1.value34.Value
+t1.value51 = t1.value35.Value
+t1.value52 = 0
+t1.value53 = 0
+t1.value54 = 0
+t1.value55 = 0
+t1.value56 = 0
+t1.value57 = 0
+t1.value58 = 0
+t1.value59 = 0
+t1.value60 = 0
+t1.value61 = 0
+t1.value62 = 0
+t1.value63 = 0
+task.spawn(function()
+    local timestamp = tick()
+
+    while true do
+        local timestamp2 = tick()
+        local value34Value = t1.value34.Value
+        local value35Value = t1.value35.Value
+
+        t1.value41.Text = "Strength: " .. v15(value34Value) .. " | Gained: " .. v15(value34Value - t1.value50)
+        t1.value42.Text = "Durability: " .. v15(value35Value) .. " | Gained: " .. v15(value35Value - t1.value51)
+
+        if t1.value45 then
+            if not t1.value46 then
+                t1.value46 = true
+                t1.value43 = timestamp2
+                t1.value47 = {}
+                t1.value48 = {}
+
+                if t1.value52 > 0 then
+                    t1.value37.Text = "Strength: " .. v15(t1.value52) .. "/Hour | " .. v15(t1.value53) .. "/Day | " .. v15(t1.value54) .. "/Week"
+                    t1.value39.Text = "Dura: " .. v15(t1.value55) .. "/Hour | " .. v15(t1.value56) .. "/Day | " .. v15(t1.value57) .. "/Week"
+                    t1.value38.Text = "Average: " .. v15(t1.value58) .. "/Hour | " .. v15(t1.value59) .. "/Day | " .. v15(t1.value60) .. "/Week"
+                    t1.value40.Text = "Average: " .. v15(t1.value61) .. "/Hour | " .. v15(t1.value62) .. "/Day | " .. v15(t1.value63) .. "/Week"
+                end
+            end
+
+            local v74 = t1.value44 + (timestamp2 - t1.value43)
+            local v75 = math.floor(v74 / 86400)
+            local v76 = math.floor(v74 % 86400 / 3600)
+            local v77 = math.floor(v74 % 3600 / 60)
+            local v78 = math.floor(v74 % 60)
+
+            t1.value36.Text = string.format("%dd %dh %dm %ds - Farming", v75, v76, v77, v78)
+            t1.value36.TextColor3 = Color3.fromRGB(50, 255, 50)
+            table.insert(t1.value47, {
+				time = timestamp2,
+				value = value34Value
+			})
+            table.insert(t1.value48, {
+				time = timestamp2,
+				value = value35Value
+			})
+
+            while true do
+                local v79 = #t1.value47 > 0
+
+                if v79 then
+                    v79 = timestamp2 - t1.value47[1].time > t1.value49
+                end
+
+                if not v79 then
+                    break
+                end
+
+                table.remove(t1.value47, 1)
+            end
+
+            while true do
+                local v80 = #t1.value48 > 0
+
+                if v80 then
+                    v80 = timestamp2 - t1.value48[1].time > t1.value49
+                end
+
+                if not v80 then
+                    break
+                end
+
+                table.remove(t1.value48, 1)
+            end
+
+            if timestamp2 - timestamp >= t1.value49 then
+                timestamp = timestamp2
+
+                if #t1.value47 >= 2 then
+                    local v81 = (t1.value47[#t1.value47].value - t1.value47[1].value) / t1.value49
+
+                    t1.value52 = v81 * 3600
+                    t1.value53 = v81 * 86400
+                    t1.value54 = v81 * 604800
+                    t1.value37.Text = "Strength: " .. v15(t1.value52) .. "/Hour | " .. v15(t1.value53) .. "/Day | " .. v15(t1.value54) .. "/Week"
+                end
+
+                if #t1.value48 >= 2 then
+                    local v82 = (t1.value48[#t1.value48].value - t1.value48[1].value) / t1.value49
+
+                    t1.value55 = v82 * 3600
+                    t1.value56 = v82 * 86400
+                    t1.value57 = v82 * 604800
+                    t1.value39.Text = "Dura: " .. v15(t1.value55) .. "/Hour | " .. v15(t1.value56) .. "/Day | " .. v15(t1.value57) .. "/Week"
+                end
+
+                local v83 = t1.value44 + (timestamp2 - t1.value43)
+
+                if v83 > 0 then
+                    local v84 = (value34Value - t1.value50) / v83
+
+                    t1.value58 = v84 * 3600
+                    t1.value59 = v84 * 86400
+                    t1.value60 = v84 * 604800
+                    t1.value38.Text = "Average: " .. v15(t1.value58) .. "/Hour | " .. v15(t1.value59) .. "/Day | " .. v15(t1.value60) .. "/Week"
+
+                    local v85 = (value35Value - t1.value51) / v83
+
+                    t1.value61 = v85 * 3600
+                    t1.value62 = v85 * 86400
+                    t1.value63 = v85 * 604800
+                    t1.value40.Text = "Average: " .. v15(t1.value61) .. "/Hour | " .. v15(t1.value62) .. "/Day | " .. v15(t1.value63) .. "/Week"
+                end
+            end
+        elseif t1.value46 then
+            t1.value46 = false
+            t1.value44 = t1.value44 + (timestamp2 - t1.value43)
+
+            local v86 = math.floor(t1.value44 / 86400)
+            local v87 = math.floor(t1.value44 % 86400 / 3600)
+            local v88 = math.floor(t1.value44 % 3600 / 60)
+            local v89 = math.floor(t1.value44 % 60)
+
+            if t1.value44 > 0 then
+                t1.value36.Text = string.format("%dd %dh %dm %ds - Farming Paused", v86, v87, v88, v89)
+                t1.value36.TextColor3 = Color3.fromRGB(255, 165, 0)
+            else
+                t1.value36.Text = "0d 0h 0m 0s - Fast Rep Inactive"
+                t1.value36.TextColor3 = Color3.fromRGB(255, 50, 50)
+            end
+
+            t1.value47 = {}
+            t1.value48 = {}
+        end
+
+        task.wait(0.05)
+    end
+end)
+v18:AddLabel("")
+v18:AddLabel("⚡ Fast Farm:").TextSize = 17
+t1.value64 = false
+t1.value65 = 350
+t1.value66 = true
+local v19 = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]
+
+t1.value67 = nil
+t1.value67 = v19
+function t1.value68()
+    return t1.value67:GetValue()
+end
+function t1.value69(p6)
+    if p6 < 80 then
+        return 500
+    end
+
+    if p6 < 150 then
+        return 300
+    end
+
+    if p6 < 250 then
+        return 100
+    end
+
+    return 50
+end
+v18:AddTextBox("Rep Speed:", function(p7)
+    local num = tonumber(p7)
+
+    if num then
+        t1.value65 = math.clamp(math.floor(num), 1, 1000)
+    end
+end)
+v18:AddSwitch("Controlled Speed", function(p8)
+    t1.value66 = p8
+end):Set(true)
+
+local function v20()
+    local v94 = time()
+    local v95 = t1.value68()
+
+    while t1.value64 do
+        if time() - v94 > 0.5 then
+            v95 = t1.value68()
+            v94 = time()
+        end
+
+        local v96 = t1.value66 and t1.value69(v95) or t1.value65
+        local v97 = math.clamp(v95 / 2500, 0.001, 0.1)
+
+        for i = 1, math.min(v96, t1.value65) do
+            t1.value5:FireServer("rep")
+
+            if i % 500 == 0 then
+                task.wait(0)
+            end
+        end
+
+        task.wait(v97)
+    end
+end
+v18:AddSwitch("Fast Rep", function(p9)
+    t1.value64 = p9
+
+    if t1.value64 then
+        task.spawn(v20)
+
+        return
+    end
+
+    task.cancel(v20)
+end)
+
+local v21 = v13:AddTab("Misc")
+
+v21:AddLabel("📈 Better Farming:").TextSize = 17
+t1.value70 = false
+t1.value71 = nil
+t1.value72 = nil
+v21:AddSwitch("Set Size 1", function(p10)
+    t1.value70 = p10
+
+    if t1.value70 then
+        t1.value71 = coroutine.create(function()
+            while t1.value70 do
+                game:GetService("ReplicatedStorage").rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+                wait(0.01)
+            end
+        end)
+        coroutine.resume(t1.value71)
+    end
+end)
+t1.value73 = false
+t1.value72 = nil
+function t1.value74()
+    if not t1.value73 or not t1.value72 then
+        return
+    end
+
+    local Character = t1.value2.Character
+
+    if not Character then
+        return
+    end
+
+    local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+
+    if not HumanoidRootPart then
+        return
+    end
+
+    local PositionLocker = HumanoidRootPart:FindFirstChild("PositionLocker")
+
+    if PositionLocker then
+        PositionLocker.Position = t1.value72
+
+        return
+    end
+
+    local BodyPosition = Instance.new("BodyPosition")
+
+    BodyPosition.Name = "PositionLocker"
+    BodyPosition.MaxForce = Vector3.new(1e999, 1e999, 1e999)
+    BodyPosition.Position = t1.value72
+    BodyPosition.P = 100000
+    BodyPosition.Parent = HumanoidRootPart
+end
+function t1.value75()
+    local Character = t1.value2.Character
+
+    if Character then
+        local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+
+        if HumanoidRootPart then
+            local PositionLocker = HumanoidRootPart:FindFirstChild("PositionLocker")
+
+            if PositionLocker then
+                PositionLocker:Destroy()
+            end
+        end
+    end
+
+    t1.value72 = nil
+end
+v21:AddSwitch("Lock Position", function(p11)
+    t1.value73 = p11
+
+    if p11 then
+        local Character = t1.value2.Character
+
+        if Character then
+            Character = t1.value2.Character:FindFirstChild("HumanoidRootPart")
+        end
+
+        if Character then
+            local _ = Character.Position
+        end
+
+        t1.value74()
+
+        return
+    end
+
+    t1.value75()
+end)
+t1.value2.CharacterAdded:Connect(function(character)
+    local HumanoidRootPart = character:WaitForChild("HumanoidRootPart", 5)
+
+    if t1.value73 and HumanoidRootPart then
+        local _ = HumanoidRootPart.Position
+
+        t1.value74()
+    end
+end)
+task.spawn(function()
+    while true do
+        if t1.value73 then
+            t1.value74()
+        end
+
+        task.wait(0.1)
+    end
+end)
+t1.value76 = {
+	"strengthFrame",
+	"durabilityFrame",
+	"agilityFrame",
+	"evilKarmaFrame",
+	"goodKarmaFrame"
+}
+v21:AddSwitch("Hide Stat Frames", function(p12)
+    if p12 then
+
+        for v117, v118 in ipairs(t1.value76) do
+
+            local v119 = t1.value4:FindFirstChild(v118)
+            local v120 = v119
+
+            if v119 then
+                v120 = v119:IsA("GuiObject")
+            end
+
+            if v120 then
+                v119.Visible = false
+            end
+        end
+        if not _G.frameMonitorConnection then
+            _G.frameMonitorConnection = t1.value4.ChildAdded:Connect(function(child)
+                for _, v in ipairs(t1.value76) do
+                    if v == child.Name and child:IsA("GuiObject") then
+                        child.Visible = false
+                    end
+                end
+            end)
+
+            return
+        end
+    else
+        for _, v in ipairs(t1.value76) do
+            local v3 = t1.value4:FindFirstChild(v)
+
+            if v3 and v3:IsA("GuiObject") then
+                v3.Visible = true
+            end
+        end
+
+        if _G.frameMonitorConnection then
+            _G.frameMonitorConnection:Disconnect()
+            _G.frameMonitorConnection = nil
+        end
+    end
+end):Set(false)
+v21:AddButton("Anti Lag", function()
+    local PlayerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    local Lighting = game:GetService("Lighting")
+
+    for _, child in pairs(PlayerGui:GetChildren()) do
+        if child:IsA("ScreenGui") then
+            child:Destroy()
+        end
+    end;
+
+    (function()
+        for _, descendant in pairs(workspace:GetDescendants()) do
+            if descendant:IsA("ParticleEmitter") then
+                descendant:Destroy()
+            end
+        end
+    end)();
+    (function()
+        for _, descendant in pairs(workspace:GetDescendants()) do
+            local v161 = descendant:IsA("PointLight")
+
+            if not v161 then
+                v161 = descendant:IsA("SpotLight") or descendant:IsA("SurfaceLight")
+            end
+
+            if v161 then
+                descendant:Destroy()
+            end
+        end
+    end)();
+    (function()
+        for _, child in pairs(Lighting:GetChildren()) do
+            if child:IsA("Sky") then
+                child:Destroy()
+            end
+        end
+
+        local Sky = Instance.new("Sky")
+
+        Sky.Name = "DarkSky"
+        Sky.SkyboxBk = "rbxassetid://0"
+        Sky.SkyboxDn = "rbxassetid://0"
+        Sky.SkyboxFt = "rbxassetid://0"
+        Sky.SkyboxLf = "rbxassetid://0"
+        Sky.SkyboxRt = "rbxassetid://0"
+        Sky.SkyboxUp = "rbxassetid://0"
+        Sky.Parent = Lighting
+        Lighting.Brightness = 0
+        Lighting.ClockTime = 0
+        Lighting.TimeOfDay = "00:00:00"
+        Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+        Lighting.Ambient = Color3.new(0, 0, 0)
+        Lighting.FogColor = Color3.new(0, 0, 0)
+        Lighting.FogEnd = 100
+        task.spawn(function()
+            while true do
+                wait(5)
+
+                if not Lighting:FindFirstChild("DarkSky") then
+                    Sky:Clone().Parent = Lighting
+                end
+
+                Lighting.Brightness = 0
+                Lighting.ClockTime = 0
+                Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+                Lighting.Ambient = Color3.new(0, 0, 0)
+                Lighting.FogColor = Color3.new(0, 0, 0)
+                Lighting.FogEnd = 100
+            end
+        end)
+    end)()
+end)
+v21:AddLabel("🔥 QoL:").TextSize = 17
+function t1.value77()
+    local v128 = t1.value2.Character:FindFirstChild("Protein Egg")
+
+    if not v128 then
+        v128 = t1.value2.Backpack:FindFirstChild("Protein Egg")
+    end
+
+    if v128 then
+        t1.value5:FireServer("proteinEgg", v128)
+    end
+end
+t1.value78 = false
+task.spawn(function()
+    while true do
+        if t1.value78 then
+            t1.value77()
+            task.wait(1800)
+        else
+            task.wait(1)
+        end
+    end
+end)
+v21:AddSwitch("Auto Egg", function(p13)
+    t1.value78 = p13
+
+    if p13 then
+        t1.value77()
+    end
+end)
+t1.value79 = false
+task.spawn(function()
+    while true do
+        if t1.value79 then
+            local v131 = t1.value2.Character:FindFirstChild("Tropical Shake")
+
+            if not v131 then
+                v131 = t1.value2.Backpack:FindFirstChild("Tropical Shake")
+            end
+
+            if v131 then
+                t1.value5:FireServer("tropicalShake", v131)
+            end
+
+            task.wait(450)
+        else
+            task.wait(1)
+        end
+    end
+end)
+v21:AddSwitch("Auto Shake", function(p14)
+    t1.value79 = p14
+
+    if p14 then
+        local v133 = t1.value2.Character:FindFirstChild("Tropical Shake")
+
+        if not v133 then
+            v133 = t1.value2.Backpack:FindFirstChild("Tropical Shake")
+        end
+
+        if v133 then
+            t1.value5:FireServer("tropicalShake", v133)
+        end
+    end
+end)
+v21:AddSwitch("Spin Fortune Wheel", function(p15)
+    _G.AutoSpinWheel = p15
+
+    if p15 then
+        spawn(function()
+            while _G.AutoSpinWheel and wait(1) do
+                game:GetService("ReplicatedStorage").rEvents.openFortuneWheelRemote:InvokeServer("openFortuneWheel", game:GetService("ReplicatedStorage").fortuneWheelChances["Fortune Wheel"])
+            end
+        end)
+    end
+end)
+
+local v22 = v21:AddDropdown("Perk Pet Equip", function(p16)
+
+    for v138, v139 in pairs(game.Players.LocalPlayer.petsFolder:GetChildren()) do
+
+        if v139:IsA("Folder") then
+            for _, child in pairs(v139:GetChildren()) do
+                game:GetService("ReplicatedStorage").rEvents.equipPetEvent:FireServer("unequipPet", child)
+            end
+        end
+    end
+    task.wait(0.2)
+    local t5 = {}
+    for _, child in pairs(game.Players.LocalPlayer.petsFolder.Unique:GetChildren()) do
+        if p16 == child.Name then
+            table.insert(t5, child)
+        end
+    end
+    for i = 1, math.min(8, #t5) do
+        game:GetService("ReplicatedStorage").rEvents.equipPetEvent:FireServer("equipPet", t5[i])
+        task.wait(0.1)
+    end
+end)
+
+v22:Add("Swift Samurai")
+v22:Add("Tribal Overlord")
+
+local Character = t1.value2.Character
+if not Character then
+    Character = t1.value2.CharacterAdded:wait()
+end
+t1.value80 = Character:WaitForChild("HumanoidRootPart")
+v21:AddButton("Jungle Lift", function()
+    t1.value80.CFrame = CFrame.new(-8642.396484375, 6.7980651855, 2086.1030273)
+    task.wait(0.2)
+    t1.value3:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    task.wait(0.05)
+    t1.value3:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+end)
+v21:AddButton("Jungle Squat", function()
+    t1.value80.CFrame = CFrame.new(-8371.43359375, 6.79806327, 2858.8852539)
+    task.wait(0.2)
+    t1.value3:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    task.wait(0.05)
+    t1.value3:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+end)
+
+local v24 = v13:AddTab("Info")
+
+v24:Show()
+v24:AddLabel("Made with ♥\239\184\143 by Henne").TextSize = 17
+v24:AddLabel("Contact: Henne @imhenne").TextSize = 17
+v24:AddLabel("Community Owner: MadMax @musicisthegame. ").TextSize = 17
+v24:AddButton("Copy Discord Invite", function()
+    if setclipboard then
+        setclipboard("https://discord.gg/jG9AaZPXrC")
+        game.StarterGui:SetCore("SendNotification", {
+			Title = "Link Copied!",
+			Text = "You can continue to Discord now.",
+			Duration = 3
+		})
+
+        return
+    end
+
+    game.StarterGui:SetCore("SendNotification", {
+		Title = "Error!",
+		Text = "Clipboard not Supported.",
+		Duration = 3
+	})
+end)
+v24:AddLabel("")
+
+local v25 = v24:AddLabel("GenX Script [V1.0.0]")
+
+v25.TextSize = 30
+v25.Font = Enum.Font.Arcade
