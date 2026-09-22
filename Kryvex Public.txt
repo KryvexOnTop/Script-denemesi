@@ -16,7 +16,7 @@ background = {
 }, 
 background_transparency = 0.1, 
 main_color = Color3.fromRGB(255, 60, 60), -- Açık kırmızı
-min_size = Vector2.new(535, 300), -- Boyut büyütüldü
+min_size = Vector2.new(480, 350), -- Boyut büyütüldü
 can_resize = true 
 })
 
@@ -2102,347 +2102,347 @@ for _, itemName in ipairs(items) do
 end
 
 
-local tabFarming = window:AddTab("Pack Farm")
+_G.tabFarming = window:AddTab("Pack Farm")
 
-local player = game.Players.LocalPlayer
-local muscleEvent = player:WaitForChild("muscleEvent")
-local rEvents = game:GetService("ReplicatedStorage"):WaitForChild("rEvents")
-local isRunning = false
-local strengthOnly = false
-local autoEatEnabled = false
-local startTime = tick()
-local totalElapsed = 0
-local initialRebirthsCount = player.leaderstats.Rebirths.Value
-local rebirthsStat = player.leaderstats.Rebirths
-local strengthStat = player.leaderstats.Strength
-local durabilityStat = player:WaitForChild("Durability")
+_G.player = game.Players.LocalPlayer
+_G.muscleEvent = _G.player:WaitForChild("muscleEvent")
+_G.rEvents = game:GetService("ReplicatedStorage"):WaitForChild("rEvents")
+_G.isRunning = false
+_G.strengthOnly = false
+_G.autoEatEnabled = false
+_G.startTime = tick()
+_G.totalElapsed = 0
+_G.initialRebirthsCount = _G.player.leaderstats.Rebirths.Value
+_G.rebirthsStat = _G.player.leaderstats.Rebirths
+_G.strengthStat = _G.player.leaderstats.Strength
+_G.durabilityStat = _G.player:WaitForChild("Durability")
 
-local function formatNumber(n)
+_G.formatNumber = function(n)
     if not n then return "0" end
-    local num = tonumber(n) or 0
-    if num < 1000 then return tostring(math.floor(num)) end
-    local abbreviations = {"", "K", "M", "B", "T", "Qa", "Qi"}
-    local i = 1
-    while num >= 1000 and i < #abbreviations do
-        num = num / 1000
-        i = i + 1
+    _G.num = tonumber(n) or 0
+    if _G.num < 1000 then return tostring(math.floor(_G.num)) end
+    _G.abbreviations = {"", "K", "M", "B", "T", "Qa", "Qi"}
+    _G.i = 1
+    while _G.num >= 1000 and _G.i < #_G.abbreviations do
+        _G.num = _G.num / 1000
+        _G.i = _G.i + 1
     end
-    return string.format("%.2f%s", num, abbreviations[i])
+    return string.format("%.2f%s", _G.num, _G.abbreviations[_G.i])
 end
 
-local function unequipAllPets()
-    if player:FindFirstChild("petsFolder") then
-        for _, folder in pairs(player.petsFolder:GetChildren()) do
-            for _, pet in pairs(folder:GetChildren()) do
-                rEvents.equipPetEvent:FireServer("unequipPet", pet)
+_G.unequipAllPets = function()
+    if _G.player:FindFirstChild("petsFolder") then
+        for _, _G.folder in pairs(_G.player.petsFolder:GetChildren()) do
+            for _, _G.pet in pairs(_G.folder:GetChildren()) do
+                _G.rEvents.equipPetEvent:FireServer("unequipPet", _G.pet)
             end
         end
     end
 end
 
-local function equipUniquePet(name)
-    if player:FindFirstChild("petsFolder") and player.petsFolder:FindFirstChild("Unique") then
-        for _, pet in pairs(player.petsFolder.Unique:GetChildren()) do
-            if pet.Name == name then
-                rEvents.equipPetEvent:FireServer("equipPet", pet)
+_G.equipUniquePet = function(name)
+    if _G.player:FindFirstChild("petsFolder") and _G.player.petsFolder:FindFirstChild("Unique") then
+        for _, _G.pet in pairs(_G.player.petsFolder.Unique:GetChildren()) do
+            if _G.pet.Name == name then
+                _G.rEvents.equipPetEvent:FireServer("equipPet", _G.pet)
                 task.wait(0.01)
             end
         end
     end
 end
 
-local function findMachine(machineName)
-    local machine = workspace:FindFirstChild("machinesFolder") and workspace.machinesFolder:FindFirstChild(machineName)
-    if not machine then
-        for _, f in pairs(workspace:GetChildren()) do
-            if f:IsA("Folder") and f.Name:find("machines") then
-                machine = f:FindFirstChild(machineName)
-                if machine then break end
+_G.findMachine = function(machineName)
+    _G.machine = workspace:FindFirstChild("machinesFolder") and workspace.machinesFolder:FindFirstChild(machineName)
+    if not _G.machine then
+        for _, _G.f in pairs(workspace:GetChildren()) do
+            if _G.f:IsA("Folder") and _G.f.Name:find("machines") then
+                _G.machine = _G.f:FindFirstChild(machineName)
+                if _G.machine then break end
             end
         end
     end
-    return machine
+    return _G.machine
 end
 
-local function pressE()
-    local vim = game:GetService("VirtualInputManager")
-    vim:SendKeyEvent(true, "E", false, game)
+_G.pressE = function()
+    _G.vim = game:GetService("VirtualInputManager")
+    _G.vim:SendKeyEvent(true, "E", false, game)
     task.wait(0.05)
-    vim:SendKeyEvent(false, "E", false, game)
+    _G.vim:SendKeyEvent(false, "E", false, game)
 end
 
-local serverLabel = tabFarming:AddLabel("Time:")
-serverLabel.TextSize = 20
-local timeLabel = tabFarming:AddLabel("0d 0h 0m 0s - Inactive")
-local paceLabel = tabFarming:AddLabel("Pace: 0 / Hour | 0 / Day | 0 / Week")
-local averagePaceLabel = tabFarming:AddLabel("Average Pace: 0 / Hour | 0 / Day | 0 / Week")
+_G.serverLabel = _G.tabFarming:AddLabel("Time:")
+_G.serverLabel.TextSize = 20
+_G.timeLabel = _G.tabFarming:AddLabel("0d 0h 0m 0s - Inactive")
+_G.paceLabel = _G.tabFarming:AddLabel("Pace: 0 / Hour | 0 / Day | 0 / Week")
+_G.averagePaceLabel = _G.tabFarming:AddLabel("Average Pace: 0 / Hour | 0 / Day | 0 / Week")
 
-paceLabel.TextSize = 17
-averagePaceLabel.TextSize = 17
-timeLabel.TextSize = 17
-timeLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+_G.paceLabel.TextSize = 17
+_G.averagePaceLabel.TextSize = 17
+_G.timeLabel.TextSize = 17
+_G.timeLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
 
-local rebirthsStatsLabel = tabFarming:AddLabel("Rebirths: 0 | Gained: 0")
-rebirthsStatsLabel.TextSize = 17
+_G.rebirthsStatsLabel = _G.tabFarming:AddLabel("Rebirths: 0 | Gained: 0")
+_G.rebirthsStatsLabel.TextSize = 17
 
-local paceHistoryHour = {}
-local paceHistoryDay = {}
-local paceHistoryWeek = {}
-local maxHistoryLength = 20
-local rebirthCount = 0
-local lastRebirthTime = tick()
-local lastRebirthValue = rebirthsStat.Value
+_G.paceHistoryHour = {}
+_G.paceHistoryDay = {}
+_G.paceHistoryWeek = {}
+_G.maxHistoryLength = 20
+_G.rebirthCount = 0
+_G.lastRebirthTime = tick()
+_G.lastRebirthValue = _G.rebirthsStat.Value
 
-local function updateRebirthsLabel()
-    local gained = rebirthsStat.Value - initialRebirthsCount
-    rebirthsStatsLabel.Text = string.format("Rebirths: %s | Gained: %s",
-        formatNumber(rebirthsStat.Value),
-        formatNumber(gained))
+_G.updateRebirthsLabel = function()
+    _G.gained = _G.rebirthsStat.Value - _G.initialRebirthsCount
+    _G.rebirthsStatsLabel.Text = string.format("Rebirths: %s | Gained: %s",
+        _G.formatNumber(_G.rebirthsStat.Value),
+        _G.formatNumber(_G.gained))
 end
 
-local function average(tbl)
-    local sum = 0
-    for _, v in ipairs(tbl) do
-        sum = sum + v
+_G.average = function(tbl)
+    _G.sum = 0
+    for _, _G.v in ipairs(tbl) do
+        _G.sum = _G.sum + _G.v
     end
-    return #tbl > 0 and (sum / #tbl) or 0
+    return #tbl > 0 and (_G.sum / #tbl) or 0
 end
 
-local function calculatePaceOnRebirth()
-    rebirthCount = rebirthCount + 1
+_G.calculatePaceOnRebirth = function()
+    _G.rebirthCount = _G.rebirthCount + 1
 
-    if rebirthCount < 2 then
-        lastRebirthTime = tick()
-        lastRebirthValue = rebirthsStat.Value
+    if _G.rebirthCount < 2 then
+        _G.lastRebirthTime = tick()
+        _G.lastRebirthValue = _G.rebirthsStat.Value
         return
     end
 
-    local now = tick()
-    local gained = rebirthsStat.Value - lastRebirthValue
+    _G.now = tick()
+    _G.gained = _G.rebirthsStat.Value - _G.lastRebirthValue
 
-    if gained > 0 then
-        local avgTimePerRebirth = (now - lastRebirthTime) / gained
-        local paceHour = 3600 / avgTimePerRebirth
-        local paceDay = 86400 / avgTimePerRebirth
-        local paceWeek = 604800 / avgTimePerRebirth
+    if _G.gained > 0 then
+        _G.avgTimePerRebirth = (_G.now - _G.lastRebirthTime) / _G.gained
+        _G.paceHour = 3600 / _G.avgTimePerRebirth
+        _G.paceDay = 86400 / _G.avgTimePerRebirth
+        _G.paceWeek = 604800 / _G.avgTimePerRebirth
 
-        paceLabel.Text = string.format("Pace: %s / Hour | %s / Day | %s / Week",
-            formatNumber(paceHour), formatNumber(paceDay), formatNumber(paceWeek))
+        _G.paceLabel.Text = string.format("Pace: %s / Hour | %s / Day | %s / Week",
+            _G.formatNumber(_G.paceHour), _G.formatNumber(_G.paceDay), _G.formatNumber(_G.paceWeek))
 
-        table.insert(paceHistoryHour, paceHour)
-        table.insert(paceHistoryDay, paceDay)
-        table.insert(paceHistoryWeek, paceWeek)
+        table.insert(_G.paceHistoryHour, _G.paceHour)
+        table.insert(_G.paceHistoryDay, _G.paceDay)
+        table.insert(_G.paceHistoryWeek, _G.paceWeek)
 
-        if #paceHistoryHour > maxHistoryLength then
-            table.remove(paceHistoryHour, 1)
-            table.remove(paceHistoryDay, 1)
-            table.remove(paceHistoryWeek, 1)
+        if #_G.paceHistoryHour > _G.maxHistoryLength then
+            table.remove(_G.paceHistoryHour, 1)
+            table.remove(_G.paceHistoryDay, 1)
+            table.remove(_G.paceHistoryWeek, 1)
         end
 
-        local avgHour = average(paceHistoryHour)
-        local avgDay = average(paceHistoryDay)
-        local avgWeek = average(paceHistoryWeek)
+        _G.avgHour = _G.average(_G.paceHistoryHour)
+        _G.avgDay = _G.average(_G.paceHistoryDay)
+        _G.avgWeek = _G.average(_G.paceHistoryWeek)
 
-        averagePaceLabel.Text = string.format("Average Pace: %s / Hour | %s / Day | %s / Week",
-            formatNumber(avgHour), formatNumber(avgDay), formatNumber(avgWeek))
+        _G.averagePaceLabel.Text = string.format("Average Pace: %s / Hour | %s / Day | %s / Week",
+            _G.formatNumber(_G.avgHour), _G.formatNumber(_G.avgDay), _G.formatNumber(_G.avgWeek))
 
-        lastRebirthTime = now
-        lastRebirthValue = rebirthsStat.Value
+        _G.lastRebirthTime = _G.now
+        _G.lastRebirthValue = _G.rebirthsStat.Value
     end
 end
 
-tabFarming:AddLabel("Session Stats").TextSize = 23
-local footerTimeLabel = tabFarming:AddLabel("Time: 0d 0h 0m 0s")
-local footerRebirthsLabel = tabFarming:AddLabel("Total Rebirths: " .. initialRebirthsCount)
-local footerRebirthsGainedLabel = tabFarming:AddLabel("Rebirths Gained: 0")
+_G.tabFarming:AddLabel("Session Stats").TextSize = 23
+_G.footerTimeLabel = _G.tabFarming:AddLabel("Time: 0d 0h 0m 0s")
+_G.footerRebirthsLabel = _G.tabFarming:AddLabel("Total Rebirths: " .. _G.initialRebirthsCount)
+_G.footerRebirthsGainedLabel = _G.tabFarming:AddLabel("Rebirths Gained: 0")
 
 task.spawn(function()
     while true do
-        local elapsed = tick() - startTime
-        local days = math.floor(elapsed / 86400)
-        local hours = math.floor((elapsed % 86400) / 3600)
-        local minutes = math.floor((elapsed % 3600) / 60)
-        local seconds = math.floor(elapsed % 60)
-        footerTimeLabel.Text = string.format("Time: %dd %dh %dm %ds", days, hours, minutes, seconds)
-        local current = rebirthsStat.Value
-        footerRebirthsLabel.Text = "Total Rebirths: " .. current
-        footerRebirthsGainedLabel.Text = "Rebirths Gained: " .. (current - initialRebirthsCount)
-        updateRebirthsLabel()
+        _G.elapsed = tick() - _G.startTime
+        _G.days = math.floor(_G.elapsed / 86400)
+        _G.hours = math.floor((_G.elapsed % 86400) / 3600)
+        _G.minutes = math.floor((_G.elapsed % 3600) / 60)
+        _G.seconds = math.floor(_G.elapsed % 60)
+        _G.footerTimeLabel.Text = string.format("Time: %dd %dh %dm %ds", _G.days, _G.hours, _G.minutes, _G.seconds)
+        _G.current = _G.rebirthsStat.Value
+        _G.footerRebirthsLabel.Text = "Total Rebirths: " .. _G.current
+        _G.footerRebirthsGainedLabel.Text = "Rebirths Gained: " .. (_G.current - _G.initialRebirthsCount)
+        _G.updateRebirthsLabel()
         task.wait(1)
     end
 end)
 
-tabFarming:AddLabel("👀 Pack Farm Rebirth").TextSize = 21
+_G.tabFarming:AddLabel("👀 Pack Farm Rebirth").TextSize = 21
 
-tabFarming:AddSwitch("🔄 Auto Rebirth Farm", function(bool)
-    isRunning = bool
+_G.tabFarming:AddSwitch("🔄 Auto Rebirth Farm", function(bool)
+    _G.isRunning = bool
     if not bool then return end
     task.spawn(function()
-        while isRunning do
-            local currentReb = player.leaderstats.Rebirths.Value
-            local rebirthCost = 10000 + (5000 * currentReb)
-            if player.ultimatesFolder:FindFirstChild("Golden Rebirth") then
-                local gReb = player.ultimatesFolder["Golden Rebirth"].Value
-                rebirthCost = math.floor(rebirthCost * (1 - (gReb * 0.1)))
+        while _G.isRunning do
+            _G.currentReb = _G.player.leaderstats.Rebirths.Value
+            _G.rebirthCost = 10000 + (5000 * _G.currentReb)
+            if _G.player.ultimatesFolder:FindFirstChild("Golden Rebirth") then
+                _G.gReb = _G.player.ultimatesFolder["Golden Rebirth"].Value
+                _G.rebirthCost = math.floor(_G.rebirthCost * (1 - (_G.gReb * 0.1)))
             end
-            unequipAllPets()
+            _G.unequipAllPets()
             task.wait(0.1)
-            equipUniquePet("Swift Samurai")
-            while isRunning and player.leaderstats.Strength.Value < rebirthCost do
+            _G.equipUniquePet("Swift Samurai")
+            while _G.isRunning and _G.player.leaderstats.Strength.Value < _G.rebirthCost do
                 for i = 1, 12 do
-                    muscleEvent:FireServer("rep")
+                    _G.muscleEvent:FireServer("rep")
                 end
                 task.wait(0.01)
             end
-            if not isRunning then break end
-            unequipAllPets()
+            if not _G.isRunning then break end
+            _G.unequipAllPets()
             task.wait(0.1)
-            equipUniquePet("Tribal Overlord")
-            local machine = findMachine("Jungle Bar Lift")
-            if machine and machine:FindFirstChild("interactSeat") then
-                player.Character.HumanoidRootPart.CFrame = machine.interactSeat.CFrame * CFrame.new(0, 3, 0)
-                local retryCount = 0
+            _G.equipUniquePet("Tribal Overlord")
+            _G.machine = _G.findMachine("Jungle Bar Lift")
+            if _G.machine and _G.machine:FindFirstChild("interactSeat") then
+                _G.player.Character.HumanoidRootPart.CFrame = _G.machine.interactSeat.CFrame * CFrame.new(0, 3, 0)
+                _G.retryCount = 0
                 repeat
                     task.wait(0.2)
-                    pressE()
-                    retryCount = retryCount + 1
-                until (player.Character and player.Character.Humanoid.Sit) or retryCount > 20 or not isRunning
+                    _G.pressE()
+                    _G.retryCount = _G.retryCount + 1
+                until (_G.player.Character and _G.player.Character.Humanoid.Sit) or _G.retryCount > 20 or not _G.isRunning
             end
-            local beforeRebirths = player.leaderstats.Rebirths.Value
+            _G.beforeRebirths = _G.player.leaderstats.Rebirths.Value
             repeat
-                rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                _G.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
                 task.wait(0.5)
-            until player.leaderstats.Rebirths.Value > beforeRebirths or not isRunning
-            calculatePaceOnRebirth()
+            until _G.player.leaderstats.Rebirths.Value > _G.beforeRebirths or not _G.isRunning
+            _G.calculatePaceOnRebirth()
         end
     end)
 end)
 
-tabFarming:AddLabel("💪 Fast Strength").TextSize = 21
+_G.tabFarming:AddLabel("💪 Fast Strength").TextSize = 21
 
-tabFarming:AddLabel("Time:").TextSize = 20
-local stopwatchLabel = tabFarming:AddLabel("0d 0h 0m 0s - Fast Rep Inactive")
-stopwatchLabel.TextSize = 17
-stopwatchLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+_G.tabFarming:AddLabel("Time:").TextSize = 20
+_G.stopwatchLabel = _G.tabFarming:AddLabel("0d 0h 0m 0s - Fast Rep Inactive")
+_G.stopwatchLabel.TextSize = 17
+_G.stopwatchLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
 
-local projectedStrengthLabel = tabFarming:AddLabel("Strength Pace: 0 /Hour | 0 /Day | 0 /Week")
-projectedStrengthLabel.TextSize = 17
-local projectedDurabilityLabel = tabFarming:AddLabel("Durability Pace: 0 /Hour | 0 /Day | 0 /Week")
-projectedDurabilityLabel.TextSize = 17
-local averageStrengthLabel = tabFarming:AddLabel("Average Strength Pace: 0 /Hour | 0 /Day | 0 /Week")
-averageStrengthLabel.TextSize = 17
-local averageDurabilityLabel = tabFarming:AddLabel("Average Durability Pace: 0 /Hour | 0 /Day | 0 /Week")
-averageDurabilityLabel.TextSize = 17
+_G.projectedStrengthLabel = _G.tabFarming:AddLabel("Strength Pace: 0 /Hour | 0 /Day | 0 /Week")
+_G.projectedStrengthLabel.TextSize = 17
+_G.projectedDurabilityLabel = _G.tabFarming:AddLabel("Durability Pace: 0 /Hour | 0 /Day | 0 /Week")
+_G.projectedDurabilityLabel.TextSize = 17
+_G.averageStrengthLabel = _G.tabFarming:AddLabel("Average Strength Pace: 0 /Hour | 0 /Day | 0 /Week")
+_G.averageStrengthLabel.TextSize = 17
+_G.averageDurabilityLabel = _G.tabFarming:AddLabel("Average Durability Pace: 0 /Hour | 0 /Day | 0 /Week")
+_G.averageDurabilityLabel.TextSize = 17
 
-tabFarming:AddLabel("").TextSize = 10
-local statsLabel = tabFarming:AddLabel("Stats:")
-statsLabel.TextSize = 20
-local strengthLabel = tabFarming:AddLabel("Strength: 0 | Gained: 0")
-strengthLabel.TextSize = 17
-local durabilityLabel = tabFarming:AddLabel("Durability: 0 | Gained: 0")
-durabilityLabel.TextSize = 17
+_G.tabFarming:AddLabel("").TextSize = 10
+_G.statsLabel = _G.tabFarming:AddLabel("Stats:")
+_G.statsLabel.TextSize = 20
+_G.strengthLabel = _G.tabFarming:AddLabel("Strength: 0 | Gained: 0")
+_G.strengthLabel.TextSize = 17
+_G.durabilityLabel = _G.tabFarming:AddLabel("Durability: 0 | Gained: 0")
+_G.durabilityLabel.TextSize = 17
 
-local fastRepStartTime = 0
-local pausedElapsedTime = 0
-local runFastRep = false
-local trackingStarted = false
+_G.fastRepStartTime = 0
+_G.pausedElapsedTime = 0
+_G.runFastRep = false
+_G.trackingStarted = false
 
-local strengthHistory = {}
-local durabilityHistory = {}
-local calculationInterval = 10
+_G.strengthHistory = {}
+_G.durabilityHistory = {}
+_G.calculationInterval = 10
 
-local initialStrength = strengthStat.Value
-local initialDurability = durabilityStat.Value
+_G.initialStrength = _G.strengthStat.Value
+_G.initialDurability = _G.durabilityStat.Value
 
 task.spawn(function()
-    local lastCalcTime = tick()
+    _G.lastCalcTime = tick()
     while true do
-        local currentTime = tick()
-        local currentStrength = strengthStat.Value
-        local currentDurability = durabilityStat.Value
+        _G.currentTime = tick()
+        _G.currentStrength = _G.strengthStat.Value
+        _G.currentDurability = _G.durabilityStat.Value
 
-        strengthLabel.Text = "Strength: " .. formatNumber(currentStrength) .. " | Gained: " .. formatNumber(currentStrength - initialStrength)
-        durabilityLabel.Text = "Durability: " .. formatNumber(currentDurability) .. " | Gained: " .. formatNumber(currentDurability - initialDurability)
+        _G.strengthLabel.Text = "Strength: " .. _G.formatNumber(_G.currentStrength) .. " | Gained: " .. _G.formatNumber(_G.currentStrength - _G.initialStrength)
+        _G.durabilityLabel.Text = "Durability: " .. _G.formatNumber(_G.currentDurability) .. " | Gained: " .. _G.formatNumber(_G.currentDurability - _G.initialDurability)
 
-        if runFastRep then
-            if not trackingStarted then
-                trackingStarted = true
-                fastRepStartTime = currentTime
-                strengthHistory = {}
-                durabilityHistory = {}
+        if _G.runFastRep then
+            if not _G.trackingStarted then
+                _G.trackingStarted = true
+                _G.fastRepStartTime = _G.currentTime
+                _G.strengthHistory = {}
+                _G.durabilityHistory = {}
             end
-            local elapsedTime = pausedElapsedTime + (currentTime - fastRepStartTime)
-            local days = math.floor(elapsedTime / (24 * 3600))
-            local hours = math.floor((elapsedTime % (24 * 3600)) / 3600)
-            local minutes = math.floor((elapsedTime % 3600) / 60)
-            local seconds = math.floor(elapsedTime % 60)
-            stopwatchLabel.Text = string.format("%dd %dh %dm %ds - Fast Rep Running", days, hours, minutes, seconds)
-            stopwatchLabel.TextColor3 = Color3.fromRGB(50, 255, 50)
+            _G.elapsedTime = _G.pausedElapsedTime + (_G.currentTime - _G.fastRepStartTime)
+            _G.days = math.floor(_G.elapsedTime / (24 * 3600))
+            _G.hours = math.floor((_G.elapsedTime % (24 * 3600)) / 3600)
+            _G.minutes = math.floor((_G.elapsedTime % 3600) / 60)
+            _G.seconds = math.floor(_G.elapsedTime % 60)
+            _G.stopwatchLabel.Text = string.format("%dd %dh %dm %ds - Fast Rep Running", _G.days, _G.hours, _G.minutes, _G.seconds)
+            _G.stopwatchLabel.TextColor3 = Color3.fromRGB(50, 255, 50)
 
-            table.insert(strengthHistory, {time = currentTime, value = currentStrength})
-            table.insert(durabilityHistory, {time = currentTime, value = currentDurability})
+            table.insert(_G.strengthHistory, {time = _G.currentTime, value = _G.currentStrength})
+            table.insert(_G.durabilityHistory, {time = _G.currentTime, value = _G.currentDurability})
 
-            while #strengthHistory > 0 and currentTime - strengthHistory[1].time > calculationInterval do
-                table.remove(strengthHistory, 1)
+            while #_G.strengthHistory > 0 and _G.currentTime - _G.strengthHistory[1].time > _G.calculationInterval do
+                table.remove(_G.strengthHistory, 1)
             end
-            while #durabilityHistory > 0 and currentTime - durabilityHistory[1].time > calculationInterval do
-                table.remove(durabilityHistory, 1)
+            while #_G.durabilityHistory > 0 and _G.currentTime - _G.durabilityHistory[1].time > _G.calculationInterval do
+                table.remove(_G.durabilityHistory, 1)
             end
 
-            if currentTime - lastCalcTime >= calculationInterval then
-                lastCalcTime = currentTime
+            if _G.currentTime - _G.lastCalcTime >= _G.calculationInterval then
+                _G.lastCalcTime = _G.currentTime
 
-                if #strengthHistory >= 2 then
-                    local strengthDelta = strengthHistory[#strengthHistory].value - strengthHistory[1].value
-                    local strengthPerSecond = strengthDelta / calculationInterval
-                    local strengthPerHour = strengthPerSecond * 3600
-                    local strengthPerDay = strengthPerSecond * 86400
-                    local strengthPerWeek = strengthPerSecond * 604800
-                    projectedStrengthLabel.Text = "Strength Pace: " .. formatNumber(strengthPerHour) .. "/Hour | " .. formatNumber(strengthPerDay) .. "/Day | " .. formatNumber(strengthPerWeek) .. "/Week"
+                if #_G.strengthHistory >= 2 then
+                    _G.strengthDelta = _G.strengthHistory[#_G.strengthHistory].value - _G.strengthHistory[1].value
+                    _G.strengthPerSecond = _G.strengthDelta / _G.calculationInterval
+                    _G.strengthPerHour = _G.strengthPerSecond * 3600
+                    _G.strengthPerDay = _G.strengthPerSecond * 86400
+                    _G.strengthPerWeek = _G.strengthPerSecond * 604800
+                    _G.projectedStrengthLabel.Text = "Strength Pace: " .. _G.formatNumber(_G.strengthPerHour) .. "/Hour | " .. _G.formatNumber(_G.strengthPerDay) .. "/Day | " .. _G.formatNumber(_G.strengthPerWeek) .. "/Week"
                 end
 
-                if #durabilityHistory >= 2 then
-                    local durabilityDelta = durabilityHistory[#durabilityHistory].value - durabilityHistory[1].value
-                    local durabilityPerSecond = durabilityDelta / calculationInterval
-                    local durabilityPerHour = durabilityPerSecond * 3600
-                    local durabilityPerDay = durabilityPerSecond * 86400
-                    local durabilityPerWeek = durabilityPerSecond * 604800
-                    projectedDurabilityLabel.Text = "Durability Pace: " .. formatNumber(durabilityPerHour) .. "/Hour | " .. formatNumber(durabilityPerDay) .. "/Day | " .. formatNumber(durabilityPerWeek) .. "/Week"
+                if #_G.durabilityHistory >= 2 then
+                    _G.durabilityDelta = _G.durabilityHistory[#_G.durabilityHistory].value - _G.durabilityHistory[1].value
+                    _G.durabilityPerSecond = _G.durabilityDelta / _G.calculationInterval
+                    _G.durabilityPerHour = _G.durabilityPerSecond * 3600
+                    _G.durabilityPerDay = _G.durabilityPerSecond * 86400
+                    _G.durabilityPerWeek = _G.durabilityPerSecond * 604800
+                    _G.projectedDurabilityLabel.Text = "Durability Pace: " .. _G.formatNumber(_G.durabilityPerHour) .. "/Hour | " .. _G.formatNumber(_G.durabilityPerDay) .. "/Day | " .. _G.formatNumber(_G.durabilityPerWeek) .. "/Week"
                 end
 
-                local sessionElapsed = pausedElapsedTime + (currentTime - fastRepStartTime)
-                if sessionElapsed > 0 then
-                    local avgStrengthPerSecond = (currentStrength - initialStrength) / sessionElapsed
-                    local avgStrengthPerHour = avgStrengthPerSecond * 3600
-                    local avgStrengthPerDay = avgStrengthPerSecond * 86400
-                    local avgStrengthPerWeek = avgStrengthPerSecond * 604800
-                    averageStrengthLabel.Text = "Average Strength Pace: " .. formatNumber(avgStrengthPerHour) .. "/Hour | " .. formatNumber(avgStrengthPerDay) .. "/Day | " .. formatNumber(avgStrengthPerWeek) .. "/Week"
+                _G.sessionElapsed = _G.pausedElapsedTime + (_G.currentTime - _G.fastRepStartTime)
+                if _G.sessionElapsed > 0 then
+                    _G.avgStrengthPerSecond = (_G.currentStrength - _G.initialStrength) / _G.sessionElapsed
+                    _G.avgStrengthPerHour = _G.avgStrengthPerSecond * 3600
+                    _G.avgStrengthPerDay = _G.avgStrengthPerSecond * 86400
+                    _G.avgStrengthPerWeek = _G.avgStrengthPerSecond * 604800
+                    _G.averageStrengthLabel.Text = "Average Strength Pace: " .. _G.formatNumber(_G.avgStrengthPerHour) .. "/Hour | " .. _G.formatNumber(_G.avgStrengthPerDay) .. "/Day | " .. _G.formatNumber(_G.avgStrengthPerWeek) .. "/Week"
 
-                    local avgDurabilityPerSecond = (currentDurability - initialDurability) / sessionElapsed
-                    local avgDurabilityPerHour = avgDurabilityPerSecond * 3600
-                    local avgDurabilityPerDay = avgDurabilityPerSecond * 86400
-                    local avgDurabilityPerWeek = avgDurabilityPerSecond * 604800
-                    averageDurabilityLabel.Text = "Average Durability Pace: " .. formatNumber(avgDurabilityPerHour) .. "/Hour | " .. formatNumber(avgDurabilityPerDay) .. "/Day | " .. formatNumber(avgDurabilityPerWeek) .. "/Week"
+                    _G.avgDurabilityPerSecond = (_G.currentDurability - _G.initialDurability) / _G.sessionElapsed
+                    _G.avgDurabilityPerHour = _G.avgDurabilityPerSecond * 3600
+                    _G.avgDurabilityPerDay = _G.avgDurabilityPerSecond * 86400
+                    _G.avgDurabilityPerWeek = _G.avgDurabilityPerSecond * 604800
+                    _G.averageDurabilityLabel.Text = "Average Durability Pace: " .. _G.formatNumber(_G.avgDurabilityPerHour) .. "/Hour | " .. _G.formatNumber(_G.avgDurabilityPerDay) .. "/Day | " .. _G.formatNumber(_G.avgDurabilityPerWeek) .. "/Week"
                 end
             end
         else
-            if trackingStarted then
-                trackingStarted = false
-                pausedElapsedTime = pausedElapsedTime + (currentTime - fastRepStartTime)
-                stopwatchLabel.Text = string.format("%dd %dh %dm %ds - Fast Rep Stopped",
-                    math.floor(pausedElapsedTime / (24 * 3600)),
-                    math.floor((pausedElapsedTime % (24 * 3600)) / 3600),
-                    math.floor((pausedElapsedTime % 3600) / 60),
-                    math.floor(pausedElapsedTime % 60))
-                stopwatchLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
+            if _G.trackingStarted then
+                _G.trackingStarted = false
+                _G.pausedElapsedTime = _G.pausedElapsedTime + (_G.currentTime - _G.fastRepStartTime)
+                _G.stopwatchLabel.Text = string.format("%dd %dh %dm %ds - Fast Rep Stopped",
+                    math.floor(_G.pausedElapsedTime / (24 * 3600)),
+                    math.floor((_G.pausedElapsedTime % (24 * 3600)) / 3600),
+                    math.floor((_G.pausedElapsedTime % 3600) / 60),
+                    math.floor(_G.pausedElapsedTime % 60))
+                _G.stopwatchLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
 
-                projectedStrengthLabel.Text = "Strength Pace: 0 /Hour | 0 /Day | 0 /Week"
-                projectedDurabilityLabel.Text = "Durability Pace: 0 /Hour | 0 /Day | 0 /Week"
-                averageStrengthLabel.Text = "Average Strength Pace: 0 /Hour | 0 /Day | 0 /Week"
-                averageDurabilityLabel.Text = "Average Durability Pace: 0 /Hour | 0 /Day | 0 /Week"
+                _G.projectedStrengthLabel.Text = "Strength Pace: 0 /Hour | 0 /Day | 0 /Week"
+                _G.projectedDurabilityLabel.Text = "Durability Pace: 0 /Hour | 0 /Day | 0 /Week"
+                _G.averageStrengthLabel.Text = "Average Strength Pace: 0 /Hour | 0 /Day | 0 /Week"
+                _G.averageDurabilityLabel.Text = "Average Durability Pace: 0 /Hour | 0 /Day | 0 /Week"
 
-                strengthHistory = {}
-                durabilityHistory = {}
+                _G.strengthHistory = {}
+                _G.durabilityHistory = {}
             end
         end
 
@@ -2450,65 +2450,65 @@ task.spawn(function()
     end
 end)
 
-tabFarming:AddSwitch("💢 Auto Strength Farm", function(bool)
-    strengthOnly = bool
-    runFastRep = bool
+_G.tabFarming:AddSwitch("💢 Auto Strength Farm", function(bool)
+    _G.strengthOnly = bool
+    _G.runFastRep = bool
     if not bool then return end
     task.spawn(function()
-        unequipAllPets()
+        _G.unequipAllPets()
         task.wait(0.1)
-        equipUniquePet("Swift Samurai")
-        while strengthOnly do
+        _G.equipUniquePet("Swift Samurai")
+        while _G.strengthOnly do
             for i = 1, 23 do
-                muscleEvent:FireServer("rep")
+                _G.muscleEvent:FireServer("rep")
             end
             task.wait(0.01)
         end
     end)
 end)
 
-tabFarming:AddButton("⚙️ Industrial Bar Lift", function()
-    local character = player.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = CFrame.new(-5492.24, 81.82, 4644.04)
+_G.tabFarming:AddButton("⚙️ Industrial Bar Lift", function()
+    _G.character = _G.player.Character
+    if _G.character and _G.character:FindFirstChild("HumanoidRootPart") then
+        _G.character.HumanoidRootPart.CFrame = CFrame.new(-5492.24, 81.82, 4644.04)
         task.wait(0.5)
-        local machine = findMachine("Industrial Bar Lift")
-        if machine and machine:FindFirstChild("interactSeat") then
-            local retryCount = 0
+        _G.machine = _G.findMachine("Industrial Bar Lift")
+        if _G.machine and _G.machine:FindFirstChild("interactSeat") then
+            _G.retryCount = 0
             repeat
                 task.wait(0.2)
-                pressE()
-                retryCount = retryCount + 1
-            until (player.Character and player.Character.Humanoid.Sit) or retryCount > 10
+                _G.pressE()
+                _G.retryCount = _G.retryCount + 1
+            until (_G.player.Character and _G.player.Character.Humanoid.Sit) or _G.retryCount > 10
         end
     end
 end)
 
-tabFarming:AddButton("🦵 Industrial Squat", function()
-    local character = player.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = CFrame.new(-5216.36, 90.17, 5420.08)
+_G.tabFarming:AddButton("🦵 Industrial Squat", function()
+    _G.character = _G.player.Character
+    if _G.character and _G.character:FindFirstChild("HumanoidRootPart") then
+        _G.character.HumanoidRootPart.CFrame = CFrame.new(-5216.36, 90.17, 5420.08)
         task.wait(0.5)
-        local machine = findMachine("Industrial Squat")
-        if machine and machine:FindFirstChild("interactSeat") then
-            local retryCount = 0
+        _G.machine = _G.findMachine("Industrial Squat")
+        if _G.machine and _G.machine:FindFirstChild("interactSeat") then
+            _G.retryCount = 0
             repeat
                 task.wait(0.2)
-                pressE()
-                retryCount = retryCount + 1
-            until (player.Character and player.Character.Humanoid.Sit) or retryCount > 10
+                _G.pressE()
+                _G.retryCount = _G.retryCount + 1
+            until (_G.player.Character and _G.player.Character.Humanoid.Sit) or _G.retryCount > 10
         end
     end
 end)
 
-tabFarming:AddLabel("Useful Features").TextSize = 23
+_G.tabFarming:AddLabel("Useful Features").TextSize = 23
 
-tabFarming:AddSwitch("📌 Lock Position", function(state)
+_G.tabFarming:AddSwitch("📌 Lock Position", function(state)
     if state then
-        local currentPos = player.Character.HumanoidRootPart.CFrame
+        _G.currentPos = _G.player.Character.HumanoidRootPart.CFrame
         getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
-            if player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.CFrame = currentPos
+            if _G.player.Character:FindFirstChild("HumanoidRootPart") then
+                _G.player.Character.HumanoidRootPart.CFrame = _G.currentPos
             end
         end)
     else
@@ -2519,21 +2519,21 @@ tabFarming:AddSwitch("📌 Lock Position", function(state)
     end
 end)
 
-tabFarming:AddLabel("👾 Performance").TextSize = 21
+_G.tabFarming:AddLabel("👾 Performance").TextSize = 21
 
-tabFarming:AddButton("🏴 Full FPS Boost", function()
-    local lighting = game:GetService("Lighting")
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("ParticleEmitter") or obj:IsA("PointLight") or obj:IsA("SpotLight") then
-            obj:Destroy()
+_G.tabFarming:AddButton("🏴 Full FPS Boost", function()
+    _G.lighting = game:GetService("Lighting")
+    for _, _G.obj in pairs(workspace:GetDescendants()) do
+        if _G.obj:IsA("ParticleEmitter") or _G.obj:IsA("PointLight") or _G.obj:IsA("SpotLight") then
+            _G.obj:Destroy()
         end
     end
-    lighting.Brightness = 0
-    lighting.OutdoorAmbient = Color3.new(0, 0, 0)
-    for _, v in pairs(lighting:GetChildren()) do if v:IsA("Sky") then v:Destroy() end end
+    _G.lighting.Brightness = 0
+    _G.lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+    for _, _G.v in pairs(_G.lighting:GetChildren()) do if _G.v:IsA("Sky") then _G.v:Destroy() end end
 end)
 
-tabFarming:AddLabel("❤️ This Tab Made ByRuLing").TextSize = 15
+_G.tabFarming:AddLabel("❤️ This Tab Made ByRuLing").TextSize = 15
 
 
 local pets = window:AddTab("Pets")
