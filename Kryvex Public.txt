@@ -2686,13 +2686,13 @@ end)
 pets:AddLabel("----------------------------")
 pets:AddLabel(" Auto Evolve Pet")
 
-local pets = pets
 local selectedEvolvePet = ""
 local autoEvolvePet = false
 
 local evolvePetDropdown = pets:AddDropdown("🐾 Select Pet to Evolve", function(text)
     selectedEvolvePet = text:match("^(.-)%s*%(.-%)$") or text
 end)
+
 
 local evolveList = {
     -- Basic
