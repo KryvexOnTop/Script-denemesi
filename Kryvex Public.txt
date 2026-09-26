@@ -1533,7 +1533,7 @@ end)
 waitForCharacter()
 refreshActive()
 
--- Rebirth Tab
+local tabFarming
 
 tabs.rebirths.leaderstats = lp.player:WaitForChild("leaderstats")
 tabs.rebirths.rebirths = tabs.rebirths.leaderstats:WaitForChild("Rebirths")
