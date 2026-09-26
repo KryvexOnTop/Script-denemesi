@@ -1827,7 +1827,7 @@ tabs.rebirths.rebirths:GetPropertyChangedSignal("Value"):Connect(function()
     tabs.rebirths.updateStats()
 end)
 
-tabs.rebirths:AddSwitch("Fast Rebirth", function(state)
+tabs.rebirths:AddSwitch("👀 Fast Rebirth", function(state)
     tabs.rebirths.running = state
     if state then
         tabs.rebirths.hasStarted = true
@@ -2130,6 +2130,9 @@ end)
 
 tabs.strength:AddLabel("Reaching Average Speed takes some time!")
 tabs.strength:AddLabel("\nFarming also wont stop if you stop it since its too fast for the Server.")
+
+tabFarming:AddLabel("❤️ This Tab Made ByHenne").TextSize = 15
+
 
 local Rock = window:AddTab("Rock")
 
