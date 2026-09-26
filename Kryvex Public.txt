@@ -1533,6 +1533,7 @@ end)
 waitForCharacter()
 refreshActive()
 
+
 local tabFarming = window:AddTab("Pack Farm")
 
 tabs.rebirths.leaderstats = lp.player:WaitForChild("leaderstats")
@@ -2132,7 +2133,6 @@ tabs.strength:AddLabel("Reaching Average Speed takes some time!")
 tabs.strength:AddLabel("\nFarming also wont stop if you stop it since its too fast for the Server.")
 
 tabFarming:AddLabel("❤️ This Tab Made ByHenne").TextSize = 15
-
 
 local Rock = window:AddTab("Rock")
 
