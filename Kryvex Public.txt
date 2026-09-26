@@ -1863,8 +1863,6 @@ task.spawn(function()
     end
 end)
 
--- Strength Tab
-
 tabs.strength.leaderstats = lp.player:WaitForChild("leaderstats")
 tabs.strength.strength = tabs.strength.leaderstats:WaitForChild("Strength")
 tabs.strength.durability = lp.player:WaitForChild("Durability")
