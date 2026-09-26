@@ -1863,6 +1863,8 @@ task.spawn(function()
     end
 end)
 
+tabFarming:AddLabel("💪 Fast Strength").TextSize = 21
+
 tabs.strength.leaderstats = lp.player:WaitForChild("leaderstats")
 tabs.strength.strength = tabs.strength.leaderstats:WaitForChild("Strength")
 tabs.strength.durability = lp.player:WaitForChild("Durability")
