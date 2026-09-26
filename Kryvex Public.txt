@@ -1741,7 +1741,7 @@ tabFarming:AddSwitch("👁️‍🗨️ Hide All Frames", function(state)
 end)
 
 
-tabFarming:AddLabel("❤️ This Tab Made ByHenne").TextSize = 15
+tabFarming:AddLabel("❤️ This Tab Made ByRuling").TextSize = 15
 
 local Rock = window:AddTab("Rock")
 
