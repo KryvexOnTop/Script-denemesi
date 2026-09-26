@@ -3395,7 +3395,7 @@ end)
 
 local credits = window:AddTab("Credits")
 
-local title = credits:AddLabel("🔥 KRYVEX HUB V1")
+local title = credits:AddLabel("✨ Kryvex Private V1")
 title.TextColor3 = Color3.fromRGB(255, 215, 0)
 
 local dev = credits:AddLabel("👤 Developer: WozzyLaco🏴")
@@ -3403,17 +3403,41 @@ dev.TextColor3 = Color3.fromRGB(255, 50, 50)
 
 credits:AddLabel("--------------------------")
 
-local thanks = credits:AddLabel("🤝 thank you: Halis & RuLing & Henne")
+local thanks = credits:AddLabel("🤝 Special Thanks to: Halis & Henne & RuLing ")
 thanks.TextColor3 = Color3.fromRGB(0, 255, 255)
 
+local support = credits:AddLabel("❤️ Thanks for the support!")
+support.TextColor3 = Color3.fromRGB(255, 105, 180)
+
 credits:AddLabel("--------------------------")
+
+local useMsg = credits:AddLabel("🙏 Thank you for using Kryvex Hub!")
+useMsg.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 credits:AddLabel("👇 My Discord Server Link Here")
 
 credits:AddButton("Discord Link", function()
-    setclipboard("https://discord.gg/wVF7ursHz")
+    setclipboard("https://discord.gg/DbAU5Z6HPd")
 end)
 
 credits:AddLabel(" ")
+credits:AddLabel("==================================")
+
+local bigTitle = credits:AddLabel("🚀 KRYVEX PRİVATE V2 🚀")
+
+pcall(function()
+    bigTitle.TextSize = 25
+    bigTitle.Font = Enum.Font.GothamBold
+end)
+
+task.spawn(function()
+    while true do
+        for i = 0, 1, 0.005 do
+            bigTitle.TextColor3 = Color3.fromHSV(i, 1, 1)
+            task.wait()
+        end
+    end
+end)
+
 credits:AddLabel("==================================")
 
