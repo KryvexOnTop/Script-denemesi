@@ -2284,7 +2284,7 @@ end)
 
 tabFarming:AddLabel("❤️ This Tab Made ByRuling").TextSize = 15
 
-BossTab:Section({Title = "Boss"})
+local BossTab = window:AddTab("Boss")
 BossTab:Paragraph({
     Title = "Auto Boss",
     Desc = "Low lag lock + attack (no chest)"
