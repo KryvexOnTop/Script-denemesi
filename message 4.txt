@@ -2284,6 +2284,722 @@ end)
 
 tabFarming:AddLabel("❤️ This Tab Made ByRuling").TextSize = 15
 
+BossTab:Section({Title = "Boss"})
+BossTab:Paragraph({
+    Title = "Auto Boss",
+    Desc = "Low lag lock + attack (no chest)"
+})
+
+local bossRarities = {"Any", "Common", "Rare", "Epic", "Legendary", "Mythic", "Rainbow"}
+getgenv().selectedBossRarity = "Any"
+getgenv().autoKillBoss = false
+getgenv().bossSpawnInfo = "Scanning..."
+getgenv().lockedBoss = nil
+getgenv().bossHeight = 68
+getgenv().bossRange = 10
+getgenv()._bossCache = nil
+getgenv()._bossCacheT = 0
+getgenv()._bossParts = nil
+
+local playerNameSet = {}
+local function refreshPlayerNames()
+    playerNameSet = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        playerNameSet[plr.Name] = true
+        if plr.Character then
+            playerNameSet[plr.Character.Name] = true
+        end
+    end
+end
+
+local function getBossRoot(model)
+    if not model then
+        return nil
+    end
+    return model:FindFirstChild("HumanoidRootPart")
+        or model:FindFirstChild("Torso")
+        or model:FindFirstChild("UpperTorso")
+        or model:FindFirstChild("Root")
+        or model.PrimaryPart
+        or model:FindFirstChildWhichIsA("BasePart", true)
+end
+
+local function isBossPet(model)
+	if not model then return true end
+	local n = string.lower(model.Name)
+	if string.find(n, "pet") or string.find(n, "evolved") then
+		return true
+	end
+	for _, d in ipairs(model:GetDescendants()) do
+		if d:IsA("TextLabel") or d:IsA("TextButton") then
+			local t = string.lower(tostring(d.Text or ""))
+			if string.find(t, "pet") or string.find(t, "evolved") then
+				return true
+			end
+		elseif d:IsA("BillboardGui") then
+			for _, c in ipairs(d:GetDescendants()) do
+				if c:IsA("TextLabel") or c:IsA("TextButton") then
+					local t = string.lower(tostring(c.Text or ""))
+					if string.find(t, "pet") or string.find(t, "evolved") then
+						return true
+					end
+				end
+			end
+		end
+	end
+	local p = model.Parent
+	for _ = 1, 8 do
+		if not p then break end
+		if string.find(string.lower(p.Name), "pet") then
+			return true
+		end
+		p = p.Parent
+	end
+	return false
+end
+
+local function isLivingBoss(model)
+	if not model or not model:IsA("Model") or not model.Parent then
+		return false
+	end
+	if model == LocalPlayer.Character then
+		return false
+	end
+	if Players:GetPlayerFromCharacter(model) then
+		return false
+	end
+	if playerNameSet[model.Name] then
+		return false
+	end
+	if isBossPet(model) then
+		return false
+	end
+	local hum = model:FindFirstChildOfClass("Humanoid")
+	if not hum or hum.Health <= 0 then
+		return false
+	end
+	local root = getBossRoot(model)
+	if not root or not root.Parent then
+		return false
+	end
+	if root.Position.Y < -50 then
+		return false
+	end
+	return true, hum, root
+end
+
+local function clearBossTarget()
+	getgenv().lockedBoss = nil
+	getgenv()._bossCache = nil
+	getgenv()._bossParts = nil
+end
+
+local function rarityMatches(name)
+	local rarity = getgenv().selectedBossRarity or "Any"
+	if rarity == "Any" then
+		return true
+	end
+	local n, r = string.lower(name), string.lower(rarity)
+	if r == "legendary" or r == "legend" then
+		return string.find(n, "legend") ~= nil
+	end
+	if r == "mythic" or r == "myth" then
+		return string.find(n, "myth") ~= nil
+	end
+	if r == "rainbow" then
+		return string.find(n, "rainbow") ~= nil or string.find(n, "admin") ~= nil
+	end
+	return string.find(n, r) ~= nil
+end
+
+-- Real boss fights always have this hitbox. Pets do not.
+local function findBossHitbox(boss)
+	if boss then
+		for _, n in ipairs({"BossDamageHitbox", "BossHitbox", "DamageHitbox"}) do
+			local hb = boss:FindFirstChild(n, true)
+			if hb and hb:IsA("BasePart") then
+				return hb
+			end
+		end
+	end
+	for _, n in ipairs({"BossDamageHitbox", "BossHitbox"}) do
+		local hb = workspace:FindFirstChild(n, true)
+		if hb and hb:IsA("BasePart") then
+			return hb
+		end
+	end
+	return nil
+end
+
+local function modelNearPart(part, maxDist)
+	if not part then
+		return nil
+	end
+	local best, bestD = nil, maxDist or 80
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Humanoid") and obj.Health > 0 then
+			local model = obj.Parent
+			if model and model:IsA("Model") and isLivingBoss(model) then
+				local root = getBossRoot(model)
+				if root then
+					local d = (root.Position - part.Position).Magnitude
+					if d < bestD then
+						bestD = d
+						best = model
+					end
+				end
+			end
+		end
+	end
+	return best
+end
+
+local function findBossModel()
+	refreshPlayerNames()
+
+	if getgenv().lockedBoss and getgenv().lockedBoss.Parent and isLivingBoss(getgenv().lockedBoss) then
+		local hb = findBossHitbox(getgenv().lockedBoss)
+		-- keep lock only if real boss hitbox still exists nearby or on model
+		if hb or findBossHitbox() then
+			return getgenv().lockedBoss
+		end
+	end
+	getgenv().lockedBoss = nil
+
+	-- 1) hitbox first = only when a real boss fight is active
+	local hb = findBossHitbox()
+	if hb then
+		local model = hb:FindFirstAncestorOfClass("Model")
+		if model and isLivingBoss(model) then
+			getgenv().lockedBoss = model
+			return model
+		end
+		local near = modelNearPart(hb, 120)
+		if near then
+			getgenv().lockedBoss = near
+			return near
+		end
+	end
+
+	-- 2) named boss models (still require not pet + high hp)
+	for _, name in ipairs({
+		"Boss", "BossArena", "CommonBoss", "RareBoss", "EpicBoss",
+		"LegendaryBoss", "MythicBoss", "RainbowBoss", "CurrentBoss"
+	}) do
+		local m = workspace:FindFirstChild(name, true)
+		if m then
+			if not m:IsA("Model") then
+				m = m:FindFirstAncestorOfClass("Model") or m
+			end
+			if m:IsA("Model") and isLivingBoss(m) then
+				local hum = m:FindFirstChildOfClass("Humanoid")
+				if hum and hum.MaxHealth >= 1000 then
+					getgenv().lockedBoss = m
+					return m
+				end
+			end
+		end
+	end
+
+	-- 3) folders that only exist for boss content
+	for _, folderName in ipairs({"Bosses", "BossArena", "Boss", "Raids", "Raid"}) do
+		local folder = workspace:FindFirstChild(folderName)
+		if folder then
+			for _, obj in ipairs(folder:GetDescendants()) do
+				if obj:IsA("Model") and isLivingBoss(obj) then
+					local hum = obj:FindFirstChildOfClass("Humanoid")
+					if hum and hum.MaxHealth >= 1000 then
+						getgenv().lockedBoss = obj
+						return obj
+					end
+				end
+			end
+		end
+	end
+
+	-- no real boss up (lobby / pets only)
+	return nil
+end
+
+local function bossPunch()
+	local punch = equipPunch()
+	local ev = LocalPlayer:FindFirstChild("muscleEvent") or MuscleEvent
+	if punch then
+		pcall(function()
+			punch:Activate()
+		end)
+	end
+	if ev then
+		ev:FireServer("punch", "leftHand")
+		ev:FireServer("punch", "rightHand")
+		ev:FireServer("punch")
+	end
+end
+
+local function bossPunchFast()
+	-- keep Punch equipped forever while fighting; low-lag remote spam
+	local char = LocalPlayer.Character
+	local punch = char and char:FindFirstChild("Punch")
+	if not punch then
+		punch = equipPunch()
+	end
+	local ev = LocalPlayer:FindFirstChild("muscleEvent") or MuscleEvent
+	if punch then
+		pcall(function() punch:Activate() end)
+	end
+	if ev then
+		for _ = 1, 8 do
+			ev:FireServer("punch", "leftHand")
+			ev:FireServer("punch", "rightHand")
+			ev:FireServer("punch")
+		end
+	end
+end
+
+local function bossHeavy()
+    local ev = LocalPlayer:FindFirstChild("muscleEvent") or MuscleEvent
+    if not ev then
+        return
+    end
+    pcall(function()
+        local bag = LocalPlayer:FindFirstChild("Backpack")
+        local char = LocalPlayer.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if bag and hum then
+            local stomp = bag:FindFirstChild("Stomp") or char:FindFirstChild("Stomp")
+            local slam = bag:FindFirstChild("Ground Slam") or char:FindFirstChild("Ground Slam")
+            if stomp and stomp.Parent == bag then
+                hum:EquipTool(stomp)
+            elseif slam and slam.Parent == bag then
+                hum:EquipTool(slam)
+            end
+        end
+        ev:FireServer("stomp")
+        ev:FireServer("slam")
+        equipPunch()
+    end)
+end
+
+local function ensureBossAntiKnock(myRoot)
+    if not myRoot then
+        return
+    end
+    local bv = myRoot:FindFirstChild("DAN_BOSS_BV")
+    if not bv then
+        bv = Instance.new("BodyVelocity")
+        bv.Name = "DAN_BOSS_BV"
+        bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+        bv.P = 1250
+        bv.Parent = myRoot
+    end
+    bv.Velocity = Vector3.new(0, 0, 0)
+end
+
+local function clearBossAntiKnock(myRoot)
+    if myRoot then
+        local bv = myRoot:FindFirstChild("DAN_BOSS_BV")
+        if bv then
+            bv:Destroy()
+        end
+    end
+end
+
+local function bossStick(myRoot, bossRoot)
+	local h = tonumber(getgenv().bossHeight) or 68
+	local range = tonumber(getgenv().bossRange) or 6
+	-- stay above boss and follow
+	local pos = bossRoot.Position + Vector3.new(0, h, 0)
+	myRoot.CFrame = CFrame.new(pos, bossRoot.Position)
+	pcall(function()
+		myRoot.AssemblyLinearVelocity = Vector3.zero
+	end)
+	ensureBossAntiKnock(myRoot)
+end
+
+local function bossDodge(myRoot, bossRoot)
+    local h = tonumber(getgenv().bossHeight) or 10
+    local range = tonumber(getgenv().bossRange) or 8
+    local side = Vector3.new(1, 0, 0)
+    local away = (myRoot.Position - bossRoot.Position)
+    if away.Magnitude > 0.1 then
+        side = away:Cross(Vector3.new(0, 1, 0))
+        if side.Magnitude > 0.1 then
+            side = side.Unit
+        end
+    end
+    local dir = (math.random(0, 1) == 0) and 1 or -1
+    local pos = bossRoot.Position + side * (range + 6) * dir + Vector3.new(0, h, 0)
+    myRoot.CFrame = CFrame.new(pos, bossRoot.Position)
+    ensureBossAntiKnock(myRoot)
+end
+
+-- Cache boss body parts (no workspace scan every frame = less lag)
+local function refreshBossParts(bossModel, hitbox)
+	local targets = {}
+	if hitbox then
+		targets[#targets + 1] = hitbox
+	end
+	if bossModel then
+		for _, p in ipairs(bossModel:GetDescendants()) do
+			if p:IsA("BasePart") then
+				targets[#targets + 1] = p
+			end
+		end
+	end
+	getgenv()._bossParts = targets
+	return targets
+end
+
+local function ensureHugeHitbox(myRoot)
+	if not myRoot then return end
+	local box = myRoot:FindFirstChild("DAN_HUGE_HB")
+	if not box then
+		box = Instance.new("Part")
+		box.Name = "DAN_HUGE_HB"
+		box.Anchored = false
+		box.CanCollide = false
+		box.Massless = true
+		box.Transparency = 1
+		box.Size = Vector3.new(80, 80, 80)
+		box.Parent = myRoot
+		local w = Instance.new("WeldConstraint")
+		w.Part0 = myRoot
+		w.Part1 = box
+		w.Parent = box
+	end
+	box.CFrame = myRoot.CFrame
+	return box
+end
+
+local function hitBossCached(myRoot)
+	local targets = getgenv()._bossParts
+	if not myRoot or not targets then return end
+	local huge = ensureHugeHitbox(myRoot)
+	if firetouchinterest then
+		for i = 1, #targets do
+			local part = targets[i]
+			if part and part.Parent then
+				pcall(firetouchinterest, part, myRoot, 0)
+				pcall(firetouchinterest, part, myRoot, 1)
+				if huge then
+					pcall(firetouchinterest, part, huge, 0)
+					pcall(firetouchinterest, part, huge, 1)
+				end
+			end
+		end
+	end
+end
+
+local function bossHitCycle(myRoot, targetPart, boss, hitbox)
+	if not myRoot or not targetPart then return end
+	equipPunch()
+	-- always follow boss at height
+	bossStick(myRoot, targetPart)
+	hitBossCached(myRoot)
+	bossPunchFast()
+	-- quick touch then stay high
+	myRoot.CFrame = CFrame.new(targetPart.Position + Vector3.new(0, 6, 0), targetPart.Position)
+	hitBossCached(myRoot)
+	bossPunchFast()
+	bossStick(myRoot, targetPart)
+	hitBossCached(myRoot)
+	bossPunchFast()
+end
+
+-- Hide game boss reward / menu popup (the panel in screenshot)
+getgenv().hideBossUI = true
+local function hideBossPopup()
+    if getgenv().hideBossUI == false then
+        return
+    end
+    local pg = LocalPlayer:FindFirstChild("PlayerGui")
+    if not pg then
+        return
+    end
+    for _, gui in ipairs(pg:GetChildren()) do
+        local n = string.lower(gui.Name)
+        if string.find(n, "boss") or string.find(n, "reward") or string.find(n, "chest") then
+            pcall(function()
+                if gui:IsA("ScreenGui") or gui:IsA("GuiMain") then
+                    gui.Enabled = false
+                end
+            end)
+        end
+        for _, d in ipairs(gui:GetDescendants()) do
+            if d:IsA("TextLabel") or d:IsA("TextButton") then
+                local t = string.lower(d.Text or "")
+                if string.find(t, "click for rewards") or string.find(t, "chest rewards")
+                    or string.find(t, "common boss") or string.find(t, "spawn rate") then
+                    local root = d
+                    for _ = 1, 8 do
+                        if root.Parent and root.Parent ~= pg then
+                            root = root.Parent
+                        else
+                            break
+                        end
+                    end
+                    pcall(function()
+                        if root:IsA("ScreenGui") then
+                            root.Enabled = false
+                        elseif root:IsA("Frame") or root:IsA("ImageLabel") then
+                            root.Visible = false
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end
+
+BossTab:Dropdown({
+    Title = "Boss rarity filter",
+    Values = bossRarities,
+    Value = "Any",
+    Callback = function(Value)
+        getgenv().selectedBossRarity = Value
+        getgenv().lockedBoss = nil
+    end
+})
+
+BossTab:Dropdown({
+    Title = "Fight height",
+    Values = {"54", "58", "62", "68", "72"},
+    Value = "68",
+    Callback = function(Value)
+        local n = tonumber(Value)
+        if n then
+            getgenv().bossHeight = n
+        end
+    end
+})
+
+BossTab:Dropdown({
+    Title = "Distance from boss",
+    Values = {"6", "8", "10", "12", "15"},
+    Value = "10",
+    Callback = function(Value)
+        local n = tonumber(Value)
+        if n then
+            getgenv().bossRange = n
+        end
+    end
+})
+
+BossTab:Button({
+    Title = "Find & TP to boss",
+    Callback = function()
+        getgenv().lockedBoss = nil
+        local boss = findBossModel()
+        local hitbox = findBossHitbox(boss)
+        local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local root = boss and getBossRoot(boss) or hitbox
+        if root and myRoot then
+            refreshBossParts(boss, hitbox)
+            bossStick(myRoot, root)
+        end
+        hideBossPopup()
+    end
+})
+
+BossTab:Toggle({
+    Title = "Auto Boss",
+    Desc = "Low lag follow + fast punch",
+    Value = false,
+    Callback = function(Value)
+        getgenv().autoKillBoss = Value
+        if Value then
+            task.spawn(function()
+                local lastHealth = nil
+                local tickN = 0
+                local cachedBoss, cachedHitbox, cachedRoot = nil, nil, nil
+                local lastScan, lastPopup, lastEquip = 0, 0, 0
+                while getgenv().autoKillBoss do
+                    pcall(function()
+                        local now = tick()
+                        -- scan boss less often (less lag)
+                        if now - lastScan > 0.35 or not cachedBoss or not cachedBoss.Parent then
+                            lastScan = now
+                            cachedBoss = findBossModel()
+                            cachedHitbox = findBossHitbox(cachedBoss)
+                            if cachedBoss and isLivingBoss(cachedBoss) then
+                                cachedRoot = getBossRoot(cachedBoss)
+                                if now - lastScan > 0.34 then
+                                    refreshBossParts(cachedBoss, cachedHitbox)
+                                end
+                            else
+                                cachedBoss, cachedHitbox, cachedRoot = nil, cachedHitbox, nil
+                            end
+                        end
+
+                        if now - lastPopup > 2 then
+                            lastPopup = now
+                            hideBossPopup()
+                        end
+
+                        local boss, hitbox = cachedBoss, cachedHitbox
+                        if not boss and not hitbox then
+                            clearBossTarget()
+                            return
+                        end
+                        if boss and not isLivingBoss(boss) then
+                            clearBossTarget()
+                            cachedBoss = nil
+                            return
+                        end
+
+                        local char = LocalPlayer.Character
+                        local myRoot = char and char:FindFirstChild("HumanoidRootPart")
+                        local myHum = char and char:FindFirstChildOfClass("Humanoid")
+                        if not myRoot then
+                            return
+                        end
+
+                        local targetPart = cachedRoot or (boss and getBossRoot(boss)) or hitbox
+                        if not targetPart or not targetPart.Parent then
+                            clearBossTarget()
+                            cachedBoss = nil
+                            return
+                        end
+                        if targetPart.Position.Y < -50 then
+                            clearBossTarget()
+                            cachedBoss = nil
+                            return
+                        end
+
+                        -- keep Punch equipped the whole fight
+                        local held = char and char:FindFirstChild("Punch")
+                        if not held then
+                            equipPunch()
+                        end
+
+                        bossStick(myRoot, targetPart)
+
+                        -- only touch hitbox (not every boss part)
+                        if hitbox and firetouchinterest then
+                            pcall(firetouchinterest, hitbox, myRoot, 0)
+                            pcall(firetouchinterest, hitbox, myRoot, 1)
+                            local huge = myRoot:FindFirstChild("DAN_HUGE_HB")
+                            if huge then
+                                pcall(firetouchinterest, hitbox, huge, 0)
+                                pcall(firetouchinterest, hitbox, huge, 1)
+                            else
+                                ensureHugeHitbox(myRoot)
+                            end
+                        else
+                            hitBossCached(myRoot)
+                        end
+
+                        -- fast punch (optimized)
+                        bossPunchFast()
+
+                        if myHum and lastHealth and myHum.Health < lastHealth - 2 then
+                            bossDodge(myRoot, targetPart)
+                            bossStick(myRoot, targetPart)
+                        end
+                        if myHum then
+                            lastHealth = myHum.Health
+                        end
+                    end)
+                    -- tight loop for punch rate, scans already throttled
+                    task.wait(0.03)
+                end
+            end)
+        else
+            clearBossTarget()
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                local bv = myRoot:FindFirstChild("DAN_BOSS_BV")
+                if bv then bv:Destroy() end
+            end
+        end
+    end
+})
+
+BossTab:Toggle({
+    Title = "Hide boss popup UI",
+    Desc = "Hides reward / boss menu panel",
+    Value = true,
+    Callback = function(Value)
+        getgenv().hideBossUI = Value
+        if Value then
+            hideBossPopup()
+        end
+    end
+})
+
+local bossSpawnParagraph = BossTab:Paragraph({
+    Title = "Boss status / spawn",
+    Desc = "Scanning..."
+})
+
+task.spawn(function()
+    while true do
+        local info = "No timer found"
+        pcall(function()
+            local found = {}
+            local boss = findBossModel()
+            if boss then
+                local hum = boss:FindFirstChildOfClass("Humanoid")
+                local hp = hum and (math.floor(hum.Health) .. "/" .. math.floor(hum.MaxHealth)) or "?"
+                table.insert(found, "TARGET: " .. boss.Name .. " HP " .. hp)
+            end
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                local n = string.lower(obj.Name)
+                if string.find(n, "boss") or string.find(n, "spawn") or string.find(n, "timer") or string.find(n, "raid") then
+                    if obj:IsA("StringValue") or obj:IsA("NumberValue") or obj:IsA("IntValue") then
+                        table.insert(found, obj.Name .. "=" .. tostring(obj.Value))
+                    elseif obj:IsA("TextLabel") or obj:IsA("TextButton") then
+                        local t = obj.Text
+                        if t and #t > 0 and #t < 80 then
+                            local low = string.lower(t)
+                            if string.find(low, "boss") or string.find(low, "spawn") or string.find(t, ":") then
+                                table.insert(found, t)
+                            end
+                        end
+                    end
+                end
+            end
+            local pg = LocalPlayer:FindFirstChild("PlayerGui")
+            if pg then
+                for _, obj in ipairs(pg:GetDescendants()) do
+                    if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+                        local t = obj.Text or ""
+                        local low = string.lower(t)
+                        if (string.find(low, "boss") or string.find(low, "spawn") or string.find(low, "raid")) and #t < 100 then
+                            table.insert(found, t)
+                        end
+                    end
+                end
+            end
+            if #found > 0 then
+                info = table.concat(found, " | ")
+                if #info > 200 then
+                    info = string.sub(info, 1, 200) .. "..."
+                end
+            else
+                info = "No active boss / timer not found"
+            end
+        end)
+        getgenv().bossSpawnInfo = info
+        pcall(function()
+            if bossSpawnParagraph and bossSpawnParagraph.SetDesc then
+                bossSpawnParagraph:SetDesc(info)
+            end
+        end)
+        task.wait(3)
+    end
+end)
+
+BossTab:Button({
+    Title = "Refresh boss status",
+    Callback = function()
+        WindUI:Notify({
+            Title = "Boss Status",
+            Content = tostring(getgenv().bossSpawnInfo or "Scanning..."),
+            Duration = 4
+        })
+    end
+})
 
 
 
