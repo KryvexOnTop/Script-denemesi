@@ -1932,6 +1932,295 @@ Rock:AddSwitch("👊 Start Rock V2 Farm", function(Value)
 end)
 
 
+local GymTab = window:AddTab("Gym")
+
+local VIM = game:GetService("VirtualInputManager")
+local function pressEKey()
+    VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    task.wait(0.05)
+    VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+end
+
+local function createFarm(folder, toggleName, cframeValue, eventName)
+    local active = false
+    folder:AddSwitch(toggleName, function(bool)
+        active = bool
+        if bool then
+            task.spawn(function()
+                while active do
+                    local char = game.Players.LocalPlayer.Character
+                    local root = char and char:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        if (root.Position - cframeValue.p).Magnitude > 5 then
+                            root.CFrame = cframeValue
+                            task.wait(0.3)
+                            pressEKey()
+                        end
+                        local event = game:GetService("Players").LocalPlayer:FindFirstChild("muscleEvent")
+                        if event then
+                            event:FireServer(eventName)
+                        end
+                    end
+                    task.wait(0.05)
+                end
+            end)
+        end
+    end)
+end
+
+-- 1. INDUSTRIAL GYM
+local IndustrialFolder = GymTab:AddFolder(" ⚙️ Industrial Gym")
+createFarm(IndustrialFolder, "⚙️ Auto Industrial Bar Lift", CFrame.new(-5492.24, 81.82, 4644.04), "rep")
+createFarm(IndustrialFolder, "🏋️ Auto Industrial Bench", CFrame.new(-5014.39, 111.46, 4462.90), "rep")
+createFarm(IndustrialFolder, "🦵 Auto Industrial Squat", CFrame.new(-5216.36, 90.17, 5420.08), "rep")
+createFarm(IndustrialFolder, "💢 Auto Industrial Boulder", CFrame.new(-5452.94, 84.47, 5232.03), "rep")
+
+-- 2. JUNGLE GYM
+local JungleFolder = GymTab:AddFolder(" 🌴 Jungle Gym")
+createFarm(JungleFolder, "🏋️ Auto Jungle Lift", CFrame.new(-8652.85, 45.22, 2088.99), "rep")
+createFarm(JungleFolder, "💪 Auto Bench Press", CFrame.new(-8173.23, 83.82, 1907.40), "rep")
+createFarm(JungleFolder, "🦵 Auto Squat", CFrame.new(-8377.55, 48.71, 2864.90), "rep")
+createFarm(JungleFolder, "Auto Boulder", CFrame.new(-8614.81, 51.90, 2677.37), "rep")
+
+-- 3. MUSCLE KING
+local MuscleKingFolder = GymTab:AddFolder(" 👑 Muscle King")
+createFarm(MuscleKingFolder, "🏋️ Auto Lift", CFrame.new(-8774.03, 52.15, -5664.10), "rep")
+createFarm(MuscleKingFolder, "💪 Auto Bench Press", CFrame.new(-8589.43, 58.00, -6044.57), "rep")
+createFarm(MuscleKingFolder, "🦵 Auto Squat", CFrame.new(-8759.62, 46.50, -6041.16), "rep")
+createFarm(MuscleKingFolder, "🗿 Auto Boulder", CFrame.new(-8942.97, 60.71, -5692.74), "rep")
+
+-- 4. LEGENDS GYM
+local LegendsFolder = GymTab:AddFolder(" 🕊️ Legends Gym")
+createFarm(LegendsFolder, "🏋️ Auto Lift", CFrame.new(4532.02, 1025.80, -4002.15), "rep")
+createFarm(LegendsFolder, "💪 Auto Bench Press", CFrame.new(4109.20, 1035.67, -3802.88), "rep")
+createFarm(LegendsFolder, "🦵 Auto Squat", CFrame.new(4438.74, 1021.38, -4058.46), "rep")
+createFarm(LegendsFolder, "🗿 Auto Boulder", CFrame.new(4188.75, 1019.85, -3905.19), "rep")
+
+-- 5. MYTHICAL GYM
+local MythicalFolder = GymTab:AddFolder(" 👾 Mythical Gym")
+createFarm(MythicalFolder, "🏋️ Auto Lift", CFrame.new(2486.75, 31.91, 847.89), "rep")
+createFarm(MythicalFolder, "💪 Auto Bench Press", CFrame.new(2370.74, 57.09, 1243.37), "rep")
+createFarm(MythicalFolder, "🗿 Auto Boulder", CFrame.new(2667.31, 58.88, 1202.46), "rep")
+
+-- 6. FROST GYM
+local FrostFolder = GymTab:AddFolder(" 🌨️ Frost Gym")
+createFarm(FrostFolder, "🏋️ Auto Lift", CFrame.new(-2917.62, 42.60, -211.29), "rep")
+createFarm(FrostFolder, "💪 Auto Bench Press", CFrame.new(-3022.97, 41.31, -197.51), "rep")
+createFarm(FrostFolder, "🦵 Auto Squat", CFrame.new(-2720.66, 27.85, -590.72), "rep")
+
+local tabFarming = window:AddTab("Pack Farm")
+
+local player = game.Players.LocalPlayer
+local muscleEvent = player:WaitForChild("muscleEvent")
+local rEvents = game:GetService("ReplicatedStorage"):WaitForChild("rEvents")
+local isRunning = false
+local strengthOnly = false
+local autoEatEnabled = false
+local startTime = tick()
+local initialRebirthsCount = player.leaderstats.Rebirths.Value
+
+local function unequipAllPets()
+    if player:FindFirstChild("petsFolder") then
+        for _, folder in pairs(player.petsFolder:GetChildren()) do
+            for _, pet in pairs(folder:GetChildren()) do
+                rEvents.equipPetEvent:FireServer("unequipPet", pet)
+            end
+        end
+    end
+end
+
+local function equipUniquePet(name)
+    if player:FindFirstChild("petsFolder") and player.petsFolder:FindFirstChild("Unique") then
+        for _, pet in pairs(player.petsFolder.Unique:GetChildren()) do
+            if pet.Name == name then
+                rEvents.equipPetEvent:FireServer("equipPet", pet)
+                task.wait(0.01) 
+            end
+        end
+    end
+end
+
+local function findMachine(machineName)
+    local machine = workspace:FindFirstChild("machinesFolder") and workspace.machinesFolder:FindFirstChild(machineName)
+    if not machine then
+        for _, f in pairs(workspace:GetChildren()) do
+            if f:IsA("Folder") and f.Name:find("machines") then
+                machine = f:FindFirstChild(machineName)
+                if machine then break end
+            end
+        end
+    end
+    return machine
+end
+
+local function pressE()
+    local vim = game:GetService("VirtualInputManager")
+    vim:SendKeyEvent(true, "E", false, game)
+    task.wait(0.05)
+    vim:SendKeyEvent(false, "E", false, game)
+end
+
+tabFarming:AddLabel("Session Stats").TextSize = 23
+local footerTimeLabel = tabFarming:AddLabel("Time: 0d 0h 0m 0s")
+local footerRebirthsLabel = tabFarming:AddLabel("Total Rebirths: " .. initialRebirthsCount)
+local footerRebirthsGainedLabel = tabFarming:AddLabel("Rebirths Gained: 0")
+
+task.spawn(function()
+    while true do
+        local elapsed = tick() - startTime
+        local days = math.floor(elapsed / 86400)
+        local hours = math.floor((elapsed % 86400) / 3600)
+        local minutes = math.floor((elapsed % 3600) / 60)
+        local seconds = math.floor(elapsed % 60)
+        footerTimeLabel.Text = string.format("Time: %dd %dh %dm %ds", days, hours, minutes, seconds)
+        local current = player.leaderstats.Rebirths.Value
+        footerRebirthsLabel.Text = "Total Rebirths: " .. current
+        footerRebirthsGainedLabel.Text = "Rebirths Gained: " .. (current - initialRebirthsCount)
+        task.wait(1)
+    end
+end)
+
+tabFarming:AddLabel("👀 Pack Farm Rebirth").TextSize = 21
+
+tabFarming:AddSwitch("🔄 Auto Rebirth Farm", function(bool)
+    isRunning = bool
+    if not bool then return end
+    task.spawn(function()
+        while isRunning do
+            local currentReb = player.leaderstats.Rebirths.Value
+            local rebirthCost = 10000 + (5000 * currentReb)
+            if player.ultimatesFolder:FindFirstChild("Golden Rebirth") then
+                local gReb = player.ultimatesFolder["Golden Rebirth"].Value
+                rebirthCost = math.floor(rebirthCost * (1 - (gReb * 0.1)))
+            end
+            unequipAllPets()
+            task.wait(0.1)
+            equipUniquePet("Swift Samurai")
+            while isRunning and player.leaderstats.Strength.Value < rebirthCost do
+                for i = 1, 12 do 
+                    muscleEvent:FireServer("rep")
+                end
+                task.wait(0.01)
+            end
+            if not isRunning then break end
+            unequipAllPets()
+            task.wait(0.1)
+            equipUniquePet("Tribal Overlord")
+            local machine = findMachine("Jungle Bar Lift")
+            if machine and machine:FindFirstChild("interactSeat") then
+                player.Character.HumanoidRootPart.CFrame = machine.interactSeat.CFrame * CFrame.new(0, 3, 0)
+                local retryCount = 0
+                repeat
+                    task.wait(0.2)
+                    pressE()
+                    retryCount = retryCount + 1
+                until (player.Character and player.Character.Humanoid.Sit) or retryCount > 20 or not isRunning
+            end
+            local initialRebirths = player.leaderstats.Rebirths.Value
+            repeat
+                rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                task.wait(0.5)
+            until player.leaderstats.Rebirths.Value > initialRebirths or not isRunning
+        end
+    end)
+end)
+
+tabFarming:AddLabel("💪 Fast Strength").TextSize = 21
+
+tabFarming:AddSwitch("💢 Auto Strength Farm", function(bool)
+    strengthOnly = bool
+    if not bool then return end
+    task.spawn(function()
+        unequipAllPets()
+        task.wait(0.1)
+        equipUniquePet("Swift Samurai")
+        while strengthOnly do
+            for i = 1, 23 do 
+                muscleEvent:FireServer("rep")
+            end
+            task.wait(0.01)
+        end
+    end)
+end)
+
+tabFarming:AddButton("⚙️ Industrial Bar Lift", function()
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = CFrame.new(-5492.24, 81.82, 4644.04)
+        task.wait(0.5)
+        local machine = findMachine("Industrial Bar Lift")
+        if machine and machine:FindFirstChild("interactSeat") then
+            local retryCount = 0
+            repeat
+                task.wait(0.2)
+                pressE()
+                retryCount = retryCount + 1
+            until (player.Character and player.Character.Humanoid.Sit) or retryCount > 10
+        end
+    end
+end)
+
+tabFarming:AddButton("🦵 Industrial Squat", function()
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = CFrame.new(-5216.36, 90.17, 5420.08)
+        task.wait(0.5)
+        local machine = findMachine("Industrial Squat")
+        if machine and machine:FindFirstChild("interactSeat") then
+            local retryCount = 0
+            repeat
+                task.wait(0.2)
+                pressE()
+                retryCount = retryCount + 1
+            until (player.Character and player.Character.Humanoid.Sit) or retryCount > 10
+        end
+    end
+end)
+
+tabFarming:AddLabel("Useful Features").TextSize = 23
+
+tabFarming:AddSwitch("📌 Lock Position", function(state)
+    if state then
+        local currentPos = player.Character.HumanoidRootPart.CFrame
+        getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
+            if player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.CFrame = currentPos
+            end
+        end)
+    else
+        if getgenv().posLock then
+            getgenv().posLock:Disconnect()
+            getgenv().posLock = nil
+        end
+    end
+end)
+
+tabFarming:AddLabel("👾 Performance").TextSize = 21
+
+tabFarming:AddButton("🏴 Full FPS Boost", function()
+    local lighting = game:GetService("Lighting")
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("PointLight") or obj:IsA("SpotLight") then
+            obj:Destroy()
+        end
+    end
+    lighting.Brightness = 0
+    lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+    for _, v in pairs(lighting:GetChildren()) do if v:IsA("Sky") then v:Destroy() end end
+end)
+
+tabFarming:AddSwitch("👁️‍🗨️ Hide All Frames", function(state)
+    for _, obj in pairs(game:GetService("ReplicatedStorage"):GetChildren()) do
+        if obj.Name:match("Frame$") then obj.Visible = not state end
+    end
+end)
+
+
+tabFarming:AddLabel("❤️ This Tab Made ByRuling").TextSize = 15
+
+
+
+
 local rebirths = window:AddTab("Rebirths")
 
 rebirths:AddTextBox("🔢 Rebirth Target", function(text)
