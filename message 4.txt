@@ -100,6 +100,70 @@ AutoFarm:AddSwitch("🧘 Situps", function(bool)
     if bool then manageTool("Situps") end
 end)
 
+
+AutoFarm:AddLabel("----------------------------")
+AutoFarm:AddLabel("⚡ OP Tools")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function manageToolCombo(toolName)
+    task.spawn(function()
+        while _G[toolName.."On"] do
+            local character = LocalPlayer.Character
+            local hum = character and character:FindFirstChildOfClass("Humanoid")
+            
+            if character and hum then
+                local punch = LocalPlayer.Backpack:FindFirstChild("Punch") or character:FindFirstChild("Punch")
+                local tool = LocalPlayer.Backpack:FindFirstChild(toolName) or character:FindFirstChild(toolName)
+
+                if punch then
+                    if punch.Parent ~= character then
+                        hum:EquipTool(punch)
+                    end
+                    if punch:FindFirstChild("attackTime") then 
+                        punch.attackTime.Value = 0 
+                    end
+                    punch:Activate()
+                end
+
+                if tool then
+                    if tool.Parent ~= character then
+                        hum:EquipTool(tool)
+                    end
+                    
+                    local event = LocalPlayer:FindFirstChild("muscleEvent")
+                    if event then 
+                        event:FireServer("rep") 
+                    end
+                    tool:Activate()
+                end
+            end
+            task.wait(0.01)
+        end
+    end)
+end
+
+AutoFarm:AddSwitch("🏋️ Weight + 🥊 Punch", function(bool)
+    _G.WeightOn = bool
+    if bool then manageToolCombo("Weight") end
+end)
+
+AutoFarm:AddSwitch("💪 Pushups + 🥊 Punch", function(bool)
+    _G.PushupsOn = bool
+    if bool then manageToolCombo("Pushups") end
+end)
+
+AutoFarm:AddSwitch("🤸 Handstand + 🥊 Punch", function(bool)
+    _G.HandstandOn = bool
+    if bool then manageToolCombo("Handstand") end
+end)
+
+AutoFarm:AddSwitch("🧘 Situps + 🥊 Punch", function(bool)
+    _G.SitupsOn = bool
+    if bool then manageToolCombo("Situps") end
+end)
+
 AutoFarm:AddLabel("----------------------------")
 AutoFarm:AddLabel("💢 Brawl")
 
