@@ -105,7 +105,7 @@ AutoFarm:AddSwitch("🧘 Situps", function(bool)
 end)
 
 AutoFarm:AddLabel("----------------------------")
-AutoFarm:AddFolder("💨 Treadmill Farm")
+AutoFarm:AddLabel(“⚡️ SPEED FARM “)
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
