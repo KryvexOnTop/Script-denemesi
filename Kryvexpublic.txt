@@ -102,7 +102,7 @@ AutoFarm:AddSwitch("🧘 Situps", function(bool)
 end)
 
 AutoFarm:AddLabel("----------------------------")
-AutoFarm:AddLabel("💨 Treadmill Farm")
+AutoFarm:AddFolder("💨 Treadmill Farm")
 
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Players = game:GetService("Players")
@@ -366,7 +366,7 @@ AutoFarm:AddSwitch("⚔️ Auto Win Brawl", function(state)
     end
 end)
 
--- FARM GYM
+AutoFarm:AddLabel(“ GYM “)Text.Size = 30
 
 local VIM = game:GetService("VirtualInputManager")
 local Players = game:GetService("Players")
