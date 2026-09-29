@@ -1,80 +1,28 @@
--- KRYVEX PUBLIC
--- Wozzy / Kryvex
+-- This script was created by Wozzy. If you intend to use this code to "skid," know this: skids only fool themselves; using someone else's code and passing it off as your own is for idiots.
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+local library = loadstring(game:HttpGet("https://github.com/KryvexOnTop/Kryvex-paid/raw/refs/heads/main/KryvexGui%20(3).txt", true))()
+local displayName = game.Players.LocalPlayer.DisplayName
 
--- GUI KÜTÜPHANESİNİ YÜKLE
-local LibraryURL = "https://github.com/KryvexOnTop/Kryvex-paid/raw/refs/heads/main/KryvexGui%20(3).txt"
+local window = library:AddWindow("Kryvex Public | Muscle Legends || HI - ".. displayName, {
+ title_bar = {
+    Color3.fromRGB(255, 0, 0), -- Kıpkırmızı
+    Color3.fromRGB(100, 0, 0),
+    Color3.fromRGB(25, 0, 0)
+},
+title_bar_transparency = 0.1,
 
-local LibrarySource = game:HttpGet(LibraryURL, true)
+background = {
+    Color3.fromRGB(0, 0, 0),
+    Color3.fromRGB(10, 10, 10),
+    Color3.fromRGB(20, 20, 20)
+},
+background_transparency = 0.1,
 
-if not LibrarySource or LibrarySource == "" then
-    error("KRYVEX GUI: Library dosyası indirilemedi!")
-end
+main_color = Color3.fromRGB(255, 0, 0), -- Kıpkırmızı
 
-local LibraryLoader = loadstring(LibrarySource)
-
-if not LibraryLoader then
-    error("KRYVEX GUI: Library loadstring oluşturulamadı!")
-end
-
-local library = LibraryLoader()
-
-if not library then
-    error("KRYVEX GUI: Library başlatılamadı!")
-end
-
-print("[KRYVEX] Library OK")
-
--- DISPLAY NAME
-local displayName = LocalPlayer.DisplayName
-
--- WINDOW
-local window = library:AddWindow(
-    "Kryvex Public | Muscle Legends || HI - " .. displayName,
-    {
-        title_bar = {
-            Color3.fromRGB(255, 0, 0),
-            Color3.fromRGB(100, 0, 0),
-            Color3.fromRGB(25, 0, 0)
-        },
-
-        title_bar_transparency = 0.1,
-
-        background = {
-            Color3.fromRGB(0, 0, 0),
-            Color3.fromRGB(10, 10, 10),
-            Color3.fromRGB(20, 20, 20)
-        },
-
-        background_transparency = 0.1,
-
-        main_color = Color3.fromRGB(255, 0, 0),
-
-        min_size = Vector2.new(420, 350),
-        can_resize = true
-    }
-)
-
-if not window then
-    error("KRYVEX GUI: Window oluşturulamadı!")
-end
-
-print("[KRYVEX] Window OK")
-
--- TEST TAB
-local Misc = window:AddTab("Misc")
-
-if not Misc then
-    error("KRYVEX GUI: Misc tab oluşturulamadı!")
-end
-
-print("[KRYVEX] Misc OK")
-
-Misc:AddLabel("KRYVEX TEST")
-
-print("[KRYVEX] GUI başarıyla açıldı!")
+min_size = Vector2.new(420, 350),
+can_resize = true
+})
 
 local AutoFarm = window:AddTab("Farm")
 AutoFarm:AddLabel("Tools Farm")
