@@ -3265,8 +3265,8 @@ task.spawn(function()
 
                 local leaderstats = player:FindFirstChild("leaderstats")
                 if leaderstats then
-                    if leaderstats:FindFirstChild("Strength") then
-                        Update.Text = "💪 Strength: " .. FormatDisplay(leaderstats.Strength.Value)
+                    if leaderstats:FindFirstChild("💪 Strength") then
+                        Update.Text = "Strength: " .. FormatDisplay(leaderstats.Strength.Value)
                     end
                     if leaderstats:FindFirstChild("🕊️ Rebirths") then
                         Update2.Text = "Rebirth: " .. FormatDisplay(leaderstats.Rebirths.Value)
