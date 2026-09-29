@@ -3419,8 +3419,6 @@ teleport:AddButton("⚙️ Industrial Gym", function()
     })
 end)
 
-teleport:AddLabel("----------------------------------------")
-
 -- Brawl
 teleport:AddButton("⚔️ Brawl Regular", function()
     local player = game.Players.LocalPlayer
