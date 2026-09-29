@@ -3,20 +3,23 @@
 local library = loadstring(game:HttpGet("https://github.com/KryvexOnTop/Kryvex-paid/raw/refs/heads/main/KryvexGui%20(3).txt", true))()
 local displayName = game.Players.LocalPlayer.DisplayName
 
-local window = library:AddWindow("Kryvex Paid | Muscle Legends || HI - ".. displayName, {
-    title_bar = {
-    Color3.fromRGB(190, 60, 255), -- Açık mor
-Color3.fromRGB(80, 20, 100),
-Color3.fromRGB(20, 0, 25)
+local window = library:AddWindow("Kryvex Public | Muscle Legends || HI - ".. displayName, {
+ title_bar = {
+    Color3.fromRGB(255, 0, 0), -- Kıpkırmızı
+    Color3.fromRGB(100, 0, 0),
+    Color3.fromRGB(25, 0, 0)
 },
 title_bar_transparency = 0.1,
+
 background = {
     Color3.fromRGB(0, 0, 0),
     Color3.fromRGB(10, 10, 10),
     Color3.fromRGB(20, 20, 20)
 },
 background_transparency = 0.1,
-main_color = Color3.fromRGB(190, 60, 255), -- Açık mor
+
+main_color = Color3.fromRGB(255, 0, 0), -- Kıpkırmızı
+
 min_size = Vector2.new(479, 415),
 can_resize = true
 })
@@ -101,99 +104,7 @@ AutoFarm:AddSwitch("🧘 Situps", function(bool)
     if bool then manageTool("Situps") end
 end)
 
-AutoFarm:AddLabel("----------------------------")
-AutoFarm:AddLabel("💨 Treadmill Farm")
 
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Player = Players.LocalPlayer
-
-local Locations = {
-    {name = "🏭 Industrial Treadmill +20 xp", pos = Vector3.new(-4989.90, 81.62, 5414.85)},
-    {name = "🌿 Jungle Treadmill +8 xp", pos = Vector3.new(-8131.86, 25.77, 2818.17)},
-    {name = "🔱 Legends Treadmill +7 xp", pos = Vector3.new(4365.82, 997.14, -3632.9)},
-    {name = "✨ Mythical Treadmill +6 xp", pos = Vector3.new(2661.67, 19.41, 932.09)},
-    {name = "🏠 Spawn Treadmill +5 xp", pos = Vector3.new(-230.43, 8.16, -102.18)},
-    {name = "👟 Tiny Treadmill +1 xp", pos = Vector3.new(55.64, 5.16, 1947.60)}
-}
-
-local posLockConnection = nil
-
-local function lockAndSimulate(targetCFrame)
-    if posLockConnection then posLockConnection:Disconnect() end
-    posLockConnection = RunService.Heartbeat:Connect(function()
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = targetCFrame
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.W, false, game)
-        end
-    end)
-end
-
-local function stopAll()
-    if posLockConnection then
-        posLockConnection:Disconnect()
-        posLockConnection = nil
-    end
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.W, false, game)
-end
-
-for _, loc in ipairs(Locations) do
-    AutoFarm:AddSwitch(loc.name, function(bool)
-        if bool then
-            local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.CFrame = CFrame.new(loc.pos + Vector3.new(0, 3, 0))
-                task.wait(0.3)
-                lockAndSimulate(hrp.CFrame)
-            end
-        else
-            stopAll()
-        end
-    end)
-end
-
-AutoFarm:AddLabel("----------------------------")
-AutoFarm:AddLabel("🕹️ Industrial Gym Farm")
-
-local VIM = game:GetService("VirtualInputManager")
-
-local function pressEKey()
-    VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-    task.wait(0.01)
-    VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-end
-
-local function startJungleFarm(toggleName, cframeValue, eventName)
-    local active = false
-    AutoFarm:AddSwitch(toggleName, function(bool)
-        active = bool
-        if bool then
-            task.spawn(function()
-                while active do
-                    local char = game.Players.LocalPlayer.Character
-                    local root = char and char:FindFirstChild("HumanoidRootPart")
-                    
-                    if root then
-                        if (root.Position - cframeValue.p).Magnitude > 5 then
-                            root.CFrame = cframeValue
-                            task.wait(0.3)
-                            pressEKey()
-                        end
-                        
-                        game:GetService("Players").LocalPlayer.muscleEvent:FireServer(eventName)
-                    end
-                    task.wait(0.01)
-                end
-            end)
-        end
-    end)
-end
-
-startJungleFarm("⚙️ Auto Industrial Bar Lift", CFrame.new(-5492.24, 81.82, 4644.04), "rep")
-startJungleFarm("🏋️ Auto Industrial Bench", CFrame.new(-5014.39, 111.46, 4462.90), "rep")
-startJungleFarm("🦵 Auto Industrial Squat", CFrame.new(-5216.36, 90.17, 5420.08), "rep")
-startJungleFarm("💢 Auto Industrial Boulder", CFrame.new(-5452.94, 84.47, 5232.03), "rep")
 
 AutoFarm:AddLabel("----------------------------")
 AutoFarm:AddLabel("⚡ OP Tools")
@@ -257,6 +168,59 @@ AutoFarm:AddSwitch("🧘 Situps + 🥊 Punch", function(bool)
     _G.SitupsOn = bool
     if bool then manageToolCombo("Situps") end
 end)
+
+AutoFarm:AddLabel("----------------------------")
+AutoFarm:AddLabel("💨 Treadmill Farm")
+
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Player = Players.LocalPlayer
+
+local Locations = {
+    {name = "🏭 Industrial Treadmill +20 xp", pos = Vector3.new(-4989.90, 81.62, 5414.85)},
+    {name = "🌿 Jungle Treadmill +8 xp", pos = Vector3.new(-8131.86, 25.77, 2818.17)},
+    {name = "🔱 Legends Treadmill +7 xp", pos = Vector3.new(4365.82, 997.14, -3632.9)},
+    {name = "✨ Mythical Treadmill +6 xp", pos = Vector3.new(2661.67, 19.41, 932.09)},
+    {name = "🏠 Spawn Treadmill +5 xp", pos = Vector3.new(-230.43, 8.16, -102.18)},
+    {name = "👟 Tiny Treadmill +1 xp", pos = Vector3.new(55.64, 5.16, 1947.60)}
+}
+
+local posLockConnection = nil
+
+local function lockAndSimulate(targetCFrame)
+    if posLockConnection then posLockConnection:Disconnect() end
+    posLockConnection = RunService.Heartbeat:Connect(function()
+        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            Player.Character.HumanoidRootPart.CFrame = targetCFrame
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.W, false, game)
+        end
+    end)
+end
+
+local function stopAll()
+    if posLockConnection then
+        posLockConnection:Disconnect()
+        posLockConnection = nil
+    end
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.W, false, game)
+end
+
+for _, loc in ipairs(Locations) do
+    AutoFarm:AddSwitch(loc.name, function(bool)
+        if bool then
+            local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.CFrame = CFrame.new(loc.pos + Vector3.new(0, 3, 0))
+                task.wait(0.3)
+                lockAndSimulate(hrp.CFrame)
+            end
+        else
+            stopAll()
+        end
+    end)
+end
+
 
 AutoFarm:AddLabel("----------------------------")
 AutoFarm:AddLabel("💢 Brawl")
@@ -365,6 +329,296 @@ AutoFarm:AddSwitch("⚔️ Auto Win Brawl", function(state)
         end)
     end
 end)
+
+AutoFarm:AddLabel("----------------------------")
+AutoFarm:AddLabel("⚡ OP Tools")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function manageToolCombo(toolName)
+    task.spawn(function()
+        while _G[toolName.."On"] do
+            local character = LocalPlayer.Character
+            local hum = character and character:FindFirstChildOfClass("Humanoid")
+            
+            if character and hum then
+                local punch = LocalPlayer.Backpack:FindFirstChild("Punch") or character:FindFirstChild("Punch")
+                local tool = LocalPlayer.Backpack:FindFirstChild(toolName) or character:FindFirstChild(toolName)
+
+                if punch then
+                    if punch.Parent ~= character then
+                        hum:EquipTool(punch)
+                    end
+                    if punch:FindFirstChild("attackTime") then 
+                        punch.attackTime.Value = 0 
+                    end
+                    punch:Activate()
+                end
+
+                if tool then
+                    if tool.Parent ~= character then
+                        hum:EquipTool(tool)
+                    end
+                    
+                    local event = LocalPlayer:FindFirstChild("muscleEvent")
+                    if event then 
+                        event:FireServer("rep") 
+                    end
+                    tool:Activate()
+                end
+            end
+            task.wait(0.01)
+        end
+    end)
+end
+
+AutoFarm:AddSwitch("🏋️ Weight + 🥊 Punch", function(bool)
+    _G.WeightOn = bool
+    if bool then manageToolCombo("Weight") end
+end)
+
+AutoFarm:AddSwitch("💪 Pushups + 🥊 Punch", function(bool)
+    _G.PushupsOn = bool
+    if bool then manageToolCombo("Pushups") end
+end)
+
+AutoFarm:AddSwitch("🤸 Handstand + 🥊 Punch", function(bool)
+    _G.HandstandOn = bool
+    if bool then manageToolCombo("Handstand") end
+end)
+
+AutoFarm:AddSwitch("🧘 Situps + 🥊 Punch", function(bool)
+    _G.SitupsOn = bool
+    if bool then manageToolCombo("Situps") end
+end)
+
+
+
+AutoFarm:AddLabel("----------------------------")
+AutoFarm:AddLabel("🏋️ GYM FARM")
+
+local VIM = game:GetService("VirtualInputManager")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function pressEKey()
+    VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    task.wait(0.05)
+    VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+end
+
+local function createGymFarm(folder, toggleName, cframeValue, eventName)
+    local active = false
+
+    folder:AddSwitch(toggleName, function(bool)
+        active = bool
+
+        if bool then
+            task.spawn(function()
+                while active do
+                    local character = LocalPlayer.Character
+                    local root = character and character:FindFirstChild("HumanoidRootPart")
+
+                    if root then
+                        if (root.Position - cframeValue.Position).Magnitude > 5 then
+                            root.CFrame = cframeValue
+                            task.wait(0.3)
+                            pressEKey()
+                        end
+
+                        local event = LocalPlayer:FindFirstChild("muscleEvent")
+
+                        if event then
+                            event:FireServer(eventName)
+                        end
+                    end
+
+                    task.wait(0.05)
+                end
+            end)
+        end
+    end)
+end
+
+
+-- ⚙️ INDUSTRIAL GYM
+local IndustrialFolder = AutoFarm:AddFolder("⚙️ Industrial Gym")
+
+createGymFarm(
+    IndustrialFolder,
+    "⚙️ Auto Industrial Bar Lift",
+    CFrame.new(-5492.24, 81.82, 4644.04),
+    "rep"
+)
+
+createGymFarm(
+    IndustrialFolder,
+    "🏋️ Auto Industrial Bench",
+    CFrame.new(-5014.39, 111.46, 4462.90),
+    "rep"
+)
+
+createGymFarm(
+    IndustrialFolder,
+    "🦵 Auto Industrial Squat",
+    CFrame.new(-5216.36, 90.17, 5420.08),
+    "rep"
+)
+
+createGymFarm(
+    IndustrialFolder,
+    "💢 Auto Industrial Boulder",
+    CFrame.new(-5452.94, 84.47, 5232.03),
+    "rep"
+)
+
+
+-- 🌴 JUNGLE GYM
+local JungleFolder = AutoFarm:AddFolder("🌴 Jungle Gym")
+
+createGymFarm(
+    JungleFolder,
+    "🏋️ Auto Jungle Lift",
+    CFrame.new(-8652.85, 45.22, 2088.99),
+    "rep"
+)
+
+createGymFarm(
+    JungleFolder,
+    "💪 Auto Jungle Bench Press",
+    CFrame.new(-8173.23, 83.82, 1907.40),
+    "rep"
+)
+
+createGymFarm(
+    JungleFolder,
+    "🦵 Auto Jungle Squat",
+    CFrame.new(-8377.55, 48.71, 2864.90),
+    "rep"
+)
+
+createGymFarm(
+    JungleFolder,
+    "🗿 Auto Jungle Boulder",
+    CFrame.new(-8614.81, 51.90, 2677.37),
+    "rep"
+)
+
+
+-- 👑 MUSCLE KING
+local MuscleKingFolder = AutoFarm:AddFolder("👑 Muscle King")
+
+createGymFarm(
+    MuscleKingFolder,
+    "🏋️ Auto Muscle King Lift",
+    CFrame.new(-8774.03, 52.15, -5664.10),
+    "rep"
+)
+
+createGymFarm(
+    MuscleKingFolder,
+    "💪 Auto Muscle King Bench Press",
+    CFrame.new(-8589.43, 58.00, -6044.57),
+    "rep"
+)
+
+createGymFarm(
+    MuscleKingFolder,
+    "🦵 Auto Muscle King Squat",
+    CFrame.new(-8759.62, 46.50, -6041.16),
+    "rep"
+)
+
+createGymFarm(
+    MuscleKingFolder,
+    "🗿 Auto Muscle King Boulder",
+    CFrame.new(-8942.97, 60.71, -5692.74),
+    "rep"
+)
+
+
+-- 🌟 LEGENDS GYM
+local LegendsFolder = AutoFarm:AddFolder("🌟 Legends Gym")
+
+createGymFarm(
+    LegendsFolder,
+    "🏋️ Auto Legends Lift",
+    CFrame.new(4532.02, 1025.80, -4002.15),
+    "rep"
+)
+
+createGymFarm(
+    LegendsFolder,
+    "💪 Auto Legends Bench Press",
+    CFrame.new(4109.20, 1035.67, -3802.88),
+    "rep"
+)
+
+createGymFarm(
+    LegendsFolder,
+    "🦵 Auto Legends Squat",
+    CFrame.new(4438.74, 1021.38, -4058.46),
+    "rep"
+)
+
+createGymFarm(
+    LegendsFolder,
+    "🗿 Auto Legends Boulder",
+    CFrame.new(4188.75, 1019.85, -3905.19),
+    "rep"
+)
+
+
+-- 🔮 MYTHICAL GYM
+local MythicalFolder = AutoFarm:AddFolder("🔮 Mythical Gym")
+
+createGymFarm(
+    MythicalFolder,
+    "🏋️ Auto Mythical Lift",
+    CFrame.new(2486.75, 31.91, 847.89),
+    "rep"
+)
+
+createGymFarm(
+    MythicalFolder,
+    "💪 Auto Mythical Bench Press",
+    CFrame.new(2370.74, 57.09, 1243.37),
+    "rep"
+)
+
+createGymFarm(
+    MythicalFolder,
+    "🗿 Auto Mythical Boulder",
+    CFrame.new(2667.31, 58.88, 1202.46),
+    "rep"
+)
+
+
+-- ❄️ FROST GYM
+local FrostFolder = AutoFarm:AddFolder("❄️ Frost Gym")
+
+createGymFarm(
+    FrostFolder,
+    "🏋️ Auto Frost Lift",
+    CFrame.new(-2917.62, 42.60, -211.29),
+    "rep"
+)
+
+createGymFarm(
+    FrostFolder,
+    "💪 Auto Frost Bench Press",
+    CFrame.new(-3022.97, 41.31, -197.51),
+    "rep"
+)
+
+createGymFarm(
+    FrostFolder,
+    "🦵 Auto Frost Squat",
+    CFrame.new(-2720.66, 27.85, -590.72),
+    "rep"
+)
+
 
 local rebirths = window:AddTab("Rebirths")
 
