@@ -20,7 +20,7 @@ background_transparency = 0.1,
 
 main_color = Color3.fromRGB(255, 0, 0), -- Kıpkırmızı
 
-min_size = Vector2.new(479, 415),
+min_size = Vector2.new(420, 350),
 can_resize = true
 })
 
