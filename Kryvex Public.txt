@@ -3179,38 +3179,3 @@ pets:AddSwitch("📫 Auto Trade", function(state)
     end)
 end)
 
-local GymTab = window:AddTab("Gym")
-
-local VIM = game:GetService("VirtualInputManager")
-local function pressEKey()
-    VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-    task.wait(0.05)
-    VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-end
-
-local function createFarm(folder, toggleName, cframeValue, eventName)
-    local active = false
-    folder:AddSwitch(toggleName, function(bool)
-        active = bool
-        if bool then
-            task.spawn(function()
-                while active do
-                    local char = game.Players.LocalPlayer.Character
-                    local root = char and char:FindFirstChild("HumanoidRootPart")
-                    if root then
-                        if (root.Position - cframeValue.p).Magnitude > 5 then
-                            root.CFrame = cframeValue
-                            task.wait(0.3)
-                            pressEKey()
-                        end
-                        local event = game:GetService("Players").LocalPlayer:FindFirstChild("muscleEvent")
-                        if event then
-                            event:FireServer(eventName)
-                        end
-                    end
-                    task.wait(0.05)
-                end
-            end)
-        end
-    end)
-end
