@@ -619,3 +619,271 @@ createGymFarm(
     "rep"
 )
 
+
+local rebirths = window:AddTab("Rebirths")
+
+rebirths:AddTextBox("🔢 Rebirth Target", function(text)
+    local newValue = tonumber(text)
+    if newValue and newValue > 0 then
+        targetRebirthValue = newValue
+        updateStats() 
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Updated Goal",
+            Text = "New goal: " .. tostring(targetRebirthValue) .. " rebirths",
+            Duration = 0
+        })
+    else
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Size",
+            Text = "Put a size larger than 0",
+            Duration = 0
+        })
+    end
+end)
+
+local infiniteSwitch
+
+local targetSwitch = rebirths:AddSwitch("🔄 Auto Rebirth Target", function(bool)
+    _G.targetRebirthActive = bool
+    
+    if bool then
+        if _G.infiniteRebirthActive and infiniteSwitch then
+            infiniteSwitch:Set(false)
+            _G.infiniteRebirthActive = false
+        end
+        
+        spawn(function()
+            while _G.targetRebirthActive and wait(0.1) do
+                local currentRebirths = game.Players.LocalPlayer.leaderstats.Rebirths.Value
+                
+                if currentRebirths >= targetRebirthValue then
+                    targetSwitch:Set(false)
+                    _G.targetRebirthActive = false
+                    
+                    game:GetService("StarterGui"):SetCore("SendNotification", {
+                        Title = "Goal Reached",
+                        Text = "You Have Reached" .. tostring(targetRebirthValue) .. " renacimientos",
+                        Duration = 5
+                    })
+                    
+                    break
+						end
+						
+                game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+            end
+        end)
+    end
+end, "automatic rebirth until reaching the goal")
+
+infiniteSwitch = rebirths:AddSwitch("♾️ Auto Rebirth (Infinitely)", function(bool)
+    _G.infiniteRebirthActive = bool
+    
+    if bool then
+        if _G.targetRebirthActive and targetSwitch then
+            targetSwitch:Set(false)
+            _G.targetRebirthActive = false
+        end
+        
+        spawn(function()
+            while _G.infiniteRebirthActive and wait(0.1) do
+                game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+            end
+        end)
+    end
+end, "rebirth infinitely")
+
+local sizeSwitch = rebirths:AddSwitch("Auto Size 1📏", function(bool)
+    _G.autoSizeActive = bool
+    
+    if bool then
+        spawn(function()
+            while _G.autoSizeActive and wait() do
+                game:GetService("ReplicatedStorage").rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+            end
+        end)
+    end
+end, "Size 1")
+
+local sizeSwitch = rebirths:AddSwitch("Auto Size 2📏", function(bool)
+    _G.autoSizeActive = bool
+    
+    if bool then
+        spawn(function()
+            while _G.autoSizeActive and wait() do
+                game:GetService("ReplicatedStorage").rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
+            end
+        end)
+    end
+end, "Size 2")
+
+local teleportSwitch = rebirths:AddSwitch("👑 Auto Teleport to Muscle King", function(bool)
+    _G.teleportActive = bool
+    
+    if bool then
+        spawn(function()
+            while _G.teleportActive and wait() do
+                if game.Players.LocalPlayer.Character then
+                    game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-8771, 85, -5830))
+                end
+            end
+        end)
+    end
+end, "Tp to Mk")
+
+local blockedFrames = {
+	"strengthFrame",
+	"durabilityFrame",
+	"agilityFrame",
+	"evilKarmaFrame",
+	"goodKarmaFrame",
+}
+
+local frameSwitch = rebirths:AddSwitch("👁️‍🗨️ Hide All Frames", function(bool)
+	if bool then
+		for _, name in ipairs(blockedFrames) do
+			local frame = replicatedStorage:FindFirstChild(name)
+			if frame and frame:IsA("GuiObject") then
+				frame.Visible = false
+			end
+		end
+
+		if not _G.frameMonitorConnection then
+			_G.frameMonitorConnection = replicatedStorage.ChildAdded:Connect(function(child)
+				for _, name in ipairs(blockedFrames) do
+					if child.Name == name and child:IsA("GuiObject") then
+						child.Visible = false
+					end
+				end
+			end)
+		end
+	else
+		for _, name in ipairs(blockedFrames) do
+			local frame = replicatedStorage:FindFirstChild(name)
+			if frame and frame:IsA("GuiObject") then
+				frame.Visible = true
+			end
+		end
+
+		if _G.frameMonitorConnection then
+			_G.frameMonitorConnection:Disconnect()
+			_G.frameMonitorConnection = nil
+		end
+	end
+end)
+frameSwitch:Set(false)
+
+local selectedUltimate = nil
+local autoBuyActive = false
+local ultimateRemote = game:GetService("ReplicatedStorage"):WaitForChild("rEvents"):WaitForChild("ultimatesRemote")
+
+local upgradeDropdown = rebirths:AddDropdown("📦 Select Ultımate", function(choice)
+    selectedUltimate = choice
+end)
+
+local items = {
+    "RepSpeed", "PetSlot", "ItemCapacity", "DailySpin", 
+    "ChestRewards", "QuestRewards", "MuscleMind", "JungleSwift", 
+    "InfernalHealth", "GalaxyGains", "DemonDamage", "GoldenRebirth"
+}
+
+for _, itemName in ipairs(items) do
+    upgradeDropdown:Add(itemName)
+end
+
+rebirths:AddSwitch("🔄 Auto Buy Selected", function(state)
+    autoBuyActive = state
+    if autoBuyActive then
+        task.spawn(function()
+            while autoBuyActive do
+                if selectedUltimate then
+                    pcall(function()
+                        ultimateRemote:InvokeServer("upgradeUltimate", selectedUltimate)
+                    end)
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+end)
+
+local ProteinEggLabel = rebirths:AddLabel("Protein Eggs Owned: 0")
+ProteinEggLabel.TextSize = 14
+
+task.spawn(function()
+	while true do
+		local proteinEggCount = 0
+		local tropicalShakeCount = 0
+		if PlayerData.Backpack then
+			for _, item in ipairs(PlayerData.Backpack:GetChildren()) do
+				if item.Name == "Protein Egg" then proteinEggCount = proteinEggCount + 1
+				elseif item.Name == "Tropical Shake" then tropicalShakeCount = tropicalShakeCount + 1 end
+			end
+		end
+		ProteinEggLabel.Text = "Protein Eggs: " .. proteinEggCount
+		task.wait(7.5)
+	end
+end)
+
+local ProteinEggBoostLabel = rebirths:AddLabel("Protein Egg Boost: 00:00")
+ProteinEggBoostLabel.TextSize = 14
+
+local function formatTime(seconds)
+    local m = math.floor(seconds / 60)
+    local s = seconds % 60
+    return string.format("%02d:%02d", m, s)
+end
+
+task.spawn(function()
+    while true do
+        local boostTimersFolder = game.Players.LocalPlayer:FindFirstChild("boostTimersFolder")
+        if boostTimersFolder then
+            local boost = boostTimersFolder:FindFirstChild("Protein Egg")
+            if boost and boost:IsA("IntValue") then
+                local seconds = boost.Value
+                ProteinEggBoostLabel.Text = "Protein Egg Timer: " .. formatTime(seconds)
+            else
+                ProteinEggBoostLabel.Text = "Protein Egg Timer: 00:00"
+            end
+        else
+            ProteinEggBoostLabel.Text = "Protein Egg Timer: 00:00"
+        end
+        task.wait(0.5)
+    end
+end)
+
+
+local function useEggs()
+    local boost = game.Players.LocalPlayer.boostTimersFolder:FindFirstChild("Protein Egg")
+    if boost and boost:IsA("IntValue") then
+        local seconds = boost.Value
+        if seconds >= 5 then
+            return
+        end
+    end
+    
+    local tool = player.Character:FindFirstChild("Protein Egg") or player.Backpack:FindFirstChild("Protein Egg")
+    if tool then
+        muscleEvent:FireServer("proteinEgg", tool)
+    end
+end
+
+local running1 = false
+
+task.spawn(function()
+    while true do
+        if running1 then
+            useEggs()
+            task.wait(1800)
+        else
+            task.wait(1)
+        end
+    end
+end)
+
+local autoEggSwitch = rebirths:AddSwitch("🥚 Auto Eat Egg 30 Min", function(state)
+    running1 = state
+    if state then
+        useEggs()
+    end
+end)
