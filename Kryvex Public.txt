@@ -2735,6 +2735,397 @@ tabFarming:AddSwitch("👁️‍🗨️ Hide All Frames", function(state)
     end
 end)
 
+tabs.boss = window:AddTab("Boss")
+
+tabs.boss:AddLabel("👹 Boss Farming:")
+tabs.boss.StatusLabel = tabs.boss:AddLabel("Status: Waiting for Boss")
+tabs.boss.BossLabel = tabs.boss:AddLabel("Boss: None")
+tabs.boss.HealthLabel = tabs.boss:AddLabel("Health: 0 / 0")
+tabs.boss.NextBossLabel = tabs.boss:AddLabel("Next Boss: N/A")
+
+tabs.boss.Data = {
+	Running = false,
+	Generation = 0,
+	ContinueTraining = true,
+	Phase = "Waiting",
+	TrainingSnapshot = nil,
+	PunchInterval = 0.3,
+	LastPunch = 0,
+	AttackSequence = nil,
+	EvadeUntil = 0,
+	EvadeDistance = 230,
+	PunchBehindDistance = 45,
+	StompHealthThreshold = 0.35,
+	DodgeStomps = false
+}
+
+tabs.boss.findActiveBoss = function(model, stats, health, maxHealth, hitbox)
+	for _, candidate in ipairs(services.CollectionService:GetTagged("BossEventBoss")) do
+		if candidate:IsA("Model") and candidate:IsDescendantOf(services.Workspace) then
+			model = candidate
+			break
+		end
+	end
+
+	if not model then
+		tabs.boss.runtime.events = services.Workspace:FindFirstChild("Events")
+		tabs.boss.runtime.bossFolder = tabs.boss.runtime.events and (tabs.boss.runtime.events:FindFirstChild("BossEvent") or tabs.boss.runtime.events:FindFirstChild("BossArena"))
+		if tabs.boss.runtime.bossFolder then
+			for _, candidate in ipairs(tabs.boss.runtime.bossFolder:GetDescendants()) do
+				if candidate:IsA("Model") and (candidate:FindFirstChild("BossDamageHitbox") or candidate:HasTag("BossEventBoss")) then
+					model = candidate
+					break
+				end
+			end
+		end
+	end
+
+	if not model then return end
+	stats = model:FindFirstChild("stats")
+	health = stats and stats:FindFirstChild("Health")
+	maxHealth = stats and stats:FindFirstChild("MaxHealth")
+	hitbox = model:FindFirstChild("BossDamageHitbox", true)
+	if not hitbox or not hitbox:IsA("BasePart") then return end
+	tabs.boss.runtime.currentHealth = health and health.Value or services.Workspace:GetAttribute("BossHealth")
+	if typeof(tabs.boss.runtime.currentHealth) == "number" and tabs.boss.runtime.currentHealth <= 0 then return end
+	return model, health, maxHealth, hitbox
+end
+
+tabs.boss.getBossHealth = function(health)
+	return health and health.Value or services.Workspace:GetAttribute("BossHealth") or 0
+end
+
+tabs.boss.getBossMaxHealth = function(maxHealth)
+	return maxHealth and maxHealth.Value or services.Workspace:GetAttribute("BossMaxHealth") or 0
+end
+
+tabs.boss.formatCountdown = function(seconds, hours, minutes)
+	seconds = math.max(0, math.floor(seconds or 0))
+	hours = math.floor(seconds / 3600)
+	minutes = math.floor(seconds % 3600 / 60)
+	seconds = seconds % 60
+	return string.format("%dh %dmin %ds", hours, minutes, seconds)
+end
+
+tabs.boss.leaveExerciseMachine = function(character, humanoid, root)
+	character = utils.playerData.Player.Character
+	humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	root = character and character:FindFirstChild("HumanoidRootPart")
+	if not humanoid or humanoid.Health <= 0 then return end
+
+	pcall(function()
+		services.VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+		humanoid.Sit = false
+		humanoid.Jump = true
+		humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+		if root then root.AssemblyLinearVelocity = Vector3.new(0, math.max(root.AssemblyLinearVelocity.Y, 50), 0) end
+	end)
+	pcall(function() services.VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game) end)
+	task.wait(0.2)
+end
+
+tabs.boss.pauseTraining = function()
+	if tabs.boss.Data.TrainingSnapshot then return end
+	tabs.boss.Data.TrainingSnapshot = {
+		Rebirth = tabs.farming.RebirthData.IsAutoRebirthing,
+		Size = tabs.farming.SizeData.Active,
+		King = tabs.farming.KingData.TeleportActive,
+		Tool = tabs.farming.ExerciseData.AutoFarm,
+		Squat = tabs.farming.MachineExerciseData.Squat.Running,
+		Lift = tabs.farming.MachineExerciseData.Lift.Running,
+		AutoRep = tabs.farming.AutoRepRunning,
+		Rock = getgenv().RockFarmRunning == true,
+		Configs = {}
+	}
+	for _, config in ipairs(tabs.farming.Configs) do
+		tabs.boss.Data.TrainingSnapshot.Configs[config.name] = tabs.farming.ActiveConfigs[config.name] == true
+		if tabs.farming.ActiveConfigs[config.name] and config.Switch then config.Switch:Set(false) end
+	end
+	if tabs.boss.Data.TrainingSnapshot.Rebirth then tabs.farming.RebirthData.Switch:Set(false) end
+	if tabs.boss.Data.TrainingSnapshot.Size then tabs.farming.SizeSwitch:Set(false) end
+	if tabs.boss.Data.TrainingSnapshot.King then tabs.farming.KingSwitch:Set(false) end
+	if tabs.boss.Data.TrainingSnapshot.Tool then tabs.farming.ToolExerciseSwitch:Set(false) end
+	if tabs.boss.Data.TrainingSnapshot.Squat then tabs.farming.SquatExerciseSwitch:Set(false) end
+	if tabs.boss.Data.TrainingSnapshot.Lift then tabs.farming.LiftExerciseSwitch:Set(false) end
+	if tabs.boss.Data.TrainingSnapshot.Squat or tabs.boss.Data.TrainingSnapshot.Lift then tabs.boss.leaveExerciseMachine() end
+	if tabs.boss.Data.TrainingSnapshot.AutoRep then tabs.farming.AutoRepSwitch:Set(false) end
+	if tabs.boss.Data.TrainingSnapshot.Rock then tabs.farming.RockSwitch:Set(false) end
+end
+
+tabs.boss.resumeTraining = function(snapshot)
+	snapshot = tabs.boss.Data.TrainingSnapshot
+	if not snapshot then return end
+	tabs.boss.Data.TrainingSnapshot = nil
+	if snapshot.Rebirth then tabs.farming.RebirthData.Switch:Set(true) end
+	if snapshot.Size then tabs.farming.SizeSwitch:Set(true) end
+	if snapshot.King then tabs.farming.KingSwitch:Set(true) end
+	if snapshot.Tool then tabs.farming.ToolExerciseSwitch:Set(true) end
+	if snapshot.Squat then tabs.farming.SquatExerciseSwitch:Set(true) end
+	if snapshot.Lift then tabs.farming.LiftExerciseSwitch:Set(true) end
+	if snapshot.AutoRep then tabs.farming.AutoRepSwitch:Set(true) end
+	if snapshot.Rock then tabs.farming.RockSwitch:Set(true) end
+	for _, config in ipairs(tabs.farming.Configs) do
+		if snapshot.Configs[config.name] and config.Switch then config.Switch:Set(true) end
+	end
+end
+
+tabs.boss.getBossHeadPosition = function(model, hitbox, head)
+	head = model:FindFirstChild("Head", true) or model:FindFirstChild("head", true)
+	if head and head:IsA("BasePart") then return head.Position end
+	if head and head:IsA("Bone") then return head.WorldPosition end
+	return hitbox.Position + Vector3.new(0, hitbox.Size.Y * 0.35, 0)
+end
+
+tabs.boss.getAliveCharacter = function(generation, timeout, startedAt, character, root, humanoid)
+	startedAt = os.clock()
+	repeat
+		character = utils.playerData.Player.Character
+		root = character and character:FindFirstChild("HumanoidRootPart")
+		humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if root and humanoid and humanoid.Health > 0 then
+			utils.playerData.Character = character
+			utils.playerData.Humanoid = humanoid
+			return character, root, humanoid
+		end
+		tabs.boss.StatusLabel.Text = "Status: Waiting for Respawn"
+		task.wait(0.1)
+	until not tabs.boss.Data.Running
+		or tabs.boss.Data.Generation ~= generation
+		or (timeout and os.clock() - startedAt >= timeout)
+end
+
+tabs.boss.evadeAttack = function(model, hitbox, root, humanoid, sequence, attackKind, attackCFrame, impactTime, direction, safePosition, center)
+	sequence = model:GetAttribute("BossAttackSequence")
+	attackKind = model:GetAttribute("BossAttackKind")
+	attackCFrame = model:GetAttribute("BossAttackCFrame")
+	impactTime = model:GetAttribute("BossAttackImpactTime")
+
+	if typeof(sequence) == "number" and sequence ~= tabs.boss.Data.AttackSequence then
+		tabs.boss.Data.AttackSequence = sequence
+		if typeof(attackKind) == "string" and typeof(attackCFrame) == "CFrame" and typeof(impactTime) == "number" then
+			tabs.boss.Data.EvadeUntil = impactTime + 0.6
+		end
+	end
+
+	if typeof(attackCFrame) ~= "CFrame" or services.Workspace:GetServerTimeNow() > tabs.boss.Data.EvadeUntil then
+		return
+	end
+
+	attackKind = string.lower(tostring(attackKind or ""))
+	if string.find(attackKind, "punch", 1, true) then
+		center = tabs.boss.getBossHeadPosition(model, hitbox)
+		direction = Vector3.new(attackCFrame.LookVector.X, 0, attackCFrame.LookVector.Z)
+		if direction.Magnitude < 1 then direction = Vector3.new(hitbox.CFrame.LookVector.X, 0, hitbox.CFrame.LookVector.Z) end
+		if direction.Magnitude < 1 then direction = Vector3.new(0, 0, 1) end
+		safePosition = center - direction.Unit * tabs.boss.Data.PunchBehindDistance
+		root.CFrame = CFrame.lookAt(safePosition, center)
+		root.AssemblyLinearVelocity = Vector3.zero
+		root.AssemblyAngularVelocity = Vector3.zero
+		tabs.boss.StatusLabel.Text = "Status: Dodging Punch"
+		return "Punch"
+	end
+
+	if not string.find(attackKind, "stomp", 1, true) then return end
+	if humanoid.Health / math.max(humanoid.MaxHealth, 1) <= tabs.boss.Data.StompHealthThreshold then
+		tabs.boss.Data.DodgeStomps = true
+	end
+	if not tabs.boss.Data.DodgeStomps then return end
+
+	direction = Vector3.new(root.Position.X - attackCFrame.Position.X, 0, root.Position.Z - attackCFrame.Position.Z)
+	if direction.Magnitude < 1 then
+		direction = Vector3.new(-attackCFrame.LookVector.X, 0, -attackCFrame.LookVector.Z)
+	end
+	if direction.Magnitude < 1 then direction = Vector3.new(1, 0, 0) end
+	direction = direction.Unit
+	safePosition = attackCFrame.Position + direction * tabs.boss.Data.EvadeDistance + Vector3.new(0, 18, 0)
+	root.CFrame = CFrame.lookAt(safePosition, attackCFrame.Position)
+	root.AssemblyLinearVelocity = Vector3.zero
+	root.AssemblyAngularVelocity = Vector3.zero
+	tabs.boss.StatusLabel.Text = "Status: Dodging Stomp"
+	return "Stomp"
+end
+
+tabs.boss.attack = function(model, health, maxHealth, hitbox, character, root, humanoid, punch, leftHand, rightHand, center, position, evadeMode)
+	character = utils.playerData.Player.Character
+	root = character and character:FindFirstChild("HumanoidRootPart")
+	humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not root or not humanoid or humanoid.Health <= 0 then return end
+	evadeMode = tabs.boss.evadeAttack(model, hitbox, root, humanoid)
+	if evadeMode == "Stomp" then return end
+	punch = character:FindFirstChild("Punch") or utils.playerData.Backpack:FindFirstChild("Punch")
+	if punch and punch.Parent ~= character then humanoid:EquipTool(punch) end
+	leftHand = character:FindFirstChild("LeftHand")
+	rightHand = character:FindFirstChild("RightHand")
+	center = tabs.boss.getBossHeadPosition(model, hitbox)
+	if evadeMode ~= "Punch" then
+		position = center
+		root.CFrame = CFrame.lookAt(position, position + hitbox.CFrame.LookVector)
+	end
+	root.AssemblyLinearVelocity = Vector3.zero
+	root.AssemblyAngularVelocity = Vector3.zero
+	pcall(function()
+		if leftHand then
+			firetouchinterest(hitbox, leftHand, 0)
+			firetouchinterest(hitbox, leftHand, 1)
+		end
+		if rightHand then
+			firetouchinterest(hitbox, rightHand, 0)
+			firetouchinterest(hitbox, rightHand, 1)
+		end
+	end)
+
+	if os.clock() - tabs.boss.Data.LastPunch >= tabs.boss.Data.PunchInterval then
+		tabs.boss.Data.LastPunch = os.clock()
+		pcall(function()
+			utils.remotes.MuscleEvent:FireServer("punch", "leftHand")
+			utils.remotes.MuscleEvent:FireServer("punch", "rightHand")
+			if punch then punch:Activate() end
+		end)
+	end
+
+	tabs.boss.BossLabel.Text = "Boss: " .. (services.Workspace:GetAttribute("BossDisplayName") or model.Name)
+	tabs.boss.runtime.health = tabs.boss.getBossHealth(health)
+	tabs.boss.runtime.maxHealth = tabs.boss.getBossMaxHealth(maxHealth)
+	tabs.boss.HealthLabel.Text = "Health: " .. utils.formatNumber(tabs.boss.runtime.health) .. " / " .. utils.formatNumber(tabs.boss.runtime.maxHealth)
+end
+
+tabs.boss.findChest = function(chest, prompt, part)
+	for _, candidate in ipairs(services.CollectionService:GetTagged("BossEventChest")) do
+		if candidate:IsDescendantOf(services.Workspace) then chest = candidate break end
+	end
+	if not chest then chest = services.Workspace:FindFirstChild("BossChest", true) end
+	if not chest then
+		for _, candidate in ipairs(services.Workspace:GetDescendants()) do
+			if candidate:IsA("ProximityPrompt") and candidate.Name == "bossChestPrompt" then
+				chest = candidate.Parent
+				break
+			end
+		end
+	end
+	if not chest then return end
+	prompt = chest:FindFirstChild("bossChestPrompt", true)
+	part = prompt and prompt.Parent or (chest:IsA("Model") and (chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart", true))) or chest
+	if part and part:IsA("BasePart") then return chest, prompt, part end
+end
+
+tabs.boss.collectChest = function(generation, startedAt, chest, prompt, part, character, root)
+	tabs.boss.StatusLabel.Text = "Status: Waiting for Chest"
+	startedAt = os.clock()
+	repeat
+		chest, prompt, part = tabs.boss.findChest()
+		if chest and chest:GetAttribute("BossChestEmerging") ~= true then break end
+		task.wait(0.1)
+	until not tabs.boss.Data.Running or tabs.boss.Data.Generation ~= generation or os.clock() - startedAt >= 12
+	if not chest or not part then return end
+
+	tabs.boss.StatusLabel.Text = "Status: Collecting Chest"
+	startedAt = os.clock()
+	repeat
+		character, root = tabs.boss.getAliveCharacter(generation, 2)
+		if character and root and chest.Parent and part.Parent then
+			tabs.boss.StatusLabel.Text = "Status: Collecting Chest"
+			pcall(function()
+				root.CFrame = CFrame.lookAt(part.Position + Vector3.new(0, 3, 4), part.Position)
+				root.AssemblyLinearVelocity = Vector3.zero
+			end)
+			task.wait(0.15)
+			if prompt and prompt.Parent and fireproximityprompt then
+				pcall(function() fireproximityprompt(prompt) end)
+			else
+				pcall(function()
+					services.VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+					task.wait(0.1)
+					services.VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+				end)
+			end
+		end
+		task.wait(0.25)
+	until not tabs.boss.Data.Running
+		or tabs.boss.Data.Generation ~= generation
+		or utils.playerData.Player:GetAttribute("BossChestPending") == false
+		or not chest.Parent
+		or os.clock() - startedAt >= 12
+end
+
+tabs.boss.ContinueSwitch = tabs.boss:AddSwitch("Continue Farming after Boss Kill", function(state)
+	tabs.boss.Data.ContinueTraining = state
+	if state and tabs.boss.Data.Phase == "Waiting" then tabs.boss.resumeTraining() end
+end)
+tabs.boss.ContinueSwitch:Set(true)
+
+task.spawn(function(model, health, maxHealth, hitbox, currentHealth, currentMaxHealth, nextTime)
+	while utils.isCurrent() and true do
+		model, health, maxHealth, hitbox = tabs.boss.findActiveBoss()
+		if model then
+			currentHealth = tabs.boss.getBossHealth(health)
+			currentMaxHealth = tabs.boss.getBossMaxHealth(maxHealth)
+			tabs.boss.BossLabel.Text = "Boss: " .. (services.Workspace:GetAttribute("BossDisplayName") or model.Name)
+			tabs.boss.HealthLabel.Text = "Health: " .. utils.formatNumber(currentHealth) .. " / " .. utils.formatNumber(currentMaxHealth)
+			tabs.boss.NextBossLabel.Text = "Next Boss: Current boss active"
+		else
+			tabs.boss.BossLabel.Text = "Boss: None"
+			tabs.boss.HealthLabel.Text = "Health: 0 / 0"
+			nextTime = services.Workspace:GetAttribute("BossSpawnNextTime")
+			tabs.boss.NextBossLabel.Text = typeof(nextTime) == "number"
+				and "Next Boss: " .. tabs.boss.formatCountdown(nextTime - services.Workspace:GetServerTimeNow())
+				or "Next Boss: N/A"
+		end
+		task.wait(0.25)
+	end
+end)
+
+tabs.boss.AutoFarmSwitch = tabs.boss:AddSwitch("Auto Farm Boss", function(state)
+	tabs.boss.Data.Running = state
+	tabs.boss.Data.Generation += 1
+	tabs.boss.runtime.generation = tabs.boss.Data.Generation
+	if not state then
+		tabs.boss.Data.Phase = "Waiting"
+		tabs.boss.StatusLabel.Text = "Status: Disabled"
+		tabs.boss.resumeTraining()
+		return
+	end
+
+	task.spawn(function(generation, wasFighting, model, health, maxHealth, hitbox)
+		while utils.isCurrent() and tabs.boss.Data.Running and tabs.boss.Data.Generation == generation do
+			pcall(function()
+				model, health, maxHealth, hitbox = tabs.boss.findActiveBoss()
+				if model then
+					if not wasFighting then
+						wasFighting = true
+						tabs.boss.Data.Phase = "Fighting"
+						tabs.boss.Data.AttackSequence = nil
+						tabs.boss.Data.EvadeUntil = 0
+						tabs.boss.Data.DodgeStomps = false
+						tabs.boss.pauseTraining()
+					end
+					if utils.playerData.Player.Character
+						and utils.playerData.Player.Character:FindFirstChildOfClass("Humanoid")
+						and utils.playerData.Player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+						tabs.boss.StatusLabel.Text = "Status: Fighting"
+						tabs.boss.attack(model, health, maxHealth, hitbox)
+					else
+						tabs.boss.StatusLabel.Text = "Status: Waiting for Respawn"
+					end
+				elseif wasFighting then
+					wasFighting = false
+					tabs.boss.Data.Phase = "Collecting"
+					pcall(tabs.boss.collectChest, generation)
+					tabs.boss.BossLabel.Text = "Boss: None"
+					tabs.boss.HealthLabel.Text = "Health: 0 / 0"
+					if tabs.boss.Data.ContinueTraining then tabs.boss.resumeTraining() end
+					tabs.boss.Data.Phase = "Waiting"
+					tabs.boss.StatusLabel.Text = "Status: Waiting for Boss"
+				else
+					tabs.boss.StatusLabel.Text = "Status: Waiting for Boss"
+				end
+			end)
+			task.wait(model and 0.03 or 0.25)
+		end
+	end, tabs.boss.runtime.generation)
+end)
+
+tabs.boss:AddLabel("❤️ this tab made ByHenne")
+
 local pets = window:AddTab("Pets")
 pets:AddLabel("💰 Auto Buy")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -3462,272 +3853,6 @@ teleport:AddButton("🌋 Brawl Lava", function()
     })
 end)
 
-
-
-local Misc = window:AddTab("Misc")
-
-local function claimChests()
-    local lp = game:GetService("Players").LocalPlayer
-    local char = lp.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    
-    if root then
-        local oldCF = root.CFrame
-        local chests = {
-            Vector3.new(42.25, 1.5, 408.91),    
-            Vector3.new(-138.43, 1.5, -276.86), 
-            Vector3.new(-2569.81, 1.5, -554.07),
-            Vector3.new(2206.88, 1.5, 910.50),  
-            Vector3.new(-6713.64, 1.5, -1456.67),
-            Vector3.new(4666.53, 995.0, -3692.08),
-            Vector3.new(-7913.11, -1.5, 3019.15) 
-        }
-        
-        for _, pos in ipairs(chests) do
-            root.CFrame = CFrame.new(pos)
-            task.wait(0.15) 
-		end
-        root.CFrame = oldCF
-    end
-end
-
-Misc:AddButton("📦 Auto Claim Chest", function()
-    claimChests()
-end)
-
-local blockedFrames = {
-	"strengthFrame",
-	"durabilityFrame",
-	"agilityFrame",
-	"evilKarmaFrame",
-	"goodKarmaFrame",
-}
-
-
-local switch = Misc:AddSwitch("🔒 Lock Position", function(Value)
-    if Value then
-        
-        local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-        getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
-            if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
-            end
-        end)
-    else
-        
-        if getgenv().posLock then
-            getgenv().posLock:Disconnect()
-            getgenv().posLock = nil
-        end
-    end
-end)
-
-Misc:AddSwitch("🎰 Auto Fortune Wheel", function(Value)
-    _G.autoFortuneWheelActive = Value
-    if Value then
-        task.spawn(function()
-            while _G.autoFortuneWheelActive do
-                pcall(function()
-                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                    local wheelRemote = ReplicatedStorage.rEvents:FindFirstChild("openFortuneWheelRemote")
-                    
-                    local wheelChance = ReplicatedStorage:FindFirstChild("shared") 
-                        and ReplicatedStorage.shared:FindFirstChild("catalogs") 
-                        and ReplicatedStorage.shared.catalogs:FindFirstChild("fortuneWheelChances")
-                        and ReplicatedStorage.shared.catalogs.fortuneWheelChances:FindFirstChild("Fortune Wheel")
-                    
-                    if wheelRemote and wheelChance then
-                        wheelRemote:InvokeServer("openFortuneWheel", wheelChance)
-                    end
-                end)
-                task.wait(0.5)
-            end
-        end)
-    end
-end)
-
-local timeDropdown = Misc:AddDropdown("Change Time", function(selection)
-    local lighting = game:GetService("Lighting")
-    
-    if selection == "Night" then
-        lighting.ClockTime = 0
-    elseif selection == "Day" then
-        lighting.ClockTime = 12
-    elseif selection == "Midnight" then
-        lighting.ClockTime = 6
-    end
-    
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Changed Time",
-        Text = "the time has been changed: " .. selection,
-        Duration = 0
-    })
-end)
-
-timeDropdown:Add("Night")
-timeDropdown:Add("Day")
-timeDropdown:Add("Midnight")
-
-Misc:AddButton("💎 Gamepass AutoLift", function()
-    local gamepassFolder = game:GetService("ReplicatedStorage").gamepassIds
-    local player = game:GetService("Players").LocalPlayer
-    for _, gamepass in pairs(gamepassFolder:GetChildren()) do
-        local value = Instance.new("IntValue")
-        value.Name = gamepass.Name
-        value.Value = gamepass.Value
-        value.Parent = player.ownedGamepasses
-    end
-end, "🔓 Unlock AutoLift Pass")
-
-
-Misc:AddSwitch("🌊 Full Walk on Water", function(bool)
-    if bool then
-        createParts()
-    else
-        makePartsWalkthrough()
-    end
-end)
-
-Misc:AddSwitch("⬆️ Infinite Jump", function(state)
-    getgenv().InfiniteJump = state
-    game:GetService("UserInputService").JumpRequest:connect(function()
-        if getgenv().InfiniteJump then
-            local Humanoid = game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if Humanoid then
-                Humanoid:ChangeState("Jumping")
-            end
-        end
-    end)
-end)
-
-Misc:AddButton("🔄 Rejoin Game", function()
-    local ScreenGui = Instance.new("ScreenGui")
-    local Frame = Instance.new("Frame")
-    local TextLabel = Instance.new("TextLabel")
-    local YesButton = Instance.new("TextButton")
-    local NoButton = Instance.new("TextButton")
-    local UICorner = Instance.new("UICorner")
-
-    ScreenGui.Parent = game:GetService("CoreGui")
-    ScreenGui.Name = "RejoinConfirm"
-
-    Frame.Name = "MainFrame"
-    Frame.Parent = ScreenGui
-    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    Frame.Position = UDim2.new(0.5, -125, 0.5, -75)
-    Frame.Size = UDim2.new(0, 250, 0, 150)
-    Frame.BorderSizePixel = 0
-    Frame.Active = true
-    Frame.Draggable = true 
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
-
-    TextLabel.Parent = Frame
-    TextLabel.BackgroundTransparency = 1
-    TextLabel.Position = UDim2.new(0, 10, 0, 20)
-    TextLabel.Size = UDim2.new(0, 230, 0, 50)
-    TextLabel.Font = Enum.Font.GothamBold
-    TextLabel.Text = "Are you sure you want to rejoin?"
-    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TextLabel.TextSize = 16
-    TextLabel.TextWrapped = true
-
-    YesButton.Name = "YesButton"
-    YesButton.Parent = Frame
-    YesButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-    YesButton.Position = UDim2.new(0, 25, 0, 90)
-    YesButton.Size = UDim2.new(0, 85, 0, 35)
-    YesButton.Font = Enum.Font.GothamBold
-    YesButton.Text = "YES"
-    YesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    YesButton.TextSize = 14
-    Instance.new("UICorner", YesButton).CornerRadius = UDim.new(0, 6)
-
-    NoButton.Name = "NoButton"
-    NoButton.Parent = Frame
-    NoButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    NoButton.Position = UDim2.new(0, 140, 0, 90)
-    NoButton.Size = UDim2.new(0, 85, 0, 35)
-    NoButton.Font = Enum.Font.GothamBold
-    NoButton.Text = "NO"
-    NoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    NoButton.TextSize = 14
-    Instance.new("UICorner", NoButton).CornerRadius = UDim.new(0, 6)
-
-    YesButton.MouseButton1Click:Connect(function()
-        game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
-    end)
-
-    NoButton.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-    end)
-end)
-
-Misc:AddSwitch("🧱 Anti Knockback", function(Value)
-    if Value then
-        local playerName = game.Players.LocalPlayer.Name
-        local rootPart = game.Workspace:FindFirstChild(playerName):FindFirstChild("HumanoidRootPart")
-        local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.P = 1250
-        bodyVelocity.Parent = rootPart
-    else
-        local playerName = game.Players.LocalPlayer.Name
-        local rootPart = game.Workspace:FindFirstChild(playerName):FindFirstChild("HumanoidRootPart")
-        local existingVelocity = rootPart:FindFirstChild("BodyVelocity")
-        if existingVelocity and existingVelocity.MaxForce == Vector3.new(100000, 0, 100000) then
-            existingVelocity:Destroy()
-        end
-    end
-end)
-
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local noclipEnabled = false
-local noclipConnection = nil
-
-local function startNoclip()
-    if noclipConnection then noclipConnection:Disconnect() end
-    
-    noclipConnection = RunService.Stepped:Connect(function()
-        if noclipEnabled and player.Character then
-            for _, part in pairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-    end)
-end
-
-Misc:AddSwitch("👻 No Clip", function(bool)
-    noclipEnabled = bool
-    
-    if noclipEnabled then
-        startNoclip()
-    else
-        if noclipConnection then
-            noclipConnection:Disconnect()
-            noclipConnection = nil
-        end
-        
-        if player.Character then
-            for _, part in pairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = true
-                end
-            end
-        end
-    end
-end)
-
-player.CharacterAdded:Connect(function()
-    if noclipEnabled then
-        task.wait(0.1)
-        startNoclip()
-    end
-end)
 
 
 local credits = window:AddTab("Credits")
