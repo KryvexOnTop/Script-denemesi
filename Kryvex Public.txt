@@ -3459,7 +3459,61 @@ teleport:AddButton("🌋 Brawl Lava", function()
     })
 end)
 
+
 local Misc = window:AddTab("Misc")
+
+-- SET SPEED
+Misc:AddTextBox("⚡️ Set Speed", function(Value)
+    local Speed = tonumber(Value)
+
+    if Speed then
+        _G.SetSpeedValue = Speed
+    end
+end)
+
+Misc:AddSwitch("⚡️ Set Speed", function(Value)
+    _G.SetSpeedEnabled = Value
+
+    local Character = game.Players.LocalPlayer.Character
+    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+
+    if Humanoid then
+        if Value then
+            Humanoid.WalkSpeed = _G.SetSpeedValue or 16
+        else
+            Humanoid.WalkSpeed = 16
+        end
+    end
+end)
+
+
+-- SET SIZE
+Misc:AddTextBox("📏 Set Size", function(Value)
+    local Size = tonumber(Value)
+
+    if Size then
+        _G.SetSizeValue = Size
+    end
+end)
+
+Misc:AddSwitch("📏 Set Size", function(Value)
+    _G.SetSizeEnabled = Value
+
+    local Character = game.Players.LocalPlayer.Character
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+
+    if HumanoidRootPart then
+        if Value then
+            _G.OriginalSize = HumanoidRootPart.Size
+
+            local Size = _G.SetSizeValue or 2
+            HumanoidRootPart.Size = Vector3.new(Size, Size, Size)
+        else
+            HumanoidRootPart.Size = _G.OriginalSize or Vector3.new(2, 2, 1)
+        end
+    end
+end)
+
 
 local function claimChests()
     local lp = game:GetService("Players").LocalPlayer
@@ -3993,6 +4047,152 @@ Misc:AddButton("⚡ FPS Boost", function()
         print("⚡ FPS Boost: OFF")
     end
 end)
+
+Misc:AddButton("📡 Optimize Ping", function()
+    local RunService = game:GetService("RunService")
+    local Players = game:GetService("Players")
+    local Lighting = game:GetService("Lighting")
+
+    -- Görsel yükü azalt
+    pcall(function()
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    end)
+
+    for _, obj in ipairs(Lighting:GetDescendants()) do
+        if obj:IsA("PostEffect") then
+            obj.Enabled = false
+        end
+    end
+
+    -- Gereksiz efektleri kapat
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter")
+        or obj:IsA("Trail")
+        or obj:IsA("Beam")
+        or obj:IsA("Smoke")
+        or obj:IsA("Fire")
+        or obj:IsA("Sparkles") then
+            obj.Enabled = false
+        end
+    end
+
+    -- Fizik hesaplamalarının yerel yükünü azalt
+    pcall(function()
+        settings().Physics.AllowSleep = true
+    end)
+
+    -- Karakterin network ownership'ini değiştirmeye çalışma;
+    -- sunucu pingini doğrudan düşürmek mümkün değildir.
+end)
+
+Misc:AddButton("👻 Hide Effects", function()
+    local Workspace = game:GetService("Workspace")
+    local Lighting = game:GetService("Lighting")
+
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter")
+        or obj:IsA("Trail")
+        or obj:IsA("Beam")
+        or obj:IsA("Smoke")
+        or obj:IsA("Fire")
+        or obj:IsA("Sparkles") then
+            obj.Enabled = false
+        end
+    end
+
+    for _, obj in ipairs(Lighting:GetDescendants()) do
+        if obj:IsA("PostEffect") then
+            obj.Enabled = false
+        end
+    end
+end)
+
+Misc:AddButton("👤 Hide Players", function()
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    for _, Player in ipairs(Players:GetPlayers()) do
+        if Player ~= LocalPlayer and Player.Character then
+            for _, obj in ipairs(Player.Character:GetDescendants()) do
+                if obj:IsA("BasePart")
+                or obj:IsA("Decal")
+                or obj:IsA("Texture") then
+                    obj.LocalTransparencyModifier = 1
+                end
+            end
+        end
+    end
+end)
+
+
+Misc:AddButton("🚀 Full Optimization", function()
+    local Workspace = game:GetService("Workspace")
+    local Lighting = game:GetService("Lighting")
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    -- Grafik kalitesini düşür
+    pcall(function()
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    end)
+
+    -- Lighting efektlerini kapat
+    for _, obj in ipairs(Lighting:GetDescendants()) do
+        if obj:IsA("PostEffect")
+        or obj:IsA("Atmosphere")
+        or obj:IsA("Clouds") then
+            pcall(function()
+                obj.Enabled = false
+            end)
+        end
+    end
+
+    -- Gereksiz görsel efektleri kapat
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter")
+        or obj:IsA("Trail")
+        or obj:IsA("Beam")
+        or obj:IsA("Smoke")
+        or obj:IsA("Fire")
+        or obj:IsA("Sparkles") then
+            pcall(function()
+                obj.Enabled = false
+            end)
+
+        elseif obj:IsA("BasePart") then
+            pcall(function()
+                obj.Material = Enum.Material.SmoothPlastic
+                obj.CastShadow = false
+            end)
+        end
+    end
+
+    -- Diğer oyuncuları gizle
+    for _, Player in ipairs(Players:GetPlayers()) do
+        if Player ~= LocalPlayer and Player.Character then
+            for _, obj in ipairs(Player.Character:GetDescendants()) do
+                if obj:IsA("BasePart")
+                or obj:IsA("Decal")
+                or obj:IsA("Texture") then
+                    pcall(function()
+                        obj.LocalTransparencyModifier = 1
+                    end)
+                end
+            end
+        end
+    end
+
+    -- Terrain efektlerini azalt
+    pcall(function()
+        local Terrain = Workspace:FindFirstChildOfClass("Terrain")
+        if Terrain then
+            Terrain.Decoration = false
+        end
+    end)
+
+    print("Full Optimization aktif!")
+end)
+
 
 AutoFarm:AddLabel(" 🌦️ Change Time ")
 
