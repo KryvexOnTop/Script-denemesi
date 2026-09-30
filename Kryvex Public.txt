@@ -5056,6 +5056,765 @@ teleport:AddButton("🌋 Brawl Lava", function()
     })
 end)
 
+--//======================================================
+--// MISC
+--//======================================================
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local TeleportService = game:GetService("TeleportService")
+local Stats = game:GetService("Stats")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local StarterGui = game:GetService("StarterGui")
+
+local LocalPlayer = Players.LocalPlayer
+
+local Misc = window:AddTab("Misc")
+
+--//======================================================
+--// AUTO CLAIM CHEST
+--//======================================================
+
+Misc:AddButton("📦 Auto Claim Chest", function()
+
+    local character = LocalPlayer.Character
+    local root = character and character:FindFirstChild("HumanoidRootPart")
+
+    if not root then
+        return
+    end
+
+    local oldCFrame = root.CFrame
+
+    local chests = {
+        Vector3.new(42.25, 1.5, 408.91),
+        Vector3.new(-138.43, 1.5, -276.86),
+        Vector3.new(-2569.81, 1.5, -554.07),
+        Vector3.new(2206.88, 1.5, 910.50),
+        Vector3.new(-6713.64, 1.5, -1456.67),
+        Vector3.new(4666.53, 995, -3692.08),
+        Vector3.new(-7913.11, -1.5, 3019.15)
+    }
+
+    task.spawn(function()
+
+        for _, position in ipairs(chests) do
+
+            if not root or not root.Parent then
+                break
+            end
+
+            root.CFrame = CFrame.new(position)
+            task.wait(0.15)
+
+        end
+
+        if root and root.Parent then
+            root.CFrame = oldCFrame
+        end
+
+    end)
+
+end)
+
+--//======================================================
+--// HIDE ALL FRAMES
+--//======================================================
+
+local hideFrames = false
+
+local blockedFrames = {
+    "strengthFrame",
+    "durabilityFrame",
+    "agilityFrame",
+    "evilKarmaFrame",
+    "goodKarmaFrame"
+}
+
+local function updateFrames()
+
+    for _, name in ipairs(blockedFrames) do
+
+        local frame = ReplicatedStorage:FindFirstChild(name)
+
+        if frame and frame:IsA("GuiObject") then
+            frame.Visible = not hideFrames
+        end
+
+    end
+
+end
+
+Misc:AddSwitch("👁️ Hide All Frames", function(value)
+
+    hideFrames = value
+    updateFrames()
+
+end)
+
+--//======================================================
+--// LOCK POSITION
+--//======================================================
+
+local lockPosition = false
+local lockedCFrame = nil
+local lockConnection = nil
+
+Misc:AddSwitch("🔒 Lock Position", function(value)
+
+    lockPosition = value
+
+    if value then
+
+        local character = LocalPlayer.Character
+        local root = character and character:FindFirstChild("HumanoidRootPart")
+
+        if root then
+            lockedCFrame = root.CFrame
+        end
+
+        if lockConnection then
+            lockConnection:Disconnect()
+        end
+
+        lockConnection = RunService.Heartbeat:Connect(function()
+
+            if not lockPosition or not lockedCFrame then
+                return
+            end
+
+            local char = LocalPlayer.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+            if hrp then
+                hrp.CFrame = lockedCFrame
+            end
+
+        end)
+
+    else
+
+        lockedCFrame = nil
+
+        if lockConnection then
+            lockConnection:Disconnect()
+            lockConnection = nil
+        end
+
+    end
+
+end)
+
+--//======================================================
+--// AUTO FORTUNE WHEEL
+--//======================================================
+
+local autoFortuneWheel = false
+local fortuneThread = nil
+
+Misc:AddSwitch("🎰 Auto Fortune Wheel", function(value)
+
+    autoFortuneWheel = value
+
+    if fortuneThread then
+        task.cancel(fortuneThread)
+        fortuneThread = nil
+    end
+
+    if value then
+
+        fortuneThread = task.spawn(function()
+
+            while autoFortuneWheel do
+
+                pcall(function()
+
+                    local events = ReplicatedStorage:FindFirstChild("rEvents")
+                    local wheelRemote = events and events:FindFirstChild("openFortuneWheelRemote")
+
+                    local shared = ReplicatedStorage:FindFirstChild("shared")
+                    local catalogs = shared and shared:FindFirstChild("catalogs")
+                    local chances = catalogs and catalogs:FindFirstChild("fortuneWheelChances")
+                    local wheelChance = chances and chances:FindFirstChild("Fortune Wheel")
+
+                    if wheelRemote and wheelChance then
+                        wheelRemote:InvokeServer("openFortuneWheel", wheelChance)
+                    end
+
+                end)
+
+                task.wait(0.5)
+
+            end
+
+        end)
+
+    end
+
+end)
+
+--//======================================================
+--// ANTI AFK
+--//======================================================
+
+local AntiAfkEnabled = false
+local AntiAfkThread = nil
+local AntiAfkStartTime = 0
+
+local FPS = 0
+local FrameCount = 0
+local LastFPSTime = tick()
+
+local AntiAfkGui = Instance.new("ScreenGui")
+AntiAfkGui.Name = "KryvexAntiAfk"
+AntiAfkGui.ResetOnSpawn = false
+AntiAfkGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local AntiAfkFrame = Instance.new("Frame")
+AntiAfkFrame.Size = UDim2.new(0, 230, 0, 125)
+AntiAfkFrame.Position = UDim2.new(0, 20, 0, 250)
+AntiAfkFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+AntiAfkFrame.BorderSizePixel = 0
+AntiAfkFrame.Visible = false
+AntiAfkFrame.Parent = AntiAfkGui
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 8)
+Corner.Parent = AntiAfkFrame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 28)
+Title.BackgroundTransparency = 1
+Title.Text = "Kryvex Anti AFK"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 16
+Title.Font = Enum.Font.GothamBold
+Title.Parent = AntiAfkFrame
+
+local TimeLabel = Instance.new("TextLabel")
+TimeLabel.Position = UDim2.new(0, 10, 0, 35)
+TimeLabel.Size = UDim2.new(1, -20, 0, 22)
+TimeLabel.BackgroundTransparency = 1
+TimeLabel.Text = "00:00:00"
+TimeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TimeLabel.TextSize = 14
+TimeLabel.Font = Enum.Font.Gotham
+TimeLabel.Parent = AntiAfkFrame
+
+local FPSLabel = Instance.new("TextLabel")
+FPSLabel.Position = UDim2.new(0, 10, 0, 58)
+FPSLabel.Size = UDim2.new(0.5, -10, 0, 22)
+FPSLabel.BackgroundTransparency = 1
+FPSLabel.Text = "FPS: 0"
+FPSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+FPSLabel.TextSize = 13
+FPSLabel.Font = Enum.Font.Gotham
+FPSLabel.Parent = AntiAfkFrame
+
+local MSLabel = Instance.new("TextLabel")
+MSLabel.Position = UDim2.new(0.5, 0, 0, 58)
+MSLabel.Size = UDim2.new(0.5, -10, 0, 22)
+MSLabel.BackgroundTransparency = 1
+MSLabel.Text = "MS: 0"
+MSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+MSLabel.TextSize = 13
+MSLabel.Font = Enum.Font.Gotham
+MSLabel.Parent = AntiAfkFrame
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Position = UDim2.new(0, 10, 0, 82)
+StatusLabel.Size = UDim2.new(1, -20, 0, 22)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "● DISABLED"
+StatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+StatusLabel.TextSize = 13
+StatusLabel.Font = Enum.Font.GothamBold
+StatusLabel.Parent = AntiAfkFrame
+
+-- Draggable
+local dragging = false
+local dragStart
+local startPos
+
+AntiAfkFrame.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+        dragStart = input.Position
+        startPos = AntiAfkFrame.Position
+
+    end
+
+end)
+
+AntiAfkFrame.InputEnded:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = false
+
+    end
+
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+
+    if not dragging then
+        return
+    end
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+
+        local delta = input.Position - dragStart
+
+        AntiAfkFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+
+    end
+
+end)
+
+local function GetPing()
+
+    local success, ping = pcall(function()
+
+        local network = Stats:FindFirstChild("Network")
+
+        if not network then
+            return 0
+        end
+
+        local serverStats = network:FindFirstChild("ServerStatsItem")
+
+        if not serverStats then
+            return 0
+        end
+
+        local dataPing = serverStats:FindFirstChild("Data Ping")
+
+        if not dataPing then
+            return 0
+        end
+
+        return math.floor(dataPing:GetValue())
+
+    end)
+
+    if success then
+        return ping
+    end
+
+    return 0
+
+end
+
+RunService.RenderStepped:Connect(function()
+
+    FrameCount += 1
+
+    if tick() - LastFPSTime >= 1 then
+
+        FPS = FrameCount
+        FrameCount = 0
+        LastFPSTime = tick()
+
+        if AntiAfkFrame.Visible then
+            FPSLabel.Text = "FPS: " .. FPS
+            MSLabel.Text = "MS: " .. GetPing()
+        end
+
+    end
+
+    if AntiAfkEnabled then
+
+        local elapsed = math.floor(os.clock() - AntiAfkStartTime)
+
+        local hours = math.floor(elapsed / 3600)
+        local minutes = math.floor((elapsed % 3600) / 60)
+        local seconds = elapsed % 60
+
+        TimeLabel.Text = string.format(
+            "%02d:%02d:%02d",
+            hours,
+            minutes,
+            seconds
+        )
+
+    end
+
+end)
+
+Misc:AddSwitch("⏰ Anti AFK", function(value)
+
+    AntiAfkEnabled = value
+    AntiAfkFrame.Visible = value
+
+    if AntiAfkThread then
+        task.cancel(AntiAfkThread)
+        AntiAfkThread = nil
+    end
+
+    if value then
+
+        AntiAfkStartTime = os.clock()
+
+        StatusLabel.Text = "● ACTIVE"
+        StatusLabel.TextColor3 = Color3.fromRGB(80, 255, 120)
+
+        AntiAfkThread = task.spawn(function()
+
+            while AntiAfkEnabled do
+
+                task.wait(600)
+
+                if AntiAfkEnabled then
+
+                    pcall(function()
+
+                        local camera = workspace.CurrentCamera
+
+                        if camera then
+
+                            local viewport = camera.ViewportSize
+
+                            VirtualInputManager:SendMouseButtonEvent(
+                                viewport.X / 2,
+                                viewport.Y / 2,
+                                0,
+                                true,
+                                game,
+                                0
+                            )
+
+                            task.wait(0.1)
+
+                            VirtualInputManager:SendMouseButtonEvent(
+                                viewport.X / 2,
+                                viewport.Y / 2,
+                                0,
+                                false,
+                                game,
+                                0
+                            )
+
+                        end
+
+                    end)
+
+                end
+
+            end
+
+        end)
+
+    else
+
+        StatusLabel.Text = "● DISABLED"
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+
+    end
+
+end)
+
+--//======================================================
+--// FPS BOOST
+--//======================================================
+
+local FPSBoostEnabled = false
+
+Misc:AddButton("⚡ FPS Boost", function()
+
+    FPSBoostEnabled = not FPSBoostEnabled
+
+    local Terrain = workspace:FindFirstChildOfClass("Terrain")
+
+    if FPSBoostEnabled then
+
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        end)
+
+        for _, object in ipairs(Lighting:GetChildren()) do
+
+            if object:IsA("PostEffect") then
+                object.Enabled = false
+            end
+
+        end
+
+        if Terrain then
+
+            pcall(function()
+                Terrain.WaterWaveSize = 0
+                Terrain.WaterWaveSpeed = 0
+                Terrain.WaterReflectance = 0
+                Terrain.WaterTransparency = 1
+                Terrain.Decoration = false
+            end)
+
+        end
+
+        for _, object in ipairs(workspace:GetDescendants()) do
+
+            if object:IsA("BasePart") then
+
+                pcall(function()
+                    object.CastShadow = false
+                end)
+
+            end
+
+        end
+
+    else
+
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+        end)
+
+        for _, object in ipairs(Lighting:GetChildren()) do
+
+            if object:IsA("PostEffect") then
+                object.Enabled = true
+            end
+
+        end
+
+        for _, object in ipairs(workspace:GetDescendants()) do
+
+            if object:IsA("BasePart") then
+
+                pcall(function()
+                    object.CastShadow = true
+                end)
+
+            end
+
+        end
+
+    end
+
+end)
+
+--//======================================================
+--// CHANGE TIME
+--//======================================================
+
+Misc:AddLabel("🌦️ Change Time")
+
+local timeDropdown = Misc:AddDropdown("Change Time", function(value)
+
+    if value == "Day" then
+
+        Lighting.ClockTime = 12
+
+    elseif value == "Night" then
+
+        Lighting.ClockTime = 0
+
+    elseif value == "Midnight" then
+
+        Lighting.ClockTime = 6
+
+    end
+
+end)
+
+timeDropdown:Add("Day")
+timeDropdown:Add("Night")
+timeDropdown:Add("Midnight")
+
+--//======================================================
+--// GAMEPASS AUTOLIFT
+--//======================================================
+
+Misc:AddButton("💎 Gamepass AutoLift", function()
+
+    pcall(function()
+
+        local gamepassFolder = ReplicatedStorage:FindFirstChild("gamepassIds")
+        local ownedGamepasses = LocalPlayer:FindFirstChild("ownedGamepasses")
+
+        if not gamepassFolder or not ownedGamepasses then
+            return
+        end
+
+        for _, gamepass in ipairs(gamepassFolder:GetChildren()) do
+
+            local existing = ownedGamepasses:FindFirstChild(gamepass.Name)
+
+            if not existing then
+
+                local value = Instance.new("IntValue")
+                value.Name = gamepass.Name
+                value.Value = gamepass.Value
+                value.Parent = ownedGamepasses
+
+            end
+
+        end
+
+    end)
+
+end)
+
+--//======================================================
+--// REJOIN
+--//======================================================
+
+Misc:AddButton("🔄 Rejoin Game", function()
+
+    pcall(function()
+
+        TeleportService:Teleport(
+            game.PlaceId,
+            LocalPlayer
+        )
+
+    end)
+
+end)
+
+--//======================================================
+--// ANTI KNOCKBACK
+--//======================================================
+
+local antiKnockback = false
+local antiKnockbackConnection = nil
+
+local function updateAntiKnockback()
+
+    local character = LocalPlayer.Character
+    local root = character and character:FindFirstChild("HumanoidRootPart")
+
+    if not root then
+        return
+    end
+
+    local old = root:FindFirstChild("KryvexAntiKnockback")
+
+    if old then
+        old:Destroy()
+    end
+
+    if antiKnockback then
+
+        local velocity = Instance.new("BodyVelocity")
+
+        velocity.Name = "KryvexAntiKnockback"
+        velocity.MaxForce = Vector3.new(100000, 0, 100000)
+        velocity.Velocity = Vector3.zero
+        velocity.P = 1250
+        velocity.Parent = root
+
+    end
+
+end
+
+Misc:AddSwitch("🧱 Anti Knockback", function(value)
+
+    antiKnockback = value
+    updateAntiKnockback()
+
+end)
+
+LocalPlayer.CharacterAdded:Connect(function()
+
+    task.wait(0.5)
+
+    if antiKnockback then
+        updateAntiKnockback()
+    end
+
+end)
+
+--//======================================================
+--// NOCLIP
+--//======================================================
+
+local noclip = false
+
+Misc:AddSwitch("👻 No Clip", function(value)
+
+    noclip = value
+
+    if not value and LocalPlayer.Character then
+
+        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+
+        end
+
+    end
+
+end)
+
+RunService.Stepped:Connect(function()
+
+    if not noclip then
+        return
+    end
+
+    local character = LocalPlayer.Character
+
+    if not character then
+        return
+    end
+
+    for _, part in ipairs(character:GetDescendants()) do
+
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+        end
+
+    end
+
+end)
+
+LocalPlayer.CharacterAdded:Connect(function()
+
+    task.wait(0.2)
+
+    if noclip then
+
+        local character = LocalPlayer.Character
+
+        if character then
+
+            for _, part in ipairs(character:GetDescendants()) do
+
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+
+            end
+
+        end
+
+    end
+
+end)
+
+--//======================================================
+--// MISC LOADED
+--//======================================================
+
+print("[Kryvex] Misc loaded successfully")
+
 
 local credits = window:AddTab("Credits")
 
