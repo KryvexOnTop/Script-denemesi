@@ -4833,45 +4833,45 @@ task.spawn(function()
             local player = game.Players:FindFirstChild(SelectPlayerName)
             if player then
                 if player:FindFirstChild("Gems") then
-                    Update1.Text = "Gems: " .. FormatDisplay(player.Gems.Value)
+                    Update1.Text = "💎 Gems: " .. FormatDisplay(player.Gems.Value)
                 end
                 if player:FindFirstChild("Agility") then
-                    Update3.Text = "Agility: " .. FormatDisplay(player.Agility.Value)
+                    Update3.Text = "⚡️ Agility: " .. FormatDisplay(player.Agility.Value)
                 end
                 if player:FindFirstChild("Durability") then
-                    Update4.Text = "Durability: " .. FormatDisplay(player.Durability.Value)
+                    Update4.Text = "👊🏻 Durability: " .. FormatDisplay(player.Durability.Value)
                 end
                 if player:FindFirstChild("muscleKingTime") then
-                    Update6.Text = "Muscle King Time: " .. FormatDisplay(player.muscleKingTime.Value)
+                    Update6.Text = "🕣 Muscle King Time: " .. FormatDisplay(player.muscleKingTime.Value)
                 end
                 if player:FindFirstChild("customSize") then
-                    Update10.Text = "Custom Size: " .. FormatDisplay(player.customSize.Value)
+                    Update10.Text = "📏 Custom Size: " .. FormatDisplay(player.customSize.Value)
                 end
                 if player:FindFirstChild("customSpeed") then
-                    Update11.Text = "Custom Speed: " .. FormatDisplay(player.customSpeed.Value)
+                    Update11.Text = "💨 Custom Speed: " .. FormatDisplay(player.customSpeed.Value)
                 end
                 if player:FindFirstChild("evilKarma") then
-                    Update12.Text = "Evil Karma: " .. FormatDisplay(player.evilKarma.Value)
+                    Update12.Text = "😈 Evil Karma: " .. FormatDisplay(player.evilKarma.Value)
                 end
                 if player:FindFirstChild("goodKarma") then
-                    Update13.Text = "Good Karma: " .. FormatDisplay(player.goodKarma.Value)
+                    Update13.Text = "😇 Good Karma: " .. FormatDisplay(player.goodKarma.Value)
                 end
 
                 local leaderstats = player:FindFirstChild("leaderstats")
                 if leaderstats then
                     if leaderstats:FindFirstChild("Strength") then
-                        Update.Text = "Strength: " .. FormatDisplay(leaderstats.Strength.Value)
+                        Update.Text = "💪 Strength: " .. FormatDisplay(leaderstats.Strength.Value)
                     end
                     if leaderstats:FindFirstChild("Rebirths") then
-                        Update2.Text = "Rebirth: " .. FormatDisplay(leaderstats.Rebirths.Value)
+                        Update2.Text = "🕊️ Rebirth: " .. FormatDisplay(leaderstats.Rebirths.Value)
                     end
                     if leaderstats:FindFirstChild("Kills") then
-                        Update5.Text = "Kills: " .. FormatDisplay(leaderstats.Kills.Value)
+                        Update5.Text = "🔪 Kills: " .. FormatDisplay(leaderstats.Kills.Value)
                     end
                 end
 
                 if player:FindFirstChild("currentMap") then
-                    Update9.Text = "Current Map: " .. tostring(player.currentMap.Value)
+                    Update9.Text = "📍 Current Map: " .. tostring(player.currentMap.Value)
                 else
                     Update9.Text = "Current Map: Aucune donnÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©e"
                 end
@@ -5051,6 +5051,8 @@ teleport:AddButton("🌋 Brawl Lava", function()
         Duration = 2
     })
 end)
+
+local misc = window:AddTab(“Misc”)
 
 local credits = window:AddTab("Credits")
 
