@@ -5056,8 +5056,6 @@ teleport:AddButton("🌋 Brawl Lava", function()
     })
 end)
 
-local misc = window:AddTab(“Misc”)
-
 local credits = window:AddTab("Credits")
 
 local title = credits:AddLabel("✨ KRYVEX PUBLİC V1")
