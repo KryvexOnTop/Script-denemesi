@@ -5056,7 +5056,6 @@ teleport:AddButton("🌋 Brawl Lava", function()
     })
 end)
 
-
 local Misc = window:AddTab("Misc")
 
 local function claimChests()
@@ -5096,6 +5095,40 @@ local blockedFrames = {
 	"goodKarmaFrame",
 }
 
+local frameSwitch = rebirths:AddSwitch("👁️‍🗨️ Hide All Frames", function(bool)
+	if bool then
+		for _, name in ipairs(blockedFrames) do
+			local frame = replicatedStorage:FindFirstChild(name)
+			if frame and frame:IsA("GuiObject") then
+				frame.Visible = false
+			end
+		end
+
+		if not _G.frameMonitorConnection then
+			_G.frameMonitorConnection = replicatedStorage.ChildAdded:Connect(function(child)
+				for _, name in ipairs(blockedFrames) do
+					if child.Name == name and child:IsA("GuiObject") then
+						child.Visible = false
+					end
+				end
+			end)
+		end
+	else
+		for _, name in ipairs(blockedFrames) do
+			local frame = replicatedStorage:FindFirstChild(name)
+			if frame and frame:IsA("GuiObject") then
+				frame.Visible = true
+			end
+		end
+
+		if _G.frameMonitorConnection then
+			_G.frameMonitorConnection:Disconnect()
+			_G.frameMonitorConnection = nil
+		end
+	end
+end)
+frameSwitch:Set(false)
+
 Misc:AddButton("🚀 FPS Booster", function()
     local lighting = game:GetService("Lighting")
     local terrain = game:GetService("Workspace"):FindFirstChildOfClass('Terrain')
@@ -5124,6 +5157,25 @@ Misc:AddButton("🚀 FPS Booster", function()
         Text = "FPS Boosted & Lighting Balanced!",
         Duration = 3
     })
+end)
+
+
+local switch = Misc:AddSwitch("🔒 Lock Position", function(Value)
+    if Value then
+        
+        local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+        getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
+            if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
+            end
+        end)
+    else
+        
+        if getgenv().posLock then
+            getgenv().posLock:Disconnect()
+            getgenv().posLock = nil
+        end
+    end
 end)
 
 Misc:AddSwitch("🎰 Auto Fortune Wheel", function(Value)
@@ -5183,23 +5235,6 @@ Misc:AddButton("💎 Gamepass AutoLift", function()
     end
 end, "🔓 Unlock AutoLift Pass")
 
-local switch = Misc:AddSwitch("🔒 Lock Position", function(Value)
-    if Value then
-        
-        local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-        getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
-            if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
-            end
-        end)
-    else
-        
-        if getgenv().posLock then
-            getgenv().posLock:Disconnect()
-            getgenv().posLock = nil
-        end
-    end
-end)
 
 Misc:AddSwitch("🌊 Full Walk on Water", function(bool)
     if bool then
@@ -5209,6 +5244,17 @@ Misc:AddSwitch("🌊 Full Walk on Water", function(bool)
     end
 end)
 
+Misc:AddSwitch("⬆️ Infinite Jump", function(state)
+    getgenv().InfiniteJump = state
+    game:GetService("UserInputService").JumpRequest:connect(function()
+        if getgenv().InfiniteJump then
+            local Humanoid = game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if Humanoid then
+                Humanoid:ChangeState("Jumping")
+            end
+        end
+    end)
+end)
 
 Misc:AddButton("🔄 Rejoin Game", function()
     local ScreenGui = Instance.new("ScreenGui")
@@ -5338,7 +5384,6 @@ player.CharacterAdded:Connect(function()
         startNoclip()
     end
 end)
-
 
 local credits = window:AddTab("Credits")
 
