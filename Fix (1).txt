@@ -5183,7 +5183,6 @@ end, "🔓 Unlock AutoLift Pass")
 --// =========================
 
 local Players = game:GetService("Players")
-local VirtualInputManager = game:GetService("VirtualInputManager")
 local RunService = game:GetService("RunService")
 local Stats = game:GetService("Stats")
 local UserInputService = game:GetService("UserInputService")
@@ -5199,7 +5198,10 @@ local AntiAfkGui = Instance.new("ScreenGui")
 AntiAfkGui.Name = "KryvexAntiAfk"
 AntiAfkGui.ResetOnSpawn = false
 AntiAfkGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-AntiAfkGui.Parent = Player:WaitForChild("PlayerGui")
+
+pcall(function()
+    AntiAfkGui.Parent = Player:WaitForChild("PlayerGui")
+end)
 
 local Frame = Instance.new("Frame")
 Frame.Name = "AntiAfkFrame"
@@ -5272,16 +5274,15 @@ local Status = Instance.new("TextLabel")
 Status.Position = UDim2.new(0, 0, 0, 87)
 Status.Size = UDim2.new(1, 0, 0, 22)
 Status.BackgroundTransparency = 1
-Status.Text = "● ACTIVE"
+Status.Text = "● DISABLED"
 Status.TextColor3 = Color3.fromRGB(255, 45, 45)
 Status.TextSize = 12
 Status.Font = Enum.Font.Gotham
 Status.Active = true
 Status.Parent = Frame
 
-
 --// =========================
---// IPAD + PC DRAG
+--// DRAG
 --// =========================
 
 local Dragging = false
@@ -5290,7 +5291,6 @@ local DragStart = nil
 local StartPosition = nil
 
 local function UpdateDrag(Input)
-
     if not Dragging then
         return
     end
@@ -5306,23 +5306,19 @@ local function UpdateDrag(Input)
 end
 
 local function StartDrag(Input)
-
     if Input.UserInputType == Enum.UserInputType.MouseButton1
         or Input.UserInputType == Enum.UserInputType.Touch then
 
         Dragging = true
         DragStart = Input.Position
         StartPosition = Frame.Position
-
         DragInput = Input
 
         Input.Changed:Connect(function()
-
             if Input.UserInputState == Enum.UserInputState.End then
                 Dragging = false
                 DragInput = nil
             end
-
         end)
     end
 end
@@ -5335,17 +5331,13 @@ MSLabel.InputBegan:Connect(StartDrag)
 Status.InputBegan:Connect(StartDrag)
 
 UserInputService.InputChanged:Connect(function(Input)
-
     if Input == DragInput
         or Input.UserInputType == Enum.UserInputType.MouseMovement
         or Input.UserInputType == Enum.UserInputType.Touch then
 
         UpdateDrag(Input)
-
     end
-
 end)
-
 
 --// =========================
 --// FPS
@@ -5356,13 +5348,11 @@ local FrameCount = 0
 local LastFPSTime = os.clock()
 
 RunService.RenderStepped:Connect(function()
-
     FrameCount += 1
 
     local Now = os.clock()
 
     if Now - LastFPSTime >= 1 then
-
         FPS = FrameCount
         FrameCount = 0
         LastFPSTime = Now
@@ -5370,59 +5360,44 @@ RunService.RenderStepped:Connect(function()
         if AntiAfkEnabled then
             FPSLabel.Text = "FPS: " .. FPS
         end
-
     end
-
 end)
-
 
 --// =========================
 --// MS
 --// =========================
 
 local function GetPing()
-
     local Ping = 0
 
     pcall(function()
-
         local Network = Stats:FindFirstChild("Network")
 
         if Network then
-
             local ServerStats = Network:FindFirstChild("ServerStatsItem")
 
             if ServerStats then
-
                 local DataPing = ServerStats:FindFirstChild("Data Ping")
 
                 if DataPing then
                     Ping = math.floor(DataPing:GetValue())
                 end
-
             end
-
         end
-
     end)
 
     return Ping
-
 end
-
 
 --// =========================
 --// SÜRE
 --// =========================
 
 task.spawn(function()
-
     while true do
-
         task.wait(1)
 
         if AntiAfkEnabled then
-
             local Elapsed = math.floor(os.clock() - AntiAfkStartTime)
 
             local Days = math.floor(Elapsed / 86400)
@@ -5431,7 +5406,6 @@ task.spawn(function()
             local Seconds = Elapsed % 60
 
             if Days > 0 then
-
                 TimeLabel.Text = string.format(
                     "%02d:%02d:%02d:%02d",
                     Days,
@@ -5439,35 +5413,33 @@ task.spawn(function()
                     Minutes,
                     Seconds
                 )
-
             else
-
                 TimeLabel.Text = string.format(
                     "%02d:%02d:%02d",
                     Hours,
                     Minutes,
                     Seconds
                 )
-
             end
 
             MSLabel.Text = "MS: " .. GetPing()
-
         end
-
     end
-
 end)
 
-
 --// =========================
---// SWITCH
+--// ANTI AFK SWITCH
 --// =========================
 
 Misc:AddSwitch("⏰ Anti Afk", function(Value)
 
     AntiAfkEnabled = Value
     Frame.Visible = Value
+
+    if AntiAfkThread then
+        task.cancel(AntiAfkThread)
+        AntiAfkThread = nil
+    end
 
     if Value then
 
@@ -5478,45 +5450,34 @@ Misc:AddSwitch("⏰ Anti Afk", function(Value)
         MSLabel.Text = "MS: " .. GetPing()
         Status.Text = "● ACTIVE"
 
-        if AntiAfkThread then
-            task.cancel(AntiAfkThread)
-        end
-
         AntiAfkThread = task.spawn(function()
 
             while AntiAfkEnabled do
 
-                task.wait(600)
+                -- 60 saniyede bir küçük karakter hareketi
+                task.wait(60)
 
                 if AntiAfkEnabled then
-
                     pcall(function()
 
-                        local Camera = workspace.CurrentCamera
+                        local Character = Player.Character
+                        local Humanoid = Character
+                            and Character:FindFirstChildOfClass("Humanoid")
 
-                        if Camera then
+                        if Humanoid then
+                            local OldState = Humanoid:GetState()
 
-                            local Viewport = Camera.ViewportSize
+                            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 
-                            local X = Viewport.X / 2
-                            local Y = Viewport.Y / 2
+                            task.wait(0.15)
 
-                            VirtualInputManager:SendMouseButtonEvent(
-                                X, Y, 0, true, game, 0
-                            )
-
-                            task.wait(0.1)
-
-                            VirtualInputManager:SendMouseButtonEvent(
-                                X, Y, 0, false, game, 0
-                            )
-
+                            if Humanoid and Humanoid.Parent then
+                                Humanoid:ChangeState(OldState)
+                            end
                         end
 
                     end)
-
                 end
-
             end
 
         end)
@@ -5525,15 +5486,8 @@ Misc:AddSwitch("⏰ Anti Afk", function(Value)
 
         Status.Text = "● DISABLED"
 
-        if AntiAfkThread then
-            task.cancel(AntiAfkThread)
-            AntiAfkThread = nil
-        end
-
     end
-
 end)
-
 
 local credits = window:AddTab("Credits")
 
