@@ -5218,6 +5218,7 @@ local function startAntiAFK()
     stroke.Thickness = 2
     stroke.Parent = mainFrame
 
+    -- Başlık
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, 0, 0, 25)
     title.BackgroundTransparency = 1
@@ -5227,6 +5228,7 @@ local function startAntiAFK()
     title.Font = Enum.Font.GothamBold
     title.Parent = mainFrame
 
+    -- ⏱️ SAYAÇ (00:00:00)
     local clockLabel = Instance.new("TextLabel")
     clockLabel.Size = UDim2.new(1, -10, 0, 25)
     clockLabel.Position = UDim2.new(0, 5, 0, 27)
@@ -5237,6 +5239,7 @@ local function startAntiAFK()
     clockLabel.Font = Enum.Font.Code
     clockLabel.Parent = mainFrame
 
+    -- 📊 FPS
     local fpsLabel = Instance.new("TextLabel")
     fpsLabel.Size = UDim2.new(0.5, -7, 0, 22)
     fpsLabel.Position = UDim2.new(0, 5, 0, 55)
@@ -5247,6 +5250,7 @@ local function startAntiAFK()
     fpsLabel.Font = Enum.Font.GothamBold
     fpsLabel.Parent = mainFrame
 
+    -- 📡 MS (Ping)
     local msLabel = Instance.new("TextLabel")
     msLabel.Size = UDim2.new(0.5, -7, 0, 22)
     msLabel.Position = UDim2.new(0.5, 2, 0, 55)
@@ -5257,20 +5261,20 @@ local function startAntiAFK()
     msLabel.Font = Enum.Font.GothamBold
     msLabel.Parent = mainFrame
 
-    -- Saat
+    -- ⏱️ SAYAÇ DÖNGÜSÜ (00:00:00 → saniyede bir artar)
     task.spawn(function()
-        local totalSeconds = 0
+        local totalSeconds = 0 seconds
         while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
             local hours = math.floor(totalSeconds / 3600)
-            local minutes = math.floor((totalSeconds % 3600) / 60)
-            local seconds = totalSeconds % 60
-            clockLabel.Text = string.format("%02d:%02d:%02d", hours, minutes, seconds)
-            totalSeconds = totalSeconds + 1
+            local minutes = math.floor((totalSeconds % )
+3600) / 60)
+            local seconds            = totalSeconds % 60
+            total clockLabel.Text = string.format("%02d:%02Secondsd:%02d", hours, minutes, = totalSeconds + 1
             task.wait(1)
         end
     end)
 
-    -- FPS
+    -- 📊 FPS DÖNGÜSÜ (her saniye güncellenir)
     task.spawn(function()
         local RunService = game:GetService("RunService")
         while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
@@ -5286,7 +5290,7 @@ local function startAntiAFK()
         end
     end)
 
-    -- Ping
+    -- 📡 MS DÖNGÜSÜ (her saniye güncellenir)
     task.spawn(function()
         while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
             local ping = 0
@@ -5300,7 +5304,7 @@ local function startAntiAFK()
         end
     end)
 
-    -- 10 dakikada bir tıklama
+    -- 🖱️ 10 DAKİKADA BİR TIKLAMA
     task.spawn(function()
         while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
             task.wait(600)
