@@ -5259,7 +5259,7 @@ end)
 _G.HideEffectsEnabled = false
 _G.HiddenEffects = {}
 
-Misc:AddSwitch("👻 Hide Effects", function(Value)
+Misc:AddButton("👻 Hide Effects", function(Value)
     _G.HideEffectsEnabled = Value
 
     if Value then
@@ -5287,6 +5287,65 @@ Misc:AddSwitch("👻 Hide Effects", function(Value)
         table.clear(_G.HiddenEffects)
     end
 end)
+
+-- WALK ON WATER
+_G.WalkOnWater = false
+_G.WaterWalkPart = nil
+
+Misc:AddSwitch("🌊 Walk On Water", function(Value)
+    _G.WalkOnWater = Value
+
+    if Value then
+        task.spawn(function()
+            while _G.WalkOnWater do
+                local Player = game:GetService("Players").LocalPlayer
+                local Character = Player.Character
+                local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+
+                if Root then
+                    local RayParams = RaycastParams.new()
+                    RayParams.FilterType = Enum.RaycastFilterType.Exclude
+                    RayParams.FilterDescendantsInstances = {Character}
+
+                    local Result = workspace:Raycast(
+                        Root.Position,
+                        Vector3.new(0, -15, 0),
+                        RayParams
+                    )
+
+                    if Result and Result.Instance then
+                        local Material = Result.Material
+
+                        if Material == Enum.Material.Water then
+                            if not _G.WaterWalkPart then
+                                local Part = Instance.new("Part")
+                                Part.Name = "KryvexWaterWalk"
+                                Part.Size = Vector3.new(8, 1, 8)
+                                Part.Transparency = 1
+                                Part.Anchored = true
+                                Part.CanCollide = true
+                                Part.Parent = workspace
+
+                                _G.WaterWalkPart = Part
+                            end
+
+                            _G.WaterWalkPart.CFrame =
+                                CFrame.new(Result.Position.X, Result.Position.Y, Result.Position.Z)
+                        end
+                    end
+                end
+
+                task.wait()
+            end
+        end)
+    else
+        if _G.WaterWalkPart then
+            _G.WaterWalkPart:Destroy()
+            _G.WaterWalkPart = nil
+        end
+    end
+end)
+
 
 local credits = window:AddTab("Credits")
 
