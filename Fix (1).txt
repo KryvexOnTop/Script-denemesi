@@ -5179,37 +5179,31 @@ Misc:AddButton("💎 Gamepass AutoLift", function()
 end, "🔓 Unlock AutoLift Pass")
 
 --// ANTI AFK
-local VirtualUser = game:GetService("VirtualUser")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local Stats = game:GetService("Stats")
-
-local LocalPlayer = Players.LocalPlayer
-
 local AntiAFKEnabled = false
-local AntiAFKStartTime = 0
 local AntiAFKGui = nil
-local AntiAFKConnection = nil
+local AntiAFKTimerThread = nil
+local AntiAFKClickThread = nil
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
 local function CreateAntiAFKGui()
     if AntiAFKGui then
         AntiAFKGui:Destroy()
+        AntiAFKGui = nil
     end
 
     local gui = Instance.new("ScreenGui")
     gui.Name = "KryvexAntiAFK"
     gui.ResetOnSpawn = false
+    gui.IgnoreGuiInset = true
 
-    local parent = LocalPlayer:FindFirstChildOfClass("PlayerGui")
-
-    if not parent then
-        parent = LocalPlayer:WaitForChild("PlayerGui")
-    end
-
-    gui.Parent = parent
+    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+    gui.Parent = playerGui
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 180, 0, 85)
+    frame.Name = "AntiAFKFrame"
+    frame.Size = UDim2.new(0, 190, 0, 85)
     frame.Position = UDim2.new(0, 15, 0, 250)
     frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     frame.BorderSizePixel = 0
@@ -5227,7 +5221,7 @@ local function CreateAntiAFKGui()
     local title = Instance.new("TextLabel")
     title.BackgroundTransparency = 1
     title.Size = UDim2.new(1, 0, 0, 25)
-    title.Position = UDim2.new(0, 0, 0, 4)
+    title.Position = UDim2.new(0, 0, 0, 3)
     title.Text = "⏰ ANTI AFK"
     title.TextColor3 = Color3.fromRGB(255, 40, 40)
     title.TextSize = 15
@@ -5237,8 +5231,8 @@ local function CreateAntiAFKGui()
     local info = Instance.new("TextLabel")
     info.Name = "Info"
     info.BackgroundTransparency = 1
-    info.Size = UDim2.new(1, -10, 0, 50)
-    info.Position = UDim2.new(0, 5, 0, 30)
+    info.Size = UDim2.new(1, -10, 0, 45)
+    info.Position = UDim2.new(0, 5, 0, 32)
     info.Text = "00:00:00 | FPS: 0\nMS: 0"
     info.TextColor3 = Color3.fromRGB(255, 255, 255)
     info.TextSize = 13
@@ -5249,11 +5243,6 @@ local function CreateAntiAFKGui()
 end
 
 local function RemoveAntiAFKGui()
-    if AntiAFKConnection then
-        AntiAFKConnection:Disconnect()
-        AntiAFKConnection = nil
-    end
-
     if AntiAFKGui then
         AntiAFKGui:Destroy()
         AntiAFKGui = nil
@@ -5261,80 +5250,98 @@ local function RemoveAntiAFKGui()
 end
 
 local function StartAntiAFK()
-    AntiAFKStartTime = tick()
+    AntiAFKEnabled = true
 
     CreateAntiAFKGui()
 
-    local frames = 0
-    local lastFPSUpdate = tick()
-    local currentFPS = 0
+    local startTime = os.clock()
+    local fps = 0
 
-    AntiAFKConnection = RunService.RenderStepped:Connect(function()
-        if not AntiAFKEnabled then
-            return
+    -- FPS sayacı
+    task.spawn(function()
+        while AntiAFKEnabled do
+            local frames = 0
+            local startFPS = os.clock()
+
+            while AntiAFKEnabled and os.clock() - startFPS < 1 do
+                frames = frames + 1
+                task.wait()
+            end
+
+            fps = frames
         end
+    end)
 
-        frames = frames + 1
+    -- Süre / FPS / MS göstergesi
+    AntiAFKTimerThread = task.spawn(function()
+        while AntiAFKEnabled do
+            task.wait(1)
 
-        local now = tick()
+            if not AntiAFKEnabled then
+                break
+            end
 
-        -- FPS
-        if now - lastFPSUpdate >= 1 then
-            currentFPS = frames
-            frames = 0
-            lastFPSUpdate = now
-        end
+            local elapsed = math.floor(os.clock() - startTime)
 
-        -- Süre
-        local elapsed = math.floor(now - AntiAFKStartTime)
+            local hours = math.floor(elapsed / 3600)
+            local minutes = math.floor((elapsed % 3600) / 60)
+            local seconds = elapsed % 60
 
-        local hours = math.floor(elapsed / 3600)
-        local minutes = math.floor((elapsed % 3600) / 60)
-        local seconds = elapsed % 60
-
-        local timeText = string.format(
-            "%02d:%02d:%02d",
-            hours,
-            minutes,
-            seconds
-        )
-
-        -- MS / Ping
-        local ping = 0
-
-        pcall(function()
-            ping = math.floor(
-                Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+            local timeText = string.format(
+                "%02d:%02d:%02d",
+                hours,
+                minutes,
+                seconds
             )
-        end)
 
-        if AntiAFKGui then
-            local frame = AntiAFKGui:FindFirstChild("Frame")
+            local ping = 0
 
-            if frame then
-                local info = frame:FindFirstChild("Info")
+            pcall(function()
+                ping = math.floor(
+                    game:GetService("Stats")
+                    .Network
+                    .ServerStatsItem["Data Ping"]
+                    :GetValue()
+                )
+            end)
 
-                if info then
-                    info.Text = string.format(
-                        "%s | FPS: %d\nMS: %d",
-                        timeText,
-                        currentFPS,
-                        ping
-                    )
+            if AntiAFKGui then
+                local frame = AntiAFKGui:FindFirstChild("AntiAFKFrame")
+
+                if frame then
+                    local info = frame:FindFirstChild("Info")
+
+                    if info then
+                        info.Text = string.format(
+                            "%s | FPS: %d\nMS: %d",
+                            timeText,
+                            fps,
+                            ping
+                        )
+                    end
                 end
             end
         end
     end)
 
     -- 10 dakikada bir Anti-AFK
-    task.spawn(function()
+    AntiAFKClickThread = task.spawn(function()
         while AntiAFKEnabled do
             task.wait(600)
 
             if AntiAFKEnabled then
                 pcall(function()
+                    local VirtualUser = game:GetService("VirtualUser")
+
                     VirtualUser:CaptureController()
-                    VirtualUser:ClickButton2(
+                    VirtualUser:Button2Down(
+                        Vector2.new(0, 0),
+                        workspace.CurrentCamera.CFrame
+                    )
+
+                    task.wait(0.1)
+
+                    VirtualUser:Button2Up(
                         Vector2.new(0, 0),
                         workspace.CurrentCamera.CFrame
                     )
@@ -5346,12 +5353,22 @@ end
 
 local function StopAntiAFK()
     AntiAFKEnabled = false
+
+    if AntiAFKTimerThread then
+        task.cancel(AntiAFKTimerThread)
+        AntiAFKTimerThread = nil
+    end
+
+    if AntiAFKClickThread then
+        task.cancel(AntiAFKClickThread)
+        AntiAFKClickThread = nil
+    end
+
     RemoveAntiAFKGui()
 end
 
 Misc:AddSwitch("⏰ Anti Afk", function(Value)
     if Value then
-        AntiAFKEnabled = true
         StartAntiAFK()
     else
         StopAntiAFK()
