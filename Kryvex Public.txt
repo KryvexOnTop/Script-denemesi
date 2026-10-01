@@ -761,7 +761,7 @@ local autoPunchNoAnim = false
 local targetDropdownItems = {}
 local availableTargets = {}
 
-local titleLabel = Killer:AddLabel("Select damage or durability pet")
+local titleLabel = Killer:AddLabel("🐲 Select damage or durability pet")
 titleLabel.TextSize = 18
 titleLabel.Font = Enum.Font.Merriweather 
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -799,7 +799,7 @@ local Wild_Wizard = dropdown:Add("Wild Wizard")
 local Powerful_Monster = dropdown:Add("Mighty Monster")
 
 
-Killer:AddSwitch("Auto Good Karma", function(bool)
+Killer:AddSwitch("😇 Auto Good Karma", function(bool)
     autoGoodKarma = bool
     task.spawn(function()
         while autoGoodKarma do
@@ -828,7 +828,7 @@ Killer:AddSwitch("Auto Good Karma", function(bool)
     end)
 end)
 
-Killer:AddSwitch("Auto Bad Karma", function(bool)
+Killer:AddSwitch("😈 Auto Bad Karma", function(bool)
     autoBadKarma = bool
     task.spawn(function()
         while autoBadKarma do
@@ -862,7 +862,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local friendWhitelistActive = false
 
-Killer:AddSwitch("Auto Whitelist Friends", function(state)
+Killer:AddSwitch("👥 Auto Whitelist Friends", function(state)
     friendWhitelistActive = state
 
     if state then
@@ -906,7 +906,7 @@ local whitelistDropdownItems = {}
 local selectedWhitelist = nil
 
 -- Dropdown con DisplayName
-local whitelistDropdown = Killer:AddDropdown("Add to Whitelist", function(displayName)
+local whitelistDropdown = Killer:AddDropdown("🪽 Add to Whitelist", function(displayName)
     for _, player in ipairs(Players:GetPlayers()) do
         if player.DisplayName == displayName then
             if not table.find(_G.whitelistedPlayers, player.Name) then
@@ -967,7 +967,7 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 
-Killer:AddSwitch("Auto Kill", function(bool)
+Killer:AddSwitch("🔪 Auto Kill", function(bool)
     autoKill = bool
 
     task.spawn(function()
@@ -1044,7 +1044,7 @@ local function ensurePunch(char)
     return nil
 end
 
-local targetDropdown = Killer:AddDropdown("Select Target", function(displayName)
+local targetDropdown = Killer:AddDropdown("🎯 Select Target", function(displayName)
     for _, player in ipairs(Players:GetPlayers()) do
         if player.DisplayName == displayName then
             if not table.find(targetPlayerNames, player.Name) then
@@ -1056,7 +1056,7 @@ local targetDropdown = Killer:AddDropdown("Select Target", function(displayName)
     end
 end)
 
-Killer:AddButton("Remove Selected Target", function()
+Killer:AddButton("👹 Remove Selected Target", function()
     if selectedTarget then
         for i, v in ipairs(targetPlayerNames) do
             if v == selectedTarget then
@@ -1097,7 +1097,7 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
-Killer:AddSwitch("Start Kill Target", function(state)
+Killer:AddSwitch("🎯 Start Kill Target", function(state)
     killTarget = state
     if state then
         task.spawn(function()
@@ -1181,7 +1181,7 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
-Killer:AddSwitch("View Player", function(bool)
+Killer:AddSwitch("🙋‍♂️ View Player", function(bool)
     spying = bool
     if not spying then
         local cam = workspace.CurrentCamera
@@ -1202,7 +1202,7 @@ Killer:AddSwitch("View Player", function(bool)
     end)
 end)
 
-local button = Killer:AddButton("Remove Punch Anim", function()
+local button = Killer:AddButton("🚫 Remove Punch Anim", function()
     local blockedAnimations = {
         ["rbxassetid://3638729053"] = true,
         ["rbxassetid://3638767427"] = true,
@@ -1390,11 +1390,11 @@ function RecoveryPunch()
     end
 end
 
-Killer:AddButton("Recover Punch Anim", function()
+Killer:AddButton("👾 Recover Punch Anim", function()
     RecoveryPunch()
 end)
 
-Killer:AddSwitch("Auto Punch [without animation]", function(state)
+Killer:AddSwitch("👊 Auto Punch [without animation]", function(state)
 	autoPunchNoAnim = state
 	if state then
 		task.spawn(function()
@@ -1432,7 +1432,7 @@ Killer:AddSwitch("Auto Punch [without animation]", function(state)
 end)
 
 
-Killer:AddSwitch("Auto Punch", function(state)
+Killer:AddSwitch("🥊 Auto Punch", function(state)
 	_G.fastHitActive = state
 	if state then
 		task.spawn(function()
@@ -1480,11 +1480,11 @@ Killer:AddSwitch("God mode", function(State)
         end)
     end
 end)
-Killer:AddButton("Size 30", function()
+Killer:AddButton("📏 Size 30", function()
     game:GetService("ReplicatedStorage").rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 30)
 end)
 
-Killer:AddButton("Size 2", function()
+Killer:AddButton("📏 Size 2", function()
     game:GetService("ReplicatedStorage").rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
 end)
 
@@ -1551,7 +1551,7 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
-Killer:AddButton("Dejar de Seguir", function()
+Killer:AddButton("⚡️ Dejar de Seguir", function()
     following = false
     followTarget = nil
     print("â›” Stopped following")
@@ -1584,7 +1584,7 @@ end)
 local godDamageActive = false
 
 
-Killer:AddSwitch("auto slams", function(state)
+Killer:AddSwitch("🦵 auto slams", function(state)
     godDamageActive = state
     if state then
         task.spawn(function()
@@ -4833,45 +4833,45 @@ task.spawn(function()
             local player = game.Players:FindFirstChild(SelectPlayerName)
             if player then
                 if player:FindFirstChild("Gems") then
-                    Update1.Text = "Gems: " .. FormatDisplay(player.Gems.Value)
+                    Update1.Text = "💎 Gems: " .. FormatDisplay(player.Gems.Value)
                 end
                 if player:FindFirstChild("Agility") then
-                    Update3.Text = "Agility: " .. FormatDisplay(player.Agility.Value)
+                    Update3.Text = "⚡️ Agility: " .. FormatDisplay(player.Agility.Value)
                 end
                 if player:FindFirstChild("Durability") then
-                    Update4.Text = "Durability: " .. FormatDisplay(player.Durability.Value)
+                    Update4.Text = "👊 Durability: " .. FormatDisplay(player.Durability.Value)
                 end
                 if player:FindFirstChild("muscleKingTime") then
-                    Update6.Text = "Muscle King Time: " .. FormatDisplay(player.muscleKingTime.Value)
+                    Update6.Text = "🕣 Muscle King Time: " .. FormatDisplay(player.muscleKingTime.Value)
                 end
                 if player:FindFirstChild("customSize") then
-                    Update10.Text = "Custom Size: " .. FormatDisplay(player.customSize.Value)
+                    Update10.Text = "📏 Custom Size: " .. FormatDisplay(player.customSize.Value)
                 end
                 if player:FindFirstChild("customSpeed") then
-                    Update11.Text = "Custom Speed: " .. FormatDisplay(player.customSpeed.Value)
+                    Update11.Text = "⚡️ Custom Speed: " .. FormatDisplay(player.customSpeed.Value)
                 end
                 if player:FindFirstChild("evilKarma") then
-                    Update12.Text = "Evil Karma: " .. FormatDisplay(player.evilKarma.Value)
+                    Update12.Text = "😈 Evil Karma: " .. FormatDisplay(player.evilKarma.Value)
                 end
                 if player:FindFirstChild("goodKarma") then
-                    Update13.Text = "Good Karma: " .. FormatDisplay(player.goodKarma.Value)
+                    Update13.Text = "😇 Good Karma: " .. FormatDisplay(player.goodKarma.Value)
                 end
 
                 local leaderstats = player:FindFirstChild("leaderstats")
                 if leaderstats then
                     if leaderstats:FindFirstChild("Strength") then
-                        Update.Text = "Strength: " .. FormatDisplay(leaderstats.Strength.Value)
+                        Update.Text = "💪 Strength: " .. FormatDisplay(leaderstats.Strength.Value)
                     end
                     if leaderstats:FindFirstChild("Rebirths") then
-                        Update2.Text = "Rebirth: " .. FormatDisplay(leaderstats.Rebirths.Value)
+                        Update2.Text = "🪽 Rebirth: " .. FormatDisplay(leaderstats.Rebirths.Value)
                     end
                     if leaderstats:FindFirstChild("Kills") then
-                        Update5.Text = "Kills: " .. FormatDisplay(leaderstats.Kills.Value)
+                        Update5.Text = "🔪 Kills: " .. FormatDisplay(leaderstats.Kills.Value)
                     end
                 end
 
                 if player:FindFirstChild("currentMap") then
-                    Update9.Text = "Current Map: " .. tostring(player.currentMap.Value)
+                    Update9.Text = "📍 Current Map: " .. tostring(player.currentMap.Value)
                 else
                     Update9.Text = "Current Map: Aucune donnÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©e"
                 end
