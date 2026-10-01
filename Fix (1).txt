@@ -5178,7 +5178,143 @@ Misc:AddButton("💎 Gamepass AutoLift", function()
     end
 end, "🔓 Unlock AutoLift Pass")
 
+local AntiAFK = false
+local AntiAFKStartTime = 0
+local AntiAFKUI = nil
+local AntiAFKConnection = nil
 
+local function CreateAntiAFKUI()
+    if AntiAFKUI then
+        AntiAFKUI:Destroy()
+    end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "AntiAFKStatus"
+    gui.ResetOnSpawn = false
+    gui.Parent = game:GetService("CoreGui")
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 155, 0, 75)
+    frame.Position = UDim2.new(0, 15, 0, 250)
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    frame.BorderSizePixel = 0
+    frame.Parent = gui
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.Thickness = 2
+    stroke.Parent = frame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = frame
+
+    local status = Instance.new("TextLabel")
+    status.Size = UDim2.new(1, -10, 0, 25)
+    status.Position = UDim2.new(0, 5, 0, 3)
+    status.BackgroundTransparency = 1
+    status.Text = "⏰ ANTI AFK"
+    status.TextColor3 = Color3.fromRGB(255, 50, 50)
+    status.TextSize = 16
+    status.Font = Enum.Font.GothamBold
+    status.Parent = frame
+
+    local info = Instance.new("TextLabel")
+    info.Size = UDim2.new(1, -10, 0, 40)
+    info.Position = UDim2.new(0, 5, 0, 28)
+    info.BackgroundTransparency = 1
+    info.TextColor3 = Color3.fromRGB(255, 255, 255)
+    info.TextSize = 13
+    info.Font = Enum.Font.Gotham
+    info.Text = "00:00:00 | FPS: 0\nMS: 0"
+    info.Parent = frame
+
+    AntiAFKUI = gui
+
+    AntiAFKConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if not AntiAFK or not AntiAFKUI then
+            return
+        end
+
+        local elapsed = math.floor(os.clock() - AntiAFKStartTime)
+
+        local hours = math.floor(elapsed / 3600)
+        local minutes = math.floor((elapsed % 3600) / 60)
+        local seconds = elapsed % 60
+
+        local timeText = string.format(
+            "%02d:%02d:%02d",
+            hours,
+            minutes,
+            seconds
+        )
+
+        local fps = math.floor(
+            1 / math.max(game:GetService("RunService").Heartbeat:Wait(), 0.0001)
+        )
+
+        local ping = 0
+        pcall(function()
+            ping = math.floor(
+                game:GetService("Stats")
+                .Network
+                .ServerStatsItem["Data Ping"]
+                :GetValue()
+            )
+        end)
+
+        info.Text = string.format(
+            "%s | FPS: %d\nMS: %d",
+            timeText,
+            fps,
+            ping
+        )
+    end)
+end
+
+local function RemoveAntiAFKUI()
+    if AntiAFKConnection then
+        AntiAFKConnection:Disconnect()
+        AntiAFKConnection = nil
+    end
+
+    if AntiAFKUI then
+        AntiAFKUI:Destroy()
+        AntiAFKUI = nil
+    end
+end
+
+Misc:AddSwatch("⏰ Anti Afk", function(Value)
+    AntiAFK = Value
+
+    if AntiAFK then
+        AntiAFKStartTime = os.clock()
+
+        CreateAntiAFKUI()
+
+        task.spawn(function()
+            while AntiAFK do
+                task.wait(600) -- 10 dakika
+
+                if AntiAFK then
+                    local VIM = game:GetService("VirtualInputManager")
+
+                    VIM:SendMouseButtonEvent(
+                        500, 300, 0, true, game, 0
+                    )
+
+                    task.wait(0.1)
+
+                    VIM:SendMouseButtonEvent(
+                        500, 300, 0, false, game, 0
+                    )
+                end
+            end
+        end)
+    else
+        RemoveAntiAFKUI()
+    end
+end)
 
 local credits = window:AddTab("Credits")
 
