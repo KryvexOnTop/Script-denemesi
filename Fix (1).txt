@@ -5178,6 +5178,161 @@ Misc:AddButton("💎 Gamepass AutoLift", function()
     end
 end, "🔓 Unlock AutoLift Pass")
 
+-- 🔴 ANTI AFK
+local AntiAFKEnabled = false
+local AntiAFKStartTime = nil
+local AntiAFKThread = nil
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- UI
+local AntiAFKGui = Instance.new("ScreenGui")
+AntiAFKGui.Name = "AntiAFKStatus"
+AntiAFKGui.ResetOnSpawn = false
+AntiAFKGui.Enabled = false
+AntiAFKGui.Parent = PlayerGui
+
+local StatusFrame = Instance.new("Frame")
+StatusFrame.Size = UDim2.new(0, 155, 0, 75)
+StatusFrame.Position = UDim2.new(0, 15, 0, 100)
+StatusFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
+StatusFrame.BorderSizePixel = 0
+StatusFrame.Parent = AntiAFKGui
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 8)
+Corner.Parent = StatusFrame
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.fromRGB(255, 0, 0)
+Stroke.Thickness = 1.5
+Stroke.Parent = StatusFrame
+
+local TimeLabel = Instance.new("TextLabel")
+TimeLabel.Size = UDim2.new(1, 0, 0, 25)
+TimeLabel.Position = UDim2.new(0, 0, 0, 3)
+TimeLabel.BackgroundTransparency = 1
+TimeLabel.TextColor3 = Color3.fromRGB(255, 60, 60)
+TimeLabel.TextSize = 18
+TimeLabel.Font = Enum.Font.GothamBold
+TimeLabel.Text = "00:00:00"
+TimeLabel.Parent = StatusFrame
+
+local StatsLabel = Instance.new("TextLabel")
+StatsLabel.Size = UDim2.new(1, 0, 0, 25)
+StatsLabel.Position = UDim2.new(0, 0, 0, 32)
+StatsLabel.BackgroundTransparency = 1
+StatsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatsLabel.TextSize = 14
+StatsLabel.Font = Enum.Font.Gotham
+StatsLabel.Text = "FPS: 0 | MS: 0"
+StatsLabel.Parent = StatusFrame
+
+local function formatTime(seconds)
+    seconds = math.floor(seconds)
+
+    local hours = math.floor(seconds / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local secs = seconds % 60
+
+    return string.format("%02d:%02d:%02d", hours, minutes, secs)
+end
+
+-- FPS hesaplama
+local Frames = 0
+local LastFPSUpdate = tick()
+local CurrentFPS = 0
+
+RunService.RenderStepped:Connect(function()
+    Frames = Frames + 1
+
+    local now = tick()
+
+    if now - LastFPSUpdate >= 1 then
+        CurrentFPS = Frames
+        Frames = 0
+        LastFPSUpdate = now
+    end
+
+    if AntiAFKEnabled and AntiAFKStartTime then
+        TimeLabel.Text = formatTime(tick() - AntiAFKStartTime)
+
+        local ping = 0
+
+        pcall(function()
+            ping = math.floor(
+                Player:GetNetworkPing() * 1000
+            )
+        end)
+
+        StatsLabel.Text =
+            "FPS: " .. CurrentFPS ..
+            " | MS: " .. ping
+    end
+end)
+
+-- 🔴 Anti AFK Switch
+Misc:AddSwitch("⏰ Anti Afk", function(Value)
+
+    AntiAFKEnabled = Value
+
+    if Value then
+
+        AntiAFKStartTime = tick()
+        AntiAFKGui.Enabled = true
+
+        -- Önceki thread varsa durdur
+        AntiAFKThread = task.spawn(function()
+
+            while AntiAFKEnabled do
+
+                -- 10 dakika bekle
+                task.wait(600)
+
+                if not AntiAFKEnabled then
+                    break
+                end
+
+                -- Ekrana küçük tıklama
+                pcall(function()
+                    VirtualInputManager:SendMouseButtonEvent(
+                        500,
+                        300,
+                        0,
+                        true,
+                        game,
+                        0
+                    )
+
+                    task.wait(0.1)
+
+                    VirtualInputManager:SendMouseButtonEvent(
+                        500,
+                        300,
+                        0,
+                        false,
+                        game,
+                        0
+                    )
+                end)
+
+            end
+
+        end)
+
+    else
+
+        AntiAFKGui.Enabled = false
+        AntiAFKStartTime = nil
+
+    end
+
+end)
 
 
 local credits = window:AddTab("Credits")
