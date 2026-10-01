@@ -5179,166 +5179,222 @@ Misc:AddButton("💎 Gamepass AutoLift", function()
 end, "🔓 Unlock AutoLift Pass")
 
 Misc:AddSwatch("⏰ Anti Afk", function(Value)
-    if Value then
-        -- UI oluştur
-        local antiAfkUI = Instance.new("ScreenGui")
-        antiAfkUI.Name = "AntiAfkUI"
-        antiAfkUI.ResetOnSpawn = false
-        antiAfkUI.Parent = game.CoreGui
 
-        -- Ana Frame (küçük kare)
-        local mainFrame = Instance.new("Frame")
-        mainFrame.Name = "MainFrame"
-        mainFrame.Size = UDim2.new(0, 220, 0, 85)
-        mainFrame.Position = UDim2.new(0.5, -110, 0.1, 0)
-        mainFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-        mainFrame.BorderSizePixel = 0
-        mainFrame.Active = true
-        mainFrame.Draggable = true
-        mainFrame.Parent = antiAfkUI
+--// ANTI AFK
+local antiAfkRunning = false
+local antiAfkUI = nil
 
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
-        corner.Parent = mainFrame
+local function startAntiAFK()
+    if antiAfkRunning then return end
+    antiAfkRunning = true
 
-        local stroke = Instance.new("UIStroke")
-        stroke.Color = Color3.fromRGB(255, 0, 0)
-        stroke.Thickness = 2
-        stroke.Parent = mainFrame
-
-        -- Başlık
-        local title = Instance.new("TextLabel")
-        title.Name = "Title"
-        title.Size = UDim2.new(1, 0, 0, 25)
-        title.Position = UDim2.new(0, 0, 0, 0)
-        title.BackgroundTransparency = 1
-        title.Text = "KRYVEX // AFK"
-        title.TextColor3 = Color3.fromRGB(255, 50, 50)
-        title.TextScaled = true
-        title.Font = Enum.Font.GothamBold
-        title.Parent = mainFrame
-
-        -- Oyun Saati
-        local clockLabel = Instance.new("TextLabel")
-        clockLabel.Name = "Clock"
-        clockLabel.Size = UDim2.new(1, -10, 0, 25)
-        clockLabel.Position = UDim2.new(0, 5, 0, 27)
-        clockLabel.BackgroundTransparency = 1
-        clockLabel.Text = "00:00:00"
-        clockLabel.TextColor3 = Color3.fromRGB(255, 150, 150)
-        clockLabel.TextScaled = true
-        clockLabel.Font = Enum.Font.Code
-        clockLabel.Parent = mainFrame
-
-        -- FPS
-        local fpsLabel = Instance.new("TextLabel")
-        fpsLabel.Name = "FPS"
-        fpsLabel.Size = UDim2.new(0.5, -7, 0, 22)
-        fpsLabel.Position = UDim2.new(0, 5, 0, 55)
-        fpsLabel.BackgroundTransparency = 1
-        fpsLabel.Text = "FPS: 0"
-        fpsLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-        fpsLabel.TextScaled = true
-        fpsLabel.Font = Enum.Font.GothamBold
-        fpsLabel.Parent = mainFrame
-
-        -- MS (Ping)
-        local msLabel = Instance.new("TextLabel")
-        msLabel.Name = "MS"
-        msLabel.Size = UDim2.new(0.5, -7, 0, 22)
-        msLabel.Position = UDim2.new(0.5, 2, 0, 55)
-        msLabel.BackgroundTransparency = 1
-        msLabel.Text = "MS: 0"
-        msLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-        msLabel.TextScaled = true
-        msLabel.Font = Enum.Font.GothamBold
-        msLabel.Parent = mainFrame
-
-        -- Fareyi ekrana tıklayan fonksiyon
-        local function clickScreen()
-            local vim = game:GetService("VirtualInputManager")
-            local screenSize = workspace.CurrentCamera.ViewportSize
-            local randomX = math.random(100, screenSize.X - 100)
-            local randomY = math.random(100, screenSize.Y - 100)
-            
-            vim:SendMouseButtonEvent(randomX, randomY, 0, true, game, 1)
-            task.wait(0.1)
-            vim:SendMouseButtonEvent(randomX, randomY, 0, false, game, 1)
+    -- Eski UI varsa sil
+    pcall(function()
+        local oldUI = game.CoreGui:FindFirstChild("AntiAfkUI")
+        if oldUI then
+            oldUI:Destroy()
         end
+    end)
 
-        local running = true
+    -- ScreenGui
+    antiAfkUI = Instance.new("ScreenGui")
+    antiAfkUI.Name = "AntiAfkUI"
+    antiAfkUI.ResetOnSpawn = false
+    antiAfkUI.Parent = game.CoreGui
 
-        -- Oyun saati (00:00:00 formatında, saniyede bir artar)
-        task.spawn(function()
-            local totalSeconds = 0
-            while running and Value do
-                local hours = math.floor(totalSeconds / 3600)
-                local minutes = math.floor((totalSeconds % 3600) / 60)
-                local seconds = totalSeconds % 60
-                clockLabel.Text = string.format("%02d:%02d:%02d", hours, minutes, seconds)
-                totalSeconds = totalSeconds + 1
-                task.wait(1)
-            end
-        end)
+    -- Main Frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = UDim2.new(0, 220, 0, 85)
+    mainFrame.Position = UDim2.new(0.5, -110, 0.1, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    mainFrame.Parent = antiAfkUI
 
-        -- FPS sayacı
-        task.spawn(function()
-            while running and Value do
-                local frames = 0
-                local connection
-                connection = game:GetService("RunService").RenderStepped:Connect(function()
-                    frames = frames + 1
-                end)
-                task.wait(1)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = mainFrame
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.Thickness = 2
+    stroke.Parent = mainFrame
+
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 25)
+    title.BackgroundTransparency = 1
+    title.Text = "KRYVEX // AFK"
+    title.TextColor3 = Color3.fromRGB(255, 50, 50)
+    title.TextScaled = true
+    title.Font = Enum.Font.GothamBold
+    title.Parent = mainFrame
+
+    -- Clock
+    local clockLabel = Instance.new("TextLabel")
+    clockLabel.Size = UDim2.new(1, -10, 0, 25)
+    clockLabel.Position = UDim2.new(0, 5, 0, 27)
+    clockLabel.BackgroundTransparency = 1
+    clockLabel.Text = "00:00:00"
+    clockLabel.TextColor3 = Color3.fromRGB(255, 150, 150)
+    clockLabel.TextScaled = true
+    clockLabel.Font = Enum.Font.Code
+    clockLabel.Parent = mainFrame
+
+    -- FPS
+    local fpsLabel = Instance.new("TextLabel")
+    fpsLabel.Size = UDim2.new(0.5, -7, 0, 22)
+    fpsLabel.Position = UDim2.new(0, 5, 0, 55)
+    fpsLabel.BackgroundTransparency = 1
+    fpsLabel.Text = "FPS: 0"
+    fpsLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    fpsLabel.TextScaled = true
+    fpsLabel.Font = Enum.Font.GothamBold
+    fpsLabel.Parent = mainFrame
+
+    -- MS
+    local msLabel = Instance.new("TextLabel")
+    msLabel.Size = UDim2.new(0.5, -7, 0, 22)
+    msLabel.Position = UDim2.new(0.5, 2, 0, 55)
+    msLabel.BackgroundTransparency = 1
+    msLabel.Text = "MS: 0"
+    msLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    msLabel.TextScaled = true
+    msLabel.Font = Enum.Font.GothamBold
+    msLabel.Parent = mainFrame
+
+    -- Anti AFK
+    task.spawn(function()
+        local totalSeconds = 0
+
+        while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
+            local hours = math.floor(totalSeconds / 3600)
+            local minutes = math.floor((totalSeconds % 3600) / 60)
+            local seconds = totalSeconds % 60
+
+            clockLabel.Text = string.format(
+                "%02d:%02d:%02d",
+                hours,
+                minutes,
+                seconds
+            )
+
+            totalSeconds = totalSeconds + 1
+
+            task.wait(1)
+        end
+    end)
+
+    -- FPS
+    task.spawn(function()
+        local RunService = game:GetService("RunService")
+
+        while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
+            local frames = 0
+
+            local connection = RunService.RenderStepped:Connect(function()
+                frames = frames + 1
+            end)
+
+            task.wait(1)
+
+            if connection then
                 connection:Disconnect()
+            end
+
+            if fpsLabel and fpsLabel.Parent then
                 fpsLabel.Text = "FPS: " .. frames
             end
-        end)
+        end
+    end)
 
-        -- MS (Ping) sayacı
-        task.spawn(function()
-            while running and Value do
-                local ping = 0
-                pcall(function()
-                    ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
-                end)
+    -- Ping
+    task.spawn(function()
+        while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
+            local ping = 0
+
+            pcall(function()
+                ping = math.floor(
+                    game:GetService("Stats")
+                    .Network.ServerStatsItem["Data Ping"]
+                    :GetValue()
+                )
+            end)
+
+            if msLabel and msLabel.Parent then
                 msLabel.Text = "MS: " .. ping
-                task.wait(1)
             end
-        end)
 
-        -- Anti AFK döngüsü (10 dakikada bir)
-        task.spawn(function()
-            while running and Value do
-                task.wait(600) -- 10 dakika
-                if not running or not Value then break end
-                clickScreen()
-            end
-        end)
-
-        -- Kapatma fonksiyonu
-        local function destroyUI()
-            running = false
-            if antiAfkUI then
-                antiAfkUI:Destroy()
-            end
+            task.wait(1)
         end
+    end)
 
-        -- Swatch kapatıldığında UI'ı temizle
-        task.spawn(function()
-            while antiAfkUI.Parent do
-                if not Value then
-                    destroyUI()
-                    break
+    -- Anti AFK hareketi
+    task.spawn(function()
+        while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
+            task.wait(600)
+
+            if not antiAfkRunning then
+                break
+            end
+
+            pcall(function()
+                local VirtualInputManager =
+                    game:GetService("VirtualInputManager")
+
+                local camera = workspace.CurrentCamera
+
+                if camera then
+                    local size = camera.ViewportSize
+
+                    local x = math.random(100, math.max(101, size.X - 100))
+                    local y = math.random(100, math.max(101, size.Y - 100))
+
+                    VirtualInputManager:SendMouseButtonEvent(
+                        x,
+                        y,
+                        0,
+                        true,
+                        game,
+                        1
+                    )
+
+                    task.wait(0.1)
+
+                    VirtualInputManager:SendMouseButtonEvent(
+                        x,
+                        y,
+                        0,
+                        false,
+                        game,
+                        1
+                    )
                 end
-                task.wait(0.5)
-            end
-        end)
-    else
-        local existingUI = game.CoreGui:FindFirstChild("AntiAfkUI")
-        if existingUI then
-            existingUI:Destroy()
+            end)
         end
+    end)
+end
+
+local function stopAntiAFK()
+    antiAfkRunning = false
+
+    if antiAfkUI then
+        pcall(function()
+            antiAfkUI:Destroy()
+        end)
+
+        antiAfkUI = nil
+    end
+end
+
+--// SWITCH
+Misc:AddSwitch("⏰ Anti Afk", function(Value)
+    if Value then
+        startAntiAFK()
+    else
+        stopAntiAFK()
     end
 end)
 
