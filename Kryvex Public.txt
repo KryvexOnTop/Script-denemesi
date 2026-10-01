@@ -5183,6 +5183,168 @@ Misc:AddButton("💎 Gamepass AutoLift", function()
     end
 end, "🔓 Unlock AutoLift Pass")
 
+-- Servisler
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+
+-- Anti AFK değişkenleri
+AntiAFKEnabled = false
+
+-- Ana GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AntiAFKUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Ana Frame (KÜÇÜK KARE)
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 75, 0, 55) -- Çok küçük
+MainFrame.Position = UDim2.new(0.5, -37, 0, 10)
+MainFrame.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = MainFrame
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(255, 0, 0)
+UIStroke.Thickness = 1
+UIStroke.Transparency = 0.3
+UIStroke.Parent = MainFrame
+
+-- İç Frame
+local InnerFrame = Instance.new("Frame")
+InnerFrame.Size = UDim2.new(1, -4, 1, -4)
+InnerFrame.Position = UDim2.new(0, 2, 0, 2)
+InnerFrame.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+InnerFrame.BorderSizePixel = 0
+InnerFrame.Parent = MainFrame
+
+local InnerCorner = Instance.new("UICorner")
+InnerCorner.CornerRadius = UDim.new(0, 4)
+InnerCorner.Parent = InnerFrame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Padding = UDim.new(0, 0)
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Parent = InnerFrame
+
+-- Sayaç Label
+local TimerLabel = Instance.new("TextLabel")
+TimerLabel.Size = UDim2.new(1, 0, 0, 18)
+TimerLabel.BackgroundTransparency = 1
+TimerLabel.Text = "00:00:00"
+TimerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TimerLabel.Font = Enum.Font.GothamBold
+TimerLabel.TextSize = 13
+TimerLabel.LayoutOrder = 1
+TimerLabel.Parent = InnerFrame
+
+-- FPS Label
+local FPSLabel = Instance.new("TextLabel")
+FPSLabel.Size = UDim2.new(1, 0, 0, 12)
+FPSLabel.BackgroundTransparency = 1
+FPSLabel.Text = "FPS: 0"
+FPSLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+FPSLabel.Font = Enum.Font.GothamBold
+FPSLabel.TextSize = 10
+FPSLabel.LayoutOrder = 2
+FPSLabel.Parent = InnerFrame
+
+-- MS Label
+local MSLabel = Instance.new("TextLabel")
+MSLabel.Size = UDim2.new(1, 0, 0, 12)
+MSLabel.BackgroundTransparency = 1
+MSLabel.Text = "MS: 0"
+MSLabel.TextColor3 = Color3.fromRGB(255, 180, 180)
+MSLabel.Font = Enum.Font.GothamBold
+MSLabel.TextSize = 10
+MSLabel.LayoutOrder = 3
+MSLabel.Parent = InnerFrame
+
+-- ==================== SAYAÇ ====================
+local seconds, minutes, hours = 0, 0, 0
+
+local function UpdateTimer()
+    seconds = seconds + 1
+    if seconds >= 60 then seconds = 0; minutes = minutes + 1 end
+    if minutes >= 60 then minutes = 0; hours = hours + 1 end
+    TimerLabel.Text = string.format("%02d:%02d:%02d", hours, minutes, seconds)
+end
+
+task.spawn(function()
+    while task.wait(1) do
+        if AntiAFKEnabled then UpdateTimer() end
+    end
+end)
+
+-- ==================== FPS ====================
+local frameCount = 0
+local lastFPSUpdate = tick()
+
+RunService.RenderStepped:Connect(function()
+    frameCount = frameCount + 1
+    local now = tick()
+    if now - lastFPSUpdate >= 1 then
+        FPSLabel.Text = "FPS: " .. frameCount
+        frameCount = 0
+        lastFPSUpdate = now
+    end
+end)
+
+-- ==================== MS ====================
+task.spawn(function()
+    while task.wait(1) do
+        local ping = 0
+        pcall(function()
+            ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+        end)
+        MSLabel.Text = "MS: " .. ping
+    end
+end)
+
+-- ==================== ANTI AFK ====================
+Misc:AddSwatch(":alarm_clock: Anti Afk", function(Value)
+    if Value then
+        AntiAFKEnabled = true
+        MainFrame.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+        
+        task.spawn(function()
+            while AntiAFKEnabled do
+                task.wait(600)
+                if AntiAFKEnabled then
+                    local VirtualUser = game:GetService("VirtualUser")
+                    VirtualUser:CaptureController()
+                    VirtualUser:ClickButton2(Vector2.new())
+                end
+            end
+        end)
+    else
+        AntiAFKEnabled = false
+        MainFrame.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+    end
+end, "Kırmızı")
+
+-- Sağ tık ile gizle/göster
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+
 
 local credits = window:AddTab("Credits")
 
