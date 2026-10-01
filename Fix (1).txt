@@ -5178,9 +5178,8 @@ Misc:AddButton("💎 Gamepass AutoLift", function()
     end
 end, "🔓 Unlock AutoLift Pass")
 
-Misc:AddSwatch("⏰ Anti Afk", function(Value)
+--// ============ ANTI AFK ============
 
---// ANTI AFK
 local antiAfkRunning = false
 local antiAfkUI = nil
 
@@ -5188,7 +5187,6 @@ local function startAntiAFK()
     if antiAfkRunning then return end
     antiAfkRunning = true
 
-    -- Eski UI varsa sil
     pcall(function()
         local oldUI = game.CoreGui:FindFirstChild("AntiAfkUI")
         if oldUI then
@@ -5196,13 +5194,11 @@ local function startAntiAFK()
         end
     end)
 
-    -- ScreenGui
     antiAfkUI = Instance.new("ScreenGui")
     antiAfkUI.Name = "AntiAfkUI"
     antiAfkUI.ResetOnSpawn = false
     antiAfkUI.Parent = game.CoreGui
 
-    -- Main Frame
     local mainFrame = Instance.new("Frame")
     mainFrame.Name = "MainFrame"
     mainFrame.Size = UDim2.new(0, 220, 0, 85)
@@ -5222,7 +5218,6 @@ local function startAntiAFK()
     stroke.Thickness = 2
     stroke.Parent = mainFrame
 
-    -- Title
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, 0, 0, 25)
     title.BackgroundTransparency = 1
@@ -5232,7 +5227,6 @@ local function startAntiAFK()
     title.Font = Enum.Font.GothamBold
     title.Parent = mainFrame
 
-    -- Clock
     local clockLabel = Instance.new("TextLabel")
     clockLabel.Size = UDim2.new(1, -10, 0, 25)
     clockLabel.Position = UDim2.new(0, 5, 0, 27)
@@ -5243,7 +5237,6 @@ local function startAntiAFK()
     clockLabel.Font = Enum.Font.Code
     clockLabel.Parent = mainFrame
 
-    -- FPS
     local fpsLabel = Instance.new("TextLabel")
     fpsLabel.Size = UDim2.new(0.5, -7, 0, 22)
     fpsLabel.Position = UDim2.new(0, 5, 0, 55)
@@ -5254,7 +5247,6 @@ local function startAntiAFK()
     fpsLabel.Font = Enum.Font.GothamBold
     fpsLabel.Parent = mainFrame
 
-    -- MS
     local msLabel = Instance.new("TextLabel")
     msLabel.Size = UDim2.new(0.5, -7, 0, 22)
     msLabel.Position = UDim2.new(0.5, 2, 0, 55)
@@ -5265,24 +5257,15 @@ local function startAntiAFK()
     msLabel.Font = Enum.Font.GothamBold
     msLabel.Parent = mainFrame
 
-    -- Anti AFK
+    -- Saat
     task.spawn(function()
         local totalSeconds = 0
-
         while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
             local hours = math.floor(totalSeconds / 3600)
             local minutes = math.floor((totalSeconds % 3600) / 60)
             local seconds = totalSeconds % 60
-
-            clockLabel.Text = string.format(
-                "%02d:%02d:%02d",
-                hours,
-                minutes,
-                seconds
-            )
-
+            clockLabel.Text = string.format("%02d:%02d:%02d", hours, minutes, seconds)
             totalSeconds = totalSeconds + 1
-
             task.wait(1)
         end
     end)
@@ -5290,20 +5273,13 @@ local function startAntiAFK()
     -- FPS
     task.spawn(function()
         local RunService = game:GetService("RunService")
-
         while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
             local frames = 0
-
             local connection = RunService.RenderStepped:Connect(function()
                 frames = frames + 1
             end)
-
             task.wait(1)
-
-            if connection then
-                connection:Disconnect()
-            end
-
+            if connection then connection:Disconnect() end
             if fpsLabel and fpsLabel.Parent then
                 fpsLabel.Text = "FPS: " .. frames
             end
@@ -5314,63 +5290,31 @@ local function startAntiAFK()
     task.spawn(function()
         while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
             local ping = 0
-
             pcall(function()
-                ping = math.floor(
-                    game:GetService("Stats")
-                    .Network.ServerStatsItem["Data Ping"]
-                    :GetValue()
-                )
+                ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
             end)
-
             if msLabel and msLabel.Parent then
                 msLabel.Text = "MS: " .. ping
             end
-
             task.wait(1)
         end
     end)
 
-    -- Anti AFK hareketi
+    -- 10 dakikada bir tıklama
     task.spawn(function()
         while antiAfkRunning and antiAfkUI and antiAfkUI.Parent do
             task.wait(600)
-
-            if not antiAfkRunning then
-                break
-            end
-
+            if not antiAfkRunning then break end
             pcall(function()
-                local VirtualInputManager =
-                    game:GetService("VirtualInputManager")
-
+                local VirtualInputManager = game:GetService("VirtualInputManager")
                 local camera = workspace.CurrentCamera
-
                 if camera then
                     local size = camera.ViewportSize
-
                     local x = math.random(100, math.max(101, size.X - 100))
                     local y = math.random(100, math.max(101, size.Y - 100))
-
-                    VirtualInputManager:SendMouseButtonEvent(
-                        x,
-                        y,
-                        0,
-                        true,
-                        game,
-                        1
-                    )
-
+                    VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 1)
                     task.wait(0.1)
-
-                    VirtualInputManager:SendMouseButtonEvent(
-                        x,
-                        y,
-                        0,
-                        false,
-                        game,
-                        1
-                    )
+                    VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 1)
                 end
             end)
         end
@@ -5379,17 +5323,14 @@ end
 
 local function stopAntiAFK()
     antiAfkRunning = false
-
     if antiAfkUI then
         pcall(function()
             antiAfkUI:Destroy()
         end)
-
         antiAfkUI = nil
     end
 end
 
---// SWITCH
 Misc:AddSwitch("⏰ Anti Afk", function(Value)
     if Value then
         startAntiAFK()
@@ -5397,7 +5338,6 @@ Misc:AddSwitch("⏰ Anti Afk", function(Value)
         stopAntiAFK()
     end
 end)
-
 
 local credits = window:AddTab("Credits")
 
