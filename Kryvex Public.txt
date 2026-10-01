@@ -5236,6 +5236,25 @@ Misc:AddButton("💎 Gamepass AutoLift", function()
     end
 end, "🔓 Unlock AutoLift Pass")
 
+-- INFINITE JUMP
+_G.InfiniteJumpEnabled = false
+
+Misc:AddSwitch("🦘 Infinite Jump", function(Value)
+    _G.InfiniteJumpEnabled = Value
+end)
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if _G.InfiniteJumpEnabled then
+        local Player = game:GetService("Players").LocalPlayer
+        local Character = Player.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+
+        if Humanoid then
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
 
 
 local credits = window:AddTab("Credits")
