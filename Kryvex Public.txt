@@ -5255,7 +5255,38 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
+-- HIDE EFFECTS
+_G.HideEffectsEnabled = false
+_G.HiddenEffects = {}
 
+Misc:AddSwitch("👻 Hide Effects", function(Value)
+    _G.HideEffectsEnabled = Value
+
+    if Value then
+        table.clear(_G.HiddenEffects)
+
+        for _, v in ipairs(game:GetDescendants()) do
+            if v:IsA("ParticleEmitter")
+                or v:IsA("Trail")
+                or v:IsA("Beam")
+                or v:IsA("Smoke")
+                or v:IsA("Fire")
+                or v:IsA("Sparkles") then
+
+                _G.HiddenEffects[v] = v.Enabled
+                v.Enabled = false
+            end
+        end
+    else
+        for v, oldState in pairs(_G.HiddenEffects) do
+            if v and v.Parent then
+                v.Enabled = oldState
+            end
+        end
+
+        table.clear(_G.HiddenEffects)
+    end
+end)
 
 local credits = window:AddTab("Credits")
 
