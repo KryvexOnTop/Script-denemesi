@@ -5116,6 +5116,7 @@ teleport:AddButton("🌋 Brawl Lava", function()
     })
 end)
 
+local Misc = window:AddTab(“Misc”)
 
 local credits = window:AddTab("Credits")
 
