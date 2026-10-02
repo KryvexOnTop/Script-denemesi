@@ -5346,30 +5346,6 @@ Misc:AddSwitch("🌊 Walk On Water", function(Value)
     end
 end)
 
--- TRADE
-_G.TradeEnabled = true
-
-Misc:AddButton("🔒 Disable Trade", function()
-    _G.TradeEnabled = false
-
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Kryvex Hub",
-        Text = "Trade Disabled",
-        Duration = 2
-    })
-end)
-
-Misc:AddButton("🔓 Enable Trade", function()
-    _G.TradeEnabled = true
-
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Kryvex Hub",
-        Text = "Trade Enabled",
-        Duration = 2
-    })
-end)
-
-
 local credits = window:AddTab("Credits")
 
 local title = credits:AddLabel("✨ KRYVEX PUBLİC V1")
