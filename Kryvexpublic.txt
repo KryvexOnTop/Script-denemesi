@@ -4939,8 +4939,6 @@ task.spawn(function()
     end
 end)
 
-local Misc = window:AddTab("Misc")
-
 
 local teleport = window:AddTab("Teleport")
 
