@@ -4939,287 +4939,214 @@ task.spawn(function()
     end
 end)
 
+local teleport = window:AddTab("Teleport")
 
-local Misc = window:AddTab("Misc")
-
-Misc:AddButton("🪎 Auto Claim Chest", function()
-    claimChests()
-end)
-
-local blockedFrames = {
-	"strengthFrame",
-	"durabilityFrame",
-	"agilityFrame",
-	"evilKarmaFrame",
-	"goodKarmaFrame",
-}
-
-local frameSwitch = rebirths:AddSwitch("🕶️ Hide All Frames", function(bool)
-	if bool then
-		for _, name in ipairs(blockedFrames) do
-			local frame = replicatedStorage:FindFirstChild(name)
-			if frame and frame:IsA("GuiObject") then
-				frame.Visible = false
-			end
-		end
-
-		if not _G.frameMonitorConnection then
-			_G.frameMonitorConnection = replicatedStorage.ChildAdded:Connect(function(child)
-				for _, name in ipairs(blockedFrames) do
-					if child.Name == name and child:IsA("GuiObject") then
-						child.Visible = false
-					end
-				end
-			end)
-		end
-	else
-		for _, name in ipairs(blockedFrames) do
-			local frame = replicatedStorage:FindFirstChild(name)
-			if frame and frame:IsA("GuiObject") then
-				frame.Visible = true
-			end
-		end
-
-		if _G.frameMonitorConnection then
-			_G.frameMonitorConnection:Disconnect()
-			_G.frameMonitorConnection = nil
-		end
-	end
-end)
-frameSwitch:Set(false)
-
-
-local switch = Misc:AddSwitch("🔒 Lock Position", function(Value)
-    if Value then
-        
-        local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-        getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
-            if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
-            end
-        end)
-    else
-        
-        if getgenv().posLock then
-            getgenv().posLock:Disconnect()
-            getgenv().posLock = nil
-        end
-    end
-end)
-
-Misc:AddSwitch("☸️ Auto Fortune Wheel", function(Value)
-    _G.autoFortuneWheelActive = Value
-    if Value then
-        task.spawn(function()
-            while _G.autoFortuneWheelActive do
-                pcall(function()
-                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                    local wheelRemote = ReplicatedStorage.rEvents:FindFirstChild("openFortuneWheelRemote")
-                    
-                    local wheelChance = ReplicatedStorage:FindFirstChild("shared") 
-                        and ReplicatedStorage.shared:FindFirstChild("catalogs") 
-                        and ReplicatedStorage.shared.catalogs:FindFirstChild("fortuneWheelChances")
-                        and ReplicatedStorage.shared.catalogs.fortuneWheelChances:FindFirstChild("Fortune Wheel")
-                    
-                    if wheelRemote and wheelChance then
-                        wheelRemote:InvokeServer("openFortuneWheel", wheelChance)
-                    end
-                end)
-                task.wait(0.5)
-            end
-        end)
-    end
-end)
-
-local timeDropdown = Misc:AddDropdown("Change Time", function(selection)
-    local lighting = game:GetService("Lighting")
-    
-    if selection == "Night" then
-        lighting.ClockTime = 0
-    elseif selection == "Day" then
-        lighting.ClockTime = 12
-    elseif selection == "Midnight" then
-        lighting.ClockTime = 6
-    end
+teleport:AddButton("🏠 Spawn", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(2, 8, 115)
     
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Changed Time",
-        Text = "the time has been changed: " .. selection,
-        Duration = 0
+        Title = "kryvex Hub",
+        Text = "Spawn bölgesine ışınlanıldı",
+        Duration = 2
     })
 end)
 
-timeDropdown:Add("Night")
-timeDropdown:Add("Day")
-timeDropdown:Add("Midnight")
-
-
-Misc:AddSwitch("💦 Full Walk on Water", function(bool)
-    if bool then
-        createParts()
-    else
-        makePartsWalkthrough()
-    end
-end)
-
-Misc:AddSwitch("🦋 Infinite Jump", function(state)
-    getgenv().InfiniteJump = state
-    game:GetService("UserInputService").JumpRequest:connect(function()
-        if getgenv().InfiniteJump then
-            local Humanoid = game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if Humanoid then
-                Humanoid:ChangeState("Jumping")
-            end
-        end
-    end)
-end)
-
-
-
-Misc:AddSwitch("🧱 Anti Knockback", function(Value)
-    if Value then
-        local playerName = game.Players.LocalPlayer.Name
-        local rootPart = game.Workspace:FindFirstChild(playerName):FindFirstChild("HumanoidRootPart")
-        local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.P = 1250
-        bodyVelocity.Parent = rootPart
-    else
-        local playerName = game.Players.LocalPlayer.Name
-        local rootPart = game.Workspace:FindFirstChild(playerName):FindFirstChild("HumanoidRootPart")
-        local existingVelocity = rootPart:FindFirstChild("BodyVelocity")
-        if existingVelocity and existingVelocity.MaxForce == Vector3.new(100000, 0, 100000) then
-            existingVelocity:Destroy()
-        end
-    end
-end)
-
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local noclipEnabled = false
-local noclipConnection = nil
-
-local function startNoclip()
-    if noclipConnection then noclipConnection:Disconnect() end
+teleport:AddButton("🔮 Secret Area", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(1947, 2, 6191)
     
-    noclipConnection = RunService.Stepped:Connect(function()
-        if noclipEnabled and player.Character then
-            for _, part in pairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-    end)
-end
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Secret Area bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
 
-Misc:AddSwitch("👻 No Clip", function(bool)
-    noclipEnabled = bool
+teleport:AddButton("🏝️ Tiny Island", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(-34, 7, 1903)
     
-    if noclipEnabled then
-        startNoclip()
-    else
-        if noclipConnection then
-            noclipConnection:Disconnect()
-            noclipConnection = nil
-        end
-        
-        if player.Character then
-            for _, part in pairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = true
-                end
-            end
-        end
-    end
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Tiny Island bölgesine ışınlanıldı",
+        Duration = 2
+    })
 end)
 
-player.CharacterAdded:Connect(function()
-    if noclipEnabled then
-        task.wait(0.1)
-        startNoclip()
-    end
+teleport:AddButton("❄️ Frozen Island", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(-2600.00244, 3.67686558, -403.884369, 0.0873617008, 1.0482899e-09, 0.99617666, 3.07204253e-08, 1, -3.7464023e-09, -0.99617666, 3.09302628e-08, 0.0873617008)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Frozen Island bölgesine ışınlanıldı",
+        Duration = 2
+    })
 end)
 
-Misc:AddButton("💎 Gamepass AutoLift", function()
-    local gamepassFolder = game:GetService("ReplicatedStorage").gamepassIds
-    local player = game:GetService("Players").LocalPlayer
-    for _, gamepass in pairs(gamepassFolder:GetChildren()) do
-        local value = Instance.new("IntValue")
-        value.Name = gamepass.Name
-        value.Value = gamepass.Value
-        value.Parent = player.ownedGamepasses
+teleport:AddButton("⚡ Mythical Island", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(2255, 7, 1071)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Mythical Island bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
+
+teleport:AddButton("🔥 Hell Island", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(-6768, 7, -1287)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Hell Island bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
+
+teleport:AddButton("🛡️ Legend Island", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(4604, 991, -3887)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Legend Island bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
+
+teleport:AddButton("👑 Muscle King", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(-8646, 17, -5738)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Muscle King bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
+
+teleport:AddButton("🌴 Jungle Island", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(-8659, 6, 2384)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Jungle Island bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
+
+teleport:AddButton("⚙️ Industrial Gym", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(-5350, 57, 4929)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Industrial Gym bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
+
+-- Brawl
+teleport:AddButton("⚔️ Brawl Regular", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(-1849, 20, -6335)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Brawl Regular bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
+
+teleport:AddButton("🏜️ Brawl Desert", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(960, 17, -7398)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Brawl Desert bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
+
+teleport:AddButton("🌋 Brawl Lava", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.CFrame = CFrame.new(4471, 119, -8836)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "kryvex Hub",
+        Text = "Brawl Lava bölgesine ışınlanıldı",
+        Duration = 2
+    })
+end)
+
+local Misc = window:AddTab("Misc")
+
+Misc:AddButton("🚀 FPS Booster", function()
+    local lighting = game:GetService("Lighting")
+    local terrain = game:GetService("Workspace"):FindFirstChildOfClass('Terrain')
+
+    lighting.Brightness = 0.5
+    lighting.OutdoorAmbient = Color3.fromRGB(120, 120, 120)
+    lighting.Ambient = Color3.fromRGB(120, 120, 120)
+    lighting.ClockTime = 14
+
+    if terrain then
+        terrain.WaterWaveSize = 0
+        terrain.WaterWaveSpeed = 0
+        terrain.WaterReflectance = 0
     end
-end, "🔓 Unlock AutoLift Pass")
+    
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Enabled = false
+        elseif v:IsA("BlurEffect") or v:IsA("SunRaysEffect") then
+            v.Enabled = false
+        end
+    end
 
-Misc:AddButton("🔄 Rejoin Game", function()
-    local ScreenGui = Instance.new("ScreenGui")
-    local Frame = Instance.new("Frame")
-    local TextLabel = Instance.new("TextLabel")
-    local YesButton = Instance.new("TextButton")
-    local NoButton = Instance.new("TextButton")
-    local UICorner = Instance.new("UICorner")
-
-    ScreenGui.Parent = game:GetService("CoreGui")
-    ScreenGui.Name = "RejoinConfirm"
-
-    Frame.Name = "MainFrame"
-    Frame.Parent = ScreenGui
-    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    Frame.Position = UDim2.new(0.5, -125, 0.5, -75)
-    Frame.Size = UDim2.new(0, 250, 0, 150)
-    Frame.BorderSizePixel = 0
-    Frame.Active = true
-    Frame.Draggable = true 
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
-
-    TextLabel.Parent = Frame
-    TextLabel.BackgroundTransparency = 1
-    TextLabel.Position = UDim2.new(0, 10, 0, 20)
-    TextLabel.Size = UDim2.new(0, 230, 0, 50)
-    TextLabel.Font = Enum.Font.GothamBold
-    TextLabel.Text = "Are you sure you want to rejoin?"
-    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TextLabel.TextSize = 16
-    TextLabel.TextWrapped = true
-
-    YesButton.Name = "YesButton"
-    YesButton.Parent = Frame
-    YesButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-    YesButton.Position = UDim2.new(0, 25, 0, 90)
-    YesButton.Size = UDim2.new(0, 85, 0, 35)
-    YesButton.Font = Enum.Font.GothamBold
-    YesButton.Text = "YES"
-    YesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    YesButton.TextSize = 14
-    Instance.new("UICorner", YesButton).CornerRadius = UDim.new(0, 6)
-
-    NoButton.Name = "NoButton"
-    NoButton.Parent = Frame
-    NoButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    NoButton.Position = UDim2.new(0, 140, 0, 90)
-    NoButton.Size = UDim2.new(0, 85, 0, 35)
-    NoButton.Font = Enum.Font.GothamBold
-    NoButton.Text = "NO"
-    NoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    NoButton.TextSize = 14
-    Instance.new("UICorner", NoButton).CornerRadius = UDim.new(0, 6)
-
-    YesButton.MouseButton1Click:Connect(function()
-        game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
-    end)
-
-    NoButton.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-    end)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Kryvex Hub",
+        Text = "FPS Boosted & Lighting Balanced!",
+        Duration = 3
+    })
 end)
 
 
 local credits = window:AddTab("Credits")
 
-local title = credits:AddLabel("🔥 KRYVEX HUB V1")
+local title = credits:AddLabel("✨ Kryvex Hub V2")
 title.TextColor3 = Color3.fromRGB(255, 215, 0)
 
 local dev = credits:AddLabel("👤 Developer: WozzyLaco🏴")
@@ -5227,17 +5154,40 @@ dev.TextColor3 = Color3.fromRGB(255, 50, 50)
 
 credits:AddLabel("--------------------------")
 
-local thanks = credits:AddLabel("🤝 thank you: Halis & RuLing & Henne")
+local thanks = credits:AddLabel("🤝 Special Thanks to: Halis & & RuLing")
 thanks.TextColor3 = Color3.fromRGB(0, 255, 255)
 
+local support = credits:AddLabel("❤️ Thanks for the support!")
+support.TextColor3 = Color3.fromRGB(255, 105, 180)
+
 credits:AddLabel("--------------------------")
+
+local useMsg = credits:AddLabel("🙏 Thank you for using Syniox Hub!")
+useMsg.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 credits:AddLabel("👇 My Discord Server Link Here")
 
 credits:AddButton("Discord Link", function()
-    setclipboard("https://discord.gg/wVF7ursHz")
+    setclipboard("https://discord.gg/DbAU5Z6HPd")
 end)
 
 credits:AddLabel(" ")
 credits:AddLabel("==================================")
 
+local bigTitle = credits:AddLabel("🚀 KRYVEX PUBLIC V3 🚀")
+
+pcall(function()
+    bigTitle.TextSize = 25
+    bigTitle.Font = Enum.Font.GothamBold
+end)
+
+task.spawn(function()
+    while true do
+        for i = 0, 1, 0.005 do
+            bigTitle.TextColor3 = Color3.fromHSV(i, 1, 1)
+            task.wait()
+        end
+    end
+end)
+
+credits:AddLabel("==================================")
