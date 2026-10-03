@@ -170,7 +170,7 @@ AutoFarm:AddSwitch("🧘 Situps + 🥊 Punch", function(bool)
 end)
 
 AutoFarm:AddLabel("----------------------------")
-AutoFarm:AddLabel("💨 Treadmill Farm")
+local TreadmillFolder = AutoFarm:AddFolder("💨 Treadmill Farm")
 
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Players = game:GetService("Players")
@@ -189,11 +189,22 @@ local Locations = {
 local posLockConnection = nil
 
 local function lockAndSimulate(targetCFrame)
-    if posLockConnection then posLockConnection:Disconnect() end
+    if posLockConnection then
+        posLockConnection:Disconnect()
+    end
+
     posLockConnection = RunService.Heartbeat:Connect(function()
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = targetCFrame
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.W, false, game)
+        local char = Player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+        if hrp then
+            hrp.CFrame = targetCFrame
+            VirtualInputManager:SendKeyEvent(
+                true,
+                Enum.KeyCode.W,
+                false,
+                game
+            )
         end
     end)
 end
@@ -203,17 +214,29 @@ local function stopAll()
         posLockConnection:Disconnect()
         posLockConnection = nil
     end
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.W, false, game)
+
+    VirtualInputManager:SendKeyEvent(
+        false,
+        Enum.KeyCode.W,
+        false,
+        game
+    )
 end
 
 for _, loc in ipairs(Locations) do
-    AutoFarm:AddSwitch(loc.name, function(bool)
+    TreadmillFolder:AddSwitch(loc.name, function(bool)
         if bool then
-            local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+            local char = Player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
             if hrp then
-                hrp.CFrame = CFrame.new(loc.pos + Vector3.new(0, 3, 0))
+                local targetCFrame =
+                    CFrame.new(loc.pos + Vector3.new(0, 3, 0))
+
+                hrp.CFrame = targetCFrame
                 task.wait(0.3)
-                lockAndSimulate(hrp.CFrame)
+
+                lockAndSimulate(targetCFrame)
             end
         else
             stopAll()
