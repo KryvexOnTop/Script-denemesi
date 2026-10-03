@@ -5181,40 +5181,6 @@ local blockedFrames = {
 	"goodKarmaFrame",
 }
 
-local frameSwitch = rebirths:AddSwitch("🕶️ Hide All Frames", function(bool)
-	if bool then
-		for _, name in ipairs(blockedFrames) do
-			local frame = replicatedStorage:FindFirstChild(name)
-			if frame and frame:IsA("GuiObject") then
-				frame.Visible = false
-			end
-		end
-
-		if not _G.frameMonitorConnection then
-			_G.frameMonitorConnection = replicatedStorage.ChildAdded:Connect(function(child)
-				for _, name in ipairs(blockedFrames) do
-					if child.Name == name and child:IsA("GuiObject") then
-						child.Visible = false
-					end
-				end
-			end)
-		end
-	else
-		for _, name in ipairs(blockedFrames) do
-			local frame = replicatedStorage:FindFirstChild(name)
-			if frame and frame:IsA("GuiObject") then
-				frame.Visible = true
-			end
-		end
-
-		if _G.frameMonitorConnection then
-			_G.frameMonitorConnection:Disconnect()
-			_G.frameMonitorConnection = nil
-		end
-	end
-end)
-frameSwitch:Set(false)
-
 
 local switch = Misc:AddSwitch("🔒 Lock Position", function(Value)
     if Value then
