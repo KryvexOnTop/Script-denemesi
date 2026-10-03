@@ -5233,7 +5233,7 @@ end)
 _G.HideEffectsEnabled = false
 _G.HiddenEffects = {}
 
-Misc:AddSwitch("👻 Hide Effects", function(Value)
+Misc:AddButton("👻 Hide Effects", function(Value)
     _G.HideEffectsEnabled = Value
 
     if Value then
