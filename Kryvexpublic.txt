@@ -5248,7 +5248,7 @@ support.TextColor3 = Color3.fromRGB(255, 105, 180)
 
 credits:AddLabel("--------------------------")
 
-local useMsg = credits:AddLabel("🙏 Thank you for using Syniox Hub!")
+local useMsg = credits:AddLabel("🙏 Thank you for using Kryvex Hub!")
 useMsg.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 credits:AddLabel("👇 My Discord Server Link Here")
