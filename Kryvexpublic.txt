@@ -5433,6 +5433,47 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
+-- CLAIM ALL CHESTS
+local function claimAllChests()
+    local Player = game:GetService("Players").LocalPlayer
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+    local Root = Character:WaitForChild("HumanoidRootPart")
+
+    local OldCFrame = Root.CFrame
+
+    local Chests = {
+        Vector3.new(42.25, 1.5, 408.91),
+        Vector3.new(-138.43, 1.5, -276.86),
+        Vector3.new(-2569.81, 1.5, -554.07),
+        Vector3.new(2206.88, 1.5, 910.50),
+        Vector3.new(-6713.64, 1.5, -1456.67),
+        Vector3.new(4666.53, 995.0, -3692.08),
+        Vector3.new(-7913.11, -1.5, 3019.15)
+    }
+
+    for _, Position in ipairs(Chests) do
+        if not Root or not Root.Parent then
+            break
+        end
+
+        Root.CFrame = CFrame.new(Position)
+
+        -- Sandığın algılanması için kısa bekleme
+        task.wait(0.5)
+    end
+
+    -- İşlem bitince eski konuma dön
+    if Root and Root.Parent then
+        Root.CFrame = OldCFrame
+    end
+end
+
+Misc:AddButton("📦 Claim All Chests", function()
+    task.spawn(function()
+        claimAllChests()
+    end)
+end)
+
 
 local credits = window:AddTab("Credits")
 
