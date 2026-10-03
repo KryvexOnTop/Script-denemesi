@@ -5116,3 +5116,5 @@ teleport:AddButton("🌋 Brawl Lava", function()
         Duration = 2
     })
 end)
+
+local Misc = window:AddTab("Misc")
