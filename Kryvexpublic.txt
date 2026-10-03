@@ -5116,6 +5116,7 @@ teleport:AddButton("🌋 Brawl Lava", function()
 end)
 
 local Misc = window:AddTab("Misc")
+
 -- SET SPEED
 Misc:AddTextBox("Set Speed", function(Value)
     local Speed = tonumber(Value)
@@ -5167,6 +5168,37 @@ Misc:AddSwitch("Set Size", function(Value)
         end
     end
 end)
+
+Misc:AddButton("🚀 FPS Booster", function()
+    local lighting = game:GetService("Lighting")
+    local terrain = game:GetService("Workspace"):FindFirstChildOfClass('Terrain')
+
+    lighting.Brightness = 0.5
+    lighting.OutdoorAmbient = Color3.fromRGB(120, 120, 120)
+    lighting.Ambient = Color3.fromRGB(120, 120, 120)
+    lighting.ClockTime = 14
+
+    if terrain then
+        terrain.WaterWaveSize = 0
+        terrain.WaterWaveSpeed = 0
+        terrain.WaterReflectance = 0
+    end
+    
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Enabled = false
+        elseif v:IsA("BlurEffect") or v:IsA("SunRaysEffect") then
+            v.Enabled = false
+        end
+    end
+
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Kryvex Hub",
+        Text = "FPS Boosted & Lighting Balanced!",
+        Duration = 3
+    })
+end)
+
 
 local credits = window:AddTab("Credits")
 
