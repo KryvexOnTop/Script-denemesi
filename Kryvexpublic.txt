@@ -5115,32 +5115,37 @@ teleport:AddButton("🌋 Brawl Lava", function()
     })
 end)
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+local StarterGui = game:GetService("StarterGui")
+
+local player = Players.LocalPlayer
+
 local Misc = window:AddTab("Misc")
 
 Misc:AddButton("🪎 Auto Claim Chest", function()
-    claimChests()
+    if typeof(claimChests) == "function" then
+        claimChests()
+    end
 end)
 
-local blockedFrames = {
-	"strengthFrame",
-	"durabilityFrame",
-	"agilityFrame",
-	"evilKarmaFrame",
-	"goodKarmaFrame",
-}
-
-
-local switch = Misc:AddSwitch("🔒 Lock Position", function(Value)
+Misc:AddSwitch("🔒 Lock Position", function(Value)
     if Value then
-        
-        local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-        getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
-            if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
-            end
-        end)
+        local char = player.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if root then
+            local currentPos = root.CFrame
+            getgenv().posLock = RunService.Heartbeat:Connect(function()
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character.HumanoidRootPart.CFrame = currentPos
+                end
+            end)
+        end
     else
-        
         if getgenv().posLock then
             getgenv().posLock:Disconnect()
             getgenv().posLock = nil
@@ -5154,9 +5159,7 @@ Misc:AddSwitch("🏦 Auto Fortune Wheel", function(Value)
         task.spawn(function()
             while _G.autoFortuneWheelActive do
                 pcall(function()
-                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
                     local wheelRemote = ReplicatedStorage.rEvents:FindFirstChild("openFortuneWheelRemote")
-                    
                     local wheelChance = ReplicatedStorage:FindFirstChild("shared") 
                         and ReplicatedStorage.shared:FindFirstChild("catalogs") 
                         and ReplicatedStorage.shared.catalogs:FindFirstChild("fortuneWheelChances")
@@ -5173,20 +5176,18 @@ Misc:AddSwitch("🏦 Auto Fortune Wheel", function(Value)
 end)
 
 local timeDropdown = Misc:AddDropdown("Change Time", function(selection)
-    local lighting = game:GetService("Lighting")
-    
     if selection == "Night" then
-        lighting.ClockTime = 0
+        Lighting.ClockTime = 0
     elseif selection == "Day" then
-        lighting.ClockTime = 12
+        Lighting.ClockTime = 12
     elseif selection == "Midnight" then
-        lighting.ClockTime = 6
+        Lighting.ClockTime = 6
     end
     
-    game:GetService("StarterGui"):SetCore("SendNotification", {
+    StarterGui:SetCore("SendNotification", {
         Title = "Changed Time",
-        Text = "the time has been changed: " .. selection,
-        Duration = 0
+        Text = "the time has been changed: " .. tostring(selection),
+        Duration = 2
     })
 end)
 
@@ -5194,61 +5195,57 @@ timeDropdown:Add("Night")
 timeDropdown:Add("Day")
 timeDropdown:Add("Midnight")
 
-
 Misc:AddSwitch("💦 Full Walk on Water", function(bool)
     if bool then
-        createParts()
+        if typeof(createParts) == "function" then createParts() end
     else
-        makePartsWalkthrough()
+        if typeof(makePartsWalkthrough) == "function" then makePartsWalkthrough() end
+    end
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if getgenv().InfiniteJump then
+        local char = player.Character
+        local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
     end
 end)
 
 Misc:AddSwitch("🦋 Infinite Jump", function(state)
     getgenv().InfiniteJump = state
-    game:GetService("UserInputService").JumpRequest:connect(function()
-        if getgenv().InfiniteJump then
-            local Humanoid = game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if Humanoid then
-                Humanoid:ChangeState("Jumping")
-            end
-        end
-    end)
 end)
 
-
-
 Misc:AddSwitch("🧱 Anti Knockback", function(Value)
+    local char = player.Character
+    local rootPart = char and char:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+
     if Value then
-        local playerName = game.Players.LocalPlayer.Name
-        local rootPart = game.Workspace:FindFirstChild(playerName):FindFirstChild("HumanoidRootPart")
-        local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
+        local bodyVelocity = rootPart:FindFirstChild("AntiKBVelocity") or Instance.new("BodyVelocity")
+        bodyVelocity.Name = "AntiKBVelocity"
+        bodyVelocity.MaxForce = Vector3.new(1e5, 0, 1e5)
         bodyVelocity.Velocity = Vector3.new(0, 0, 0)
         bodyVelocity.P = 1250
         bodyVelocity.Parent = rootPart
     else
-        local playerName = game.Players.LocalPlayer.Name
-        local rootPart = game.Workspace:FindFirstChild(playerName):FindFirstChild("HumanoidRootPart")
-        local existingVelocity = rootPart:FindFirstChild("BodyVelocity")
-        if existingVelocity and existingVelocity.MaxForce == Vector3.new(100000, 0, 100000) then
+        local existingVelocity = rootPart:FindFirstChild("AntiKBVelocity")
+        if existingVelocity then
             existingVelocity:Destroy()
         end
     end
 end)
 
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
 local noclipEnabled = false
 local noclipConnection = nil
 
 local function startNoclip()
     if noclipConnection then noclipConnection:Disconnect() end
-    
     noclipConnection = RunService.Stepped:Connect(function()
         if noclipEnabled and player.Character then
             for _, part in pairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
+                if part:IsA("BasePart") and part.CanCollide then
                     part.CanCollide = false
                 end
             end
@@ -5258,21 +5255,12 @@ end
 
 Misc:AddSwitch("👻 No Clip", function(bool)
     noclipEnabled = bool
-    
     if noclipEnabled then
         startNoclip()
     else
         if noclipConnection then
             noclipConnection:Disconnect()
             noclipConnection = nil
-        end
-        
-        if player.Character then
-            for _, part in pairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = true
-                end
-            end
         end
     end
 end)
@@ -5285,26 +5273,29 @@ player.CharacterAdded:Connect(function()
 end)
 
 Misc:AddButton("💎 Gamepass AutoLift", function()
-    local gamepassFolder = game:GetService("ReplicatedStorage").gamepassIds
-    local player = game:GetService("Players").LocalPlayer
-    for _, gamepass in pairs(gamepassFolder:GetChildren()) do
-        local value = Instance.new("IntValue")
-        value.Name = gamepass.Name
-        value.Value = gamepass.Value
-        value.Parent = player.ownedGamepasses
+    local gamepassFolder = ReplicatedStorage:FindFirstChild("gamepassIds")
+    if gamepassFolder and player:FindFirstChild("ownedGamepasses") then
+        for _, gamepass in pairs(gamepassFolder:GetChildren()) do
+            local value = Instance.new("IntValue")
+            value.Name = gamepass.Name
+            value.Value = gamepass.Value
+            value.Parent = player.ownedGamepasses
+        end
     end
 end, "🔓 Unlock AutoLift Pass")
 
 Misc:AddButton("🔄 Rejoin Game", function()
+    local oldGui = game:GetService("CoreGui"):FindFirstChild("RejoinConfirm")
+    if oldGui then oldGui:Destroy() end
+
     local ScreenGui = Instance.new("ScreenGui")
     local Frame = Instance.new("Frame")
     local TextLabel = Instance.new("TextLabel")
     local YesButton = Instance.new("TextButton")
     local NoButton = Instance.new("TextButton")
-    local UICorner = Instance.new("UICorner")
 
-    ScreenGui.Parent = game:GetService("CoreGui")
     ScreenGui.Name = "RejoinConfirm"
+    ScreenGui.Parent = game:GetService("CoreGui")
 
     Frame.Name = "MainFrame"
     Frame.Parent = ScreenGui
@@ -5349,7 +5340,7 @@ Misc:AddButton("🔄 Rejoin Game", function()
     Instance.new("UICorner", NoButton).CornerRadius = UDim.new(0, 6)
 
     YesButton.MouseButton1Click:Connect(function()
-        game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
+        TeleportService:Teleport(game.PlaceId, player)
     end)
 
     NoButton.MouseButton1Click:Connect(function()
