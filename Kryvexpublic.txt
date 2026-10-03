@@ -5172,43 +5172,85 @@ Misc:AddSwitch("Set Size", function(Value)
     end
 end)
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local AutoClaimChest = false
+
+local function getRoot()
+    local Character = LocalPlayer.Character
+    return Character and Character:FindFirstChild("HumanoidRootPart")
+end
+
+local function getChestPart(chest)
+    if chest:IsA("BasePart") then
+        return chest
+    end
+
+    if chest:IsA("Model") then
+        if chest.PrimaryPart then
+            return chest.PrimaryPart
+        end
+
+        return chest:FindFirstChildWhichIsA("BasePart", true)
+    end
+
+    return nil
+end
+
+local function getChests()
+    local chests = {}
+
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        local name = string.lower(obj.Name)
+
+        if string.find(name, "chest") then
+            local part = getChestPart(obj)
+
+            if part then
+                table.insert(chests, part)
+            end
+        end
+    end
+
+    return chests
+end
+
 local function claimChests()
-    local lp = game:GetService("Players").LocalPlayer
-    local char = lp.Character
-    local root = char and char:FindFirstChild("HumanoidRootPart")
-    
-    if root then
-        local oldCF = root.CFrame
-        local chests = {
-            Vector3.new(42.25, 1.5, 408.91),    
-            Vector3.new(-138.43, 1.5, -276.86), 
-            Vector3.new(-2569.81, 1.5, -554.07),
-            Vector3.new(2206.88, 1.5, 910.50),  
-            Vector3.new(-6713.64, 1.5, -1456.67),
-            Vector3.new(4666.53, 995.0, -3692.08),
-            Vector3.new(-7913.11, -1.5, 3019.15) 
-        }
-        
-        for _, pos in ipairs(chests) do
-            root.CFrame = CFrame.new(pos)
-            task.wait(0.15) 
-		end
-        root.CFrame = oldCF
+    local root = getRoot()
+    if not root then return end
+
+    local oldPosition = root.CFrame
+    local chests = getChests()
+
+    for _, chest in ipairs(chests) do
+        if not AutoClaimChest then
+            break
+        end
+
+        if chest and chest.Parent then
+            root.CFrame = chest.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.4)
+        end
+    end
+
+    if root and root.Parent then
+        root.CFrame = oldPosition
     end
 end
 
-Misc:AddButton("📦 Auto Claim Chest", function()
-    claimChests()
+Misc:AddSwitch("📦 Auto Claim Chest", function(Value)
+    AutoClaimChest = Value
+
+    if Value then
+        task.spawn(function()
+            while AutoClaimChest do
+                claimChests()
+                task.wait(1)
+            end
+        end)
+    end
 end)
-
-local blockedFrames = {
-	"strengthFrame",
-	"durabilityFrame",
-	"agilityFrame",
-	"evilKarmaFrame",
-	"goodKarmaFrame",
-}
-
 
 local credits = window:AddTab("Credits")
 
