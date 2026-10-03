@@ -5375,6 +5375,64 @@ Misc:AddButton("🔓 Enable Trade", function()
     })
 end)
 
+-- NO CLIP
+_G.NoClip = false
+_G.NoClipConnection = nil
+
+Misc:AddSwitch("👻 No Clip", function(Value)
+    _G.NoClip = Value
+
+    if _G.NoClipConnection then
+        _G.NoClipConnection:Disconnect()
+        _G.NoClipConnection = nil
+    end
+
+    if Value then
+        _G.NoClipConnection = game:GetService("RunService").Stepped:Connect(function()
+            local Player = game:GetService("Players").LocalPlayer
+            local Character = Player.Character
+
+            if Character then
+                for _, Part in ipairs(Character:GetDescendants()) do
+                    if Part:IsA("BasePart") then
+                        Part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        local Player = game:GetService("Players").LocalPlayer
+        local Character = Player.Character
+
+        if Character then
+            for _, Part in ipairs(Character:GetDescendants()) do
+                if Part:IsA("BasePart") then
+                    Part.CanCollide = true
+                end
+            end
+        end
+    end
+end)
+
+-- INFINITE JUMP
+_G.InfiniteJumpEnabled = false
+
+Misc:AddSwitch("🦘 Infinite Jump", function(Value)
+    _G.InfiniteJumpEnabled = Value
+end)
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if _G.InfiniteJumpEnabled then
+        local Player = game:GetService("Players").LocalPlayer
+        local Character = Player.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+
+        if Humanoid then
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
 
 local credits = window:AddTab("Credits")
 
