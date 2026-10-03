@@ -2733,6 +2733,9 @@ tabFarming:AddSwitch("👁️‍🗨️ Hide All Frames", function(state)
     end
 end)
 
+AutoFarm:AddLabel("❤️ This tab made by Ruling")
+
+
 local pets = window:AddTab("Pets")
 pets:AddLabel("💰 Auto Buy")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
