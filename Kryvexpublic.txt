@@ -5223,28 +5223,19 @@ Misc:AddSwitch("🎰 Auto Fortune Wheel", function(Value)
     end
 end)
 
-local timeDropdown = Misc:AddDropdown("Change Time", function(selection)
-    local lighting = game:GetService("Lighting")
-    
-    if selection == "Night" then
-        lighting.ClockTime = 0
-    elseif selection == "Day" then
-        lighting.ClockTime = 12
-    elseif selection == "Midnight" then
-        lighting.ClockTime = 6
-    end
-    
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Changed Time",
-        Text = "the time has been changed: " .. selection,
-        Duration = 0
-    })
+local Lighting = game:GetService("Lighting")
+
+Misc:AddButton("🌅 Sabah", function()
+    Lighting.ClockTime = 8
 end)
 
-timeDropdown:Add("Night")
-timeDropdown:Add("Day")
-timeDropdown:Add("Midnight")
+Misc:AddButton("🌇 Akşam", function()
+    Lighting.ClockTime = 18
+end)
 
+Misc:AddButton("🌙 Gece", function()
+    Lighting.ClockTime = 0
+end)
 
 local credits = window:AddTab("Credits")
 
