@@ -5254,24 +5254,7 @@ local function startNoclip()
     end)
 end
 
-Misc:AddSwitch("👻 No Clip", function(bool)
-    noclipEnabled = bool
-    if noclipEnabled then
-        startNoclip()
-    else
-        if noclipConnection then
-            noclipConnection:Disconnect()
-            noclipConnection = nil
-        end
-    end
-end)
 
-player.CharacterAdded:Connect(function()
-    if noclipEnabled then
-        task.wait(0.1)
-        startNoclip()
-    end
-end)
 
 Misc:AddButton("💎 Gamepass AutoLift", function()
     local gamepassFolder = ReplicatedStorage:FindFirstChild("gamepassIds")
