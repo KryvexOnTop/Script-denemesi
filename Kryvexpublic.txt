@@ -5262,6 +5262,119 @@ Misc:AddSwitch("👻 Hide Effects", function(Value)
     end
 end)
 
+-- WALK ON WATER
+_G.WalkOnWater = false
+_G.WaterWalkPart = nil
+
+Misc:AddSwitch("🌊 Walk On Water", function(Value)
+    _G.WalkOnWater = Value
+
+    if Value then
+        task.spawn(function()
+            while _G.WalkOnWater do
+                local Player = game:GetService("Players").LocalPlayer
+                local Character = Player.Character
+                local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+
+                if Root then
+                    local RayParams = RaycastParams.new()
+                    RayParams.FilterType = Enum.RaycastFilterType.Exclude
+                    RayParams.FilterDescendantsInstances = {Character}
+
+                    local Result = workspace:Raycast(
+                        Root.Position,
+                        Vector3.new(0, -15, 0),
+                        RayParams
+                    )
+
+                    if Result and Result.Instance then
+                        local Material = Result.Material
+
+                        if Material == Enum.Material.Water then
+                            if not _G.WaterWalkPart then
+                                local Part = Instance.new("Part")
+                                Part.Name = "KryvexWaterWalk"
+                                Part.Size = Vector3.new(8, 1, 8)
+                                Part.Transparency = 1
+                                Part.Anchored = true
+                                Part.CanCollide = true
+                                Part.Parent = workspace
+
+                                _G.WaterWalkPart = Part
+                            end
+
+                            _G.WaterWalkPart.CFrame =
+                                CFrame.new(Result.Position.X, Result.Position.Y, Result.Position.Z)
+                        end
+                    end
+                end
+
+                task.wait()
+            end
+        end)
+    else
+        if _G.WaterWalkPart then
+            _G.WaterWalkPart:Destroy()
+            _G.WaterWalkPart = nil
+        end
+    end
+end)
+
+-- LOCK POSITION
+_G.LockPosition = false
+_G.LockPositionConnection = nil
+
+Misc:AddSwitch("🔒 Lock Position", function(Value)
+    _G.LockPosition = Value
+
+    if _G.LockPositionConnection then
+        _G.LockPositionConnection:Disconnect()
+        _G.LockPositionConnection = nil
+    end
+
+    if Value then
+        local Player = game:GetService("Players").LocalPlayer
+        local Character = Player.Character
+        local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+
+        if Root then
+            local LockedCFrame = Root.CFrame
+
+            _G.LockPositionConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if _G.LockPosition and Root and Root.Parent then
+                    Root.CFrame = LockedCFrame
+                    Root.AssemblyLinearVelocity = Vector3.zero
+                    Root.AssemblyAngularVelocity = Vector3.zero
+                end
+            end)
+        end
+    end
+end)
+
+
+-- TRADE
+_G.TradeEnabled = true
+
+Misc:AddButton("🔒 Disable Trade", function()
+    _G.TradeEnabled = false
+
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Kryvex Hub",
+        Text = "Trade Disabled",
+        Duration = 2
+    })
+end)
+
+Misc:AddButton("🔓 Enable Trade", function()
+    _G.TradeEnabled = true
+
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Kryvex Hub",
+        Text = "Trade Enabled",
+        Duration = 2
+    })
+end)
+
 
 local credits = window:AddTab("Credits")
 
