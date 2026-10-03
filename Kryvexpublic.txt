@@ -5120,10 +5120,8 @@ end)
 local Misc = window:AddTab("Misc")
 
 
-local Misc = window:AddTab("Misc")
-
 -- SET SPEED
-Misc:AddTextBox("⚡️ Set Speed", function(Value)
+Misc:AddTextBox("Set Speed", function(Value)
     local Speed = tonumber(Value)
 
     if Speed then
@@ -5131,7 +5129,7 @@ Misc:AddTextBox("⚡️ Set Speed", function(Value)
     end
 end)
 
-Misc:AddSwitch("⚡️ Set Speed", function(Value)
+Misc:AddSwitch("Set Speed", function(Value)
     _G.SetSpeedEnabled = Value
 
     local Character = game.Players.LocalPlayer.Character
@@ -5148,7 +5146,7 @@ end)
 
 
 -- SET SIZE
-Misc:AddTextBox("📏 Set Size", function(Value)
+Misc:AddTextBox("Set Size", function(Value)
     local Size = tonumber(Value)
 
     if Size then
@@ -5156,7 +5154,7 @@ Misc:AddTextBox("📏 Set Size", function(Value)
     end
 end)
 
-Misc:AddSwitch("📏 Set Size", function(Value)
+Misc:AddSwitch("Set Size", function(Value)
     _G.SetSizeEnabled = Value
 
     local Character = game.Players.LocalPlayer.Character
